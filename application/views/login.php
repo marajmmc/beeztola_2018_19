@@ -1,14 +1,16 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
-<div class="row widget">
+<div class="row widget" style="background-image: url(<?php echo base_url('images/login_left_site.png'); ?>);
+    background-repeat: no-repeat;
+    background-size: cover;">
     <div class="widget-header">
-        <div class="title">
+        <div class="title text-center">
             Beeztola POS System
         </div>
         <div class="clearfix"></div>
     </div>
     <div class="col-sm-3">&nbsp;</div>
-    <div class="col-sm-6">
-        <div class="login-wrapper">
+    <div class="col-sm-6" >
+        <div class="login-wrapper" style="background: rgba(255,255,255, 0.8)">
             <form action="<?php echo base_url();?>home/login" class="form-horizontal" method="post">
                 <div class="login_header">
                     <h3>
