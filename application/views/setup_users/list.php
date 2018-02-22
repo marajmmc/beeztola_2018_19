@@ -45,6 +45,12 @@ if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/edit_status')
     );
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>'Change Employee ID',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/edit_employee_id')
+    );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
@@ -74,7 +80,14 @@ if(isset($CI->permissions['action5']) && ($CI->permissions['action5']==1))
         'data-title'=>"Download"
     );
 }
-
+if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
+{
+    $action_buttons[]=array
+    (
+        'label'=>'Preference',
+        'href'=>site_url($CI->controller_url.'/index/set_preference')
+    );
+}
 $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_REFRESH"),
     'href'=>site_url($CI->controller_url.'/index/list')
@@ -90,6 +103,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="clearfix"></div>
     </div>
+    <?php
+    if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
+    {
+        $CI->load->view('preference',array('system_preference_items'=>$system_preference_items));
+    }
+    ?>
     <div class="col-xs-12" id="system_jqx_container">
 
     </div>
@@ -111,6 +130,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'user_name', type: 'string' },
                 { name: 'name', type: 'string' },
                 { name: 'group_name', type: 'string' },
+                { name: 'total_outlet', type: 'string' },
+                { name: 'designation_name', type: 'string' },
+                { name: 'mobile_no', type: 'string' },
+                { name: 'blood_group', type: 'string' },
+                { name: 'ordering', type: 'int' },
                 { name: 'status', type: 'string' }
             ],
             id: 'id',
@@ -140,7 +164,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_USERNAME'); ?>', dataField: 'user_name',width:'150'},
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name',width:'300'},
                     { text: '<?php echo $CI->lang->line('LABEL_USER_GROUP'); ?>', dataField: 'group_name',filtertype: 'list'},
-                    { text: '<?php echo $CI->lang->line('STATUS'); ?>', dataField: 'status',filtertype: 'list',width:'150',cellsalign: 'right'}
+                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_TOTAL'); ?>', dataField: 'total_outlet',width:'10',cellsalign: 'right'},
+                    { text: '<?php echo $CI->lang->line('LABEL_DESIGNATION_NAME'); ?>', dataField: 'designation_name',width:'200', filtertype: 'list'},
+                    { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:'100'},
+                    { text: '<?php echo $CI->lang->line('LABEL_BLOOD_GROUP'); ?>', dataField: 'blood_group', width:'50',filtertype: 'list'},
+                    { text: '<?php echo $CI->lang->line('LABEL_ORDER'); ?>', dataField: 'ordering',width:'100',cellsalign: 'right'},
+                    { text: '<?php echo $CI->lang->line('STATUS'); ?>', dataField: 'status',width:'150',filtertype: 'list',cellsalign: 'center'}
 
                 ]
             });

@@ -7,7 +7,7 @@ class User_helper
     function __construct($id)
     {
         $CI = & get_instance();
-        $user = $CI->db->get_where($CI->config->item('table_dos_setup_user_info'), array('user_id' => $id,'revision'=>1))->row();
+        $user = $CI->db->get_where($CI->config->item('table_pos_setup_user_info'), array('user_id' => $id,'revision'=>1))->row();
         if ($user)
         {
             foreach ($user as $key => $value)
@@ -19,7 +19,7 @@ class User_helper
     public static function login($username, $password)
     {
         $CI = & get_instance();
-        $user = $CI->db->get_where($CI->config->item('table_dos_setup_user'), array('user_name' => $username, 'password' =>(md5($password)),'status'=>$CI->config->item('system_status_active')))->row();
+        $user = $CI->db->get_where($CI->config->item('table_pos_setup_user'), array('user_name' => $username, 'password' =>(md5($password)),'status'=>$CI->config->item('system_status_active')))->row();
         if ($user)
         {
             $CI->session->set_userdata("user_id", $user->id);
@@ -43,7 +43,7 @@ class User_helper
         {
             if($CI->session->userdata("user_id")!="")
             {
-                $user = $CI->db->get_where($CI->config->item('table_dos_setup_user'), array('id' => $CI->session->userdata('user_id'),'status'=>$CI->config->item('system_status_active')))->row();
+                $user = $CI->db->get_where($CI->config->item('table_pos_setup_user'), array('id' => $CI->session->userdata('user_id'),'status'=>$CI->config->item('system_status_active')))->row();
                 //$user = $CI->db->get_where($CI->config->item('table_user'), array('id' => $CI->session->userdata('user_id'),'status'=>$CI->config->item('system_status_active')))->row();
                 if($user)
                 {

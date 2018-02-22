@@ -1,7 +1,7 @@
 <?php
 $config['offline_controllers']=array('home','sys_site_offline');
 $config['external_controllers']=array('home');//user can use them without login
-$config['system_max_actions']=7;
+$config['system_max_actions']=8;
 
 $config['system_status_active']='Active';
 $config['system_status_inactive']='In-Active';
@@ -14,7 +14,7 @@ $config['system_status_done']='Done';
 
 $config['system_save']='save';
 
-$config['system_base_url_profile_picture']='http://localhost/dos_2018_19/';
+$config['system_base_url_profile_picture']='http://localhost/beeztola_2018_19/';
 
 /*$config['system_base_url_profile_picture']='http://50.116.76.180/login/';
 //$config['system_base_url_profile_picture']='http://127.0.0.1/login_2018_19/';

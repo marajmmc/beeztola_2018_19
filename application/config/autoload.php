@@ -103,7 +103,7 @@ $autoload['helper'] = array('url','user','query','system','task');
 | config files.  Otherwise, leave it blank.
 |
 */
-$autoload['config'] = array('table_system','table_dos','user_group','system');
+$autoload['config'] = array('table_system','table_pos','user_group','system');
 
 /*
 | -------------------------------------------------------------------
@@ -117,7 +117,7 @@ $autoload['config'] = array('table_system','table_dos','user_group','system');
 | "codeigniter_lang.php" would be referenced as array('codeigniter');
 |
 */
-$autoload['language'] = array('login');
+$autoload['language'] = array('pos');
 
 /*
 | -------------------------------------------------------------------

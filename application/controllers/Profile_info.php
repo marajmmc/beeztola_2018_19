@@ -37,8 +37,8 @@ class Profile_info extends Root_Controller
             $this->db->select('user.employee_id,user.user_name,user.status,user.date_created user_date_created');
             $this->db->select('user_info.*');
             $this->db->select('u_group.name group_name');
-            $this->db->from($this->config->item('table_dos_setup_user').' user');
-            $this->db->join($this->config->item('table_dos_setup_user_info').' user_info','user_info.user_id=user.id');
+            $this->db->from($this->config->item('table_pos_setup_user').' user');
+            $this->db->join($this->config->item('table_pos_setup_user_info').' user_info','user_info.user_id=user.id');
             $this->db->join($this->config->item('table_system_user_group').' u_group','u_group.id=user_info.user_group','left');
             $this->db->where('user.id',$user_id);
             $this->db->where('user_info.revision',1);
