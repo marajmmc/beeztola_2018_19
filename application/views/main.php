@@ -5,7 +5,7 @@ $CI = & get_instance();
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>DOS V 2.0.1.8.19.1</title>
+        <title>Beeztola POS System V 2.0.1.8.19.1 </title>
         <link rel="icon" type="image/ico" href="http://malikseeds.com/favicon.ico"/>
         <meta charset="utf-8">
         <link rel="stylesheet" href="<?php echo base_url('css/bootstrap.min.css');?>">
