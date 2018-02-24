@@ -324,7 +324,8 @@ $lang['LABEL_SALARY_OTHER'] = 'Other Allowance';
 $lang['LABEL_BLOOD_GROUP'] = 'Blood Group';
 $lang['LABEL_CONTACT_PERSON'] = 'Contact Person';
 $lang['LABEL_CONTACT_NO'] = 'Contact Number';
-$lang['LABEL_OUTLET_TOTAL'] = '#Outlet';
+$lang['LABEL_TOTAL_OUTLET'] = '#Outlet';
+$lang['LABEL_ORDERING'] = 'Ordering';
 
 //customer
 $lang['LABEL_NAME_OWNER'] = 'Owner Name';

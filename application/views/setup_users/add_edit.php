@@ -61,16 +61,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
             </div>
         </div>
-        <div style="font-size: 12px;margin-top: -10px;font-style: italic;" class="row show-grid">
-            <div class="col-xs-4"></div>
-            <div class="col-sm-4 col-xs-8">
-                Username only support small letters, numbers and _ . Username's first and last character will not be _
-            </div>
-        </div>
+
         <?php
         if(!$user['id']>0)
         {
             ?>
+            <div style="font-size: 12px;margin-top: -10px;font-style: italic;" class="row show-grid">
+                <div class="col-xs-4"></div>
+                <div class="col-sm-4 col-xs-8">
+                    Username only support small letters, numbers and _ . Username's first and last character will not be _
+                </div>
+            </div>
             <div style="" class="row show-grid">
                 <div class="col-xs-4">
                     <label for="password" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PASSWORD');?><span style="color:#FF0000">*</span></label>
@@ -98,15 +99,22 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <input type="text" name="user_info[name]" id="name" class="form-control" value="<?php echo $user_info['name'] ?>" >
             </div>
         </div>
-        <?php
-        if(!$user['id']>0)
-        {
-            ?>
-            <div class="row show-grid">
-                <div class="col-xs-4">
-                    <label for="user_group" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_USER_GROUP');?><span style="color:#FF0000">*</span></label>
-                </div>
-                <div class="col-sm-4 col-xs-8">
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label for="user_group" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_USER_GROUP');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <?php
+                if($user['id']>0)
+                {
+                    ?>
+                    <label for=""><?php echo $user_info['user_group_name']?></label>
+                    <input type="hidden" name="user_info[user_group]" id="user_group" class="form-control" value="<?php echo $user_info['user_group'];?>"/>
+                <?php
+                }
+                else
+                {
+                    ?>
                     <select id="user_group" name="user_info[user_group]" class="form-control">
                         <option value=""><?php echo $this->lang->line('SELECT');?></option>
                         <?php
@@ -117,11 +125,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         }
                         ?>
                     </select>
-                </div>
+                <?php
+                }
+                ?>
             </div>
-        <?php
-        }
-        ?>
+        </div>
+
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DESIGNATION_NAME');?></label>

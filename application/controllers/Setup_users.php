@@ -60,13 +60,13 @@ class Setup_users extends Root_Controller
         {
             $this->system_save_status();
         }
-        elseif($action=="change_user_group")
+        elseif($action=="edit_user_group")
         {
-            $this->system_change_user_group($id);
+            $this->system_edit_user_group($id);
         }
-        elseif($action=="save_change_user_group")
+        elseif($action=="save_user_group")
         {
-            $this->system_save_change_user_group();
+            $this->system_save_user_group();
         }
         elseif($action=="edit_employee_id")
         {
@@ -75,6 +75,14 @@ class Setup_users extends Root_Controller
         elseif($action=="save_employee_id")
         {
             $this->system_save_employee_id();
+        }
+        elseif($action=="edit_outlet")
+        {
+            $this->system_edit_outlet($id);
+        }
+        elseif($action=="save_outlet")
+        {
+            $this->system_save_outlet();
         }
         elseif($action=="set_preference")
         {
@@ -150,7 +158,7 @@ class Setup_users extends Root_Controller
         $this->db->join($this->config->item('table_system_user_group').' ug','ug.id = user_info.user_group','INNER');
         $this->db->select('ug.name user_group ');
 
-        $this->db->join($this->config->item('table_pos_setup_designation').' designation','designation.id = user_info.designation_id','INNER');
+        $this->db->join($this->config->item('table_pos_setup_designation').' designation','designation.id = user_info.designation_id','LEFT');
         $this->db->select('designation.name designation_name');
         $this->db->join($this->config->item('table_pos_setup_user_outlet').' uo','uo.user_id = user.id and uo.revision =1','LEFT');
         $this->db->select('count(customer_id) total_outlet',true);
@@ -235,18 +243,27 @@ class Setup_users extends Root_Controller
             {
                 System_helper::invalid_try('Edit Non Exists',$user_id);
                 $ajax['status']=false;
-                $ajax['system_message']='Wrong input. You use illegal way.';
+                $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
-            $data['user_info']=Query_helper::get_info($this->config->item('table_pos_setup_user_info'),'*',array('user_id ='.$user_id,'revision =1'),1);
+            //$data['user_info']=Query_helper::get_info($this->config->item('table_pos_setup_user_info'),'*',array('user_id ='.$user_id,'revision =1'),1);
+            $this->db->from($this->config->item('table_pos_setup_user_info').' user_info');
+            $this->db->select('user_info.*');
+            $this->db->join($this->config->item('table_system_user_group').' user_group','user_group.id=user_info.user_group AND user_group.status !="'.$this->config->item('system_status_delete').'"','INNER');
+            $this->db->select('user_group.name user_group_name');
+            $this->db->where('user_info.user_id',$user_id);
+            $this->db->where('user_info.revision',1);
+            $data['user_info']=$this->db->get()->row_array();
+
             $data['designations']=Query_helper::get_info($this->config->item('table_pos_setup_designation'),array('id value','name text'),array('status !="'.$this->config->item('system_status_delete').'"'));
+
             if($user->user_group==1)
             {
                 $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),array('id value','name text'),array('status !="'.$this->config->item('system_status_delete').'"'));
             }
             else
             {
-                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),array('id value','name text'),array('status ="'.$this->config->item('system_status_delete').'"','id !=1'));
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),array('id value','name text'),array('status ="'.$this->config->item('system_status_active').'"','id !=1'));
             }
 
             $data['title']="Edit User (".$data['user_info']['name'].')';
@@ -646,8 +663,9 @@ class Setup_users extends Root_Controller
             }
         }
     }
-    private function system_change_user_group($id)
+    private function system_edit_user_group($id)
     {
+        $user = User_helper::get_user();
         if(isset($this->permissions['action2']) && ($this->permissions['action2']==1))
         {
             if(($this->input->post('id')))
@@ -668,14 +686,22 @@ class Setup_users extends Root_Controller
                 die();
             }
             $data['title']="Assign User Group for ".$data['user_info']['name'];
-            $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'));
+            if($user->user_group==1)
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'));
+            }
+            else
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),array('*'),array('status ="'.$this->config->item('system_status_active').'"','id !=1'));
+            }
+
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/change_user_group",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_user_group",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/change_user_group/'.$user_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit_user_group/'.$user_id);
             $this->json_return($ajax);
         }
         else
@@ -685,7 +711,7 @@ class Setup_users extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_save_change_user_group()
+    private function system_save_user_group()
     {
         $id = $this->input->post("id");
         $user = User_helper::get_user();
@@ -761,8 +787,10 @@ class Setup_users extends Root_Controller
             {
                 $user_id=$id;
             }
-            $data['user_info']=Query_helper::get_info($this->config->item('table_login_setup_user_info'),'*',array('user_id ='.$user_id,'revision =1'),1);
-            if(!$data['user_info'])
+            //$data['user_info']=Query_helper::get_info($this->config->item('table_pos_setup_user'),'*',array('user_id ='.$user_id,'revision =1'),1);
+
+            $data['user']=Query_helper::get_info($this->config->item('table_pos_setup_user'),'*',array('id ='.$user_id),1);
+            if(!$data['user'])
             {
                 System_helper::invalid_try('Edit Non Exists (Employee ID)',$user_id);
                 $ajax['status']=false;
@@ -770,8 +798,7 @@ class Setup_users extends Root_Controller
                 $this->json_return($ajax);
                 die();
             }
-            $data['user']=Query_helper::get_info($this->config->item('table_login_setup_user'),'*',array('id ='.$user_id),1);
-            $data['title']="Reset Employee ID of (".$data['user_info']['name'].')';
+            $data['title']="Reset Employee ID of (".$data['user']['user_name'].')';
             $data['employee_id']=$data['user']['employee_id'];
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_employee_id",$data,true));
@@ -806,35 +833,155 @@ class Setup_users extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
+
+        $result=Query_helper::get_info($this->config->item('table_pos_setup_user'),array('id','employee_id','user_name'),array('id ='.$id, 'status !="'.$this->config->item('system_status_delete').'"'),1);
+        if(!$result)
+        {
+            System_helper::invalid_try('Save Non Exists',$id);
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid User.';
+            $this->json_return($ajax);
+        }
+        $this->db->trans_start();  //DB Transaction Handle START
+        $data['employee_id']=$this->input->post('new_employee_id');
+        $data['user_updated'] = $user->user_id;
+        $data['date_updated'] = time();
+        Query_helper::update($this->config->item('table_pos_setup_user'),$data,array("id = ".$id));
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
         else
         {
-            $result=Query_helper::get_info($this->config->item('table_login_setup_user'),array('id','employee_id','user_name'),array('id ='.$id, 'status !="'.$this->config->item('system_status_delete').'"'),1);
-            if(!$result)
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_edit_outlet($id)
+    {
+        if(isset($this->permissions['action2']) && ($this->permissions['action2']==1))
+        {
+            if($id>0)
             {
-                System_helper::invalid_try('Edit Non Exists (Employee ID)',$id);
-                $ajax['status']=false;
-                $ajax['system_message']='Invalid User.';
-                $this->json_return($ajax);
-                die();
-            }
-            $this->db->trans_start();  //DB Transaction Handle START
-            $data['employee_id']=$this->input->post('new_employee_id');
-            $data['user_updated'] = $user->user_id;
-            $data['date_updated'] = time();
-            Query_helper::update($this->config->item('table_login_setup_user'),$data,array("id = ".$id));
-
-            $this->db->trans_complete();   //DB Transaction Handle END
-            if ($this->db->trans_status() === TRUE)
-            {
-                $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
-                $this->system_list();
+                $user_id=$id;
             }
             else
             {
+                $user_id=$this->input->post('id');
+            }
+
+            $data['user_info']=Query_helper::get_info($this->config->item('table_pos_setup_user_info'),'*',array('user_id ='.$user_id,'revision =1'),1);
+            if(!$data['user_info'])
+            {
+                System_helper::invalid_try('Edit Assign Outlet Non Exists',$user_id);
                 $ajax['status']=false;
-                $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+                $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
+
+            $this->db->from($this->config->item('table_login_csetup_customer').' customer');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id=customer.id AND customer_info.revision=1','INNER');
+            $this->db->select('customer_info.customer_id outlet_id, CONCAT_WS(" - ",customer_info.customer_code, customer_info.name) outlet_name');
+            $this->db->where('customer.status !="'.$this->config->item('system_status_delete').'"');
+            $this->db->where('customer_info.type',$this->config->item('system_customer_type_outlet_id'));
+            $data['outlets']=$this->db->get()->result_array();
+
+            $results=Query_helper::get_info($this->config->item('table_pos_setup_user_outlet'),'*',array('user_id ='.$user_id,'revision =1'));
+            $data['assigned_outlets']=array();
+            foreach($results as $result)
+            {
+                $data['assigned_outlets'][$result['customer_id']]=$result;
+            }
+
+            $data['title']="User Assign Outlet :: (".$data['user_info']['name'].')';
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url.'/edit_outlet',$data,true));
+            $ajax['status']=true;
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit_outlet/'.$user_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_outlet()
+    {
+        $id = $this->input->post("id");
+        $user = User_helper::get_user();
+        $time=time();
+        $items=$this->input->post('items');
+        $commissions=$this->input->post('commission');
+        if($id>0)
+        {
+            if(!((isset($this->permissions['action2']) && ($this->permissions['action2']==1))))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+            }
+
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+
+        $this->db->trans_start();  //DB Transaction Handle START
+
+        $data=array();
+        $data['date_updated'] = $time;
+        $data['user_updated'] = $user->user_id;
+        Query_helper::update($this->config->item('table_pos_setup_user_outlet'),$data, array('user_id='.$id,'revision=1'), false);
+
+        $this->db->where('user_id',$id);
+        $this->db->set('revision', 'revision+1', FALSE);
+        $this->db->update($this->config->item('table_pos_setup_user_outlet'));
+
+        if(is_array($items))
+        {
+            foreach($items as $customer_id)
+            {
+                $data=array();
+                $data['user_id']=$id;
+                $data['customer_id']=$customer_id;
+                if(isset($commissions[$customer_id]))
+                {
+                    $data['commission'] = $commissions[$customer_id];
+                }
+                else
+                {
+                    $data['commission'] = 0;
+                }
+                $data['user_created'] = $user->user_id;
+                $data['date_created'] = $time;
+                $data['revision'] = 1;
+                Query_helper::add($this->config->item('table_pos_setup_user_outlet'),$data);
+            }
+        }
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
         }
     }
     private function check_validation()
@@ -952,6 +1099,29 @@ class Setup_users extends Root_Controller
         }
         return true;
     }
+    private function check_validation_employee_id()
+    {
+        $id = $this->input->post("id");
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('new_employee_id',$this->lang->line('LABEL_EMPLOYEE_ID'),'required');
+
+        if($this->input->post('new_employee_id'))
+        {
+            $duplicate_employee_id_check=Query_helper::get_info($this->config->item('table_pos_setup_user'),array('employee_id'),array('id!='.$id,'employee_id ="'.$this->input->post('new_employee_id').'"'),1);
+            if($duplicate_employee_id_check)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='This employee ID is already exists';
+                $this->json_return($ajax);
+            }
+        }
+        if($this->form_validation->run() == FALSE)
+        {
+            $this->message=validation_errors();
+            return false;
+        }
+        return true;
+    }
     private function system_set_preference()
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
@@ -979,12 +1149,11 @@ class Setup_users extends Root_Controller
         $data['user_name']= 1;
         $data['name']= 1;
         $data['user_group']= 1;
-        $data['outlet_total']= 1;
+        $data['total_outlet']= 1;
         $data['designation_name']= 1;
         $data['mobile_no']= 1;
         $data['blood_group']= 1;
-        $data['order']= 1;
-        $data['status']= 1;
+        $data['ordering']= 1;
         $data['status']= 1;
         if($result)
         {
