@@ -1,16 +1,50 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 $CI = & get_instance();
+if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)) || (isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line("ACTION_SAVE"),
+        'id'=>'button_action_save_jqx'
+    );
+}
+$CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
-<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
-    <input type="hidden" name="customer_id" value="<?php //echo $customer_id; ?>" />
-    <div style="overflow-x: auto;" class="row show-grid" id="order_items_container">
-        <div id="system_jqx_container"></div>
+<form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
+    <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
+    <input type="hidden" name="item[crop_id]" value="<?php echo $options['crop_id']; ?>" />
+    <div id="jqx_inputs">
+
     </div>
 </form>
+<div class="row widget">
+    <div class="col-xs-12" id="system_jqx_container"></div>
+</div>
 <script type="text/javascript">
     $(document).ready(function ()
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
+
+        $(document).off('click', '#button_action_save_jqx');
+        $(document).on("click", "#button_action_save_jqx", function(event)
+        {
+            $('#save_form_jqx #jqx_inputs').html('');
+            var data=$('#system_jqx_container').jqxGrid('getrows');
+            for(var i=0;i<data.length;i++)
+            {
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items[quantity_min]['+data[i]['variety_id']+']['+data[i]['pack_size_id']+']" value="'+data[i]['quantity_min']+'">');
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items[quantity_max]['+data[i]['variety_id']+']['+data[i]['pack_size_id']+']" value="'+data[i]['quantity_max']+'">');
+            }
+            var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
+            if(sure)
+            {
+                $("#save_form_jqx").submit();
+                //return false;
+            }
+
+        });
+
+
 
         var url = "<?php echo site_url($CI->controller_url.'/index/get_items/');?>";
         // prepare the data
@@ -20,16 +54,17 @@ $CI = & get_instance();
             type:'POST',
             dataFields: [
                 { name: 'id', type: 'int' },
-                { name: 'division_name', type: 'string' },
-                { name: 'zone_name', type: 'string' },
-                { name: 'territory_name', type: 'string' },
-                { name: 'district_name', type: 'string' },
-                { name: 'name', type: 'string' },
-                { name: 'quantity_acres', type: 'string' }
+                { name: 'variety_id', type: 'string' },
+                { name: 'variety_name', type: 'string' },
+                { name: 'pack_size_id', type: 'string' },
+                { name: 'pack_size', type: 'string' },
+                { name: 'quantity_min', type: 'string' },
+                { name: 'quantity_max', type: 'string' }
             ],
             id: 'id',
             url: url,
-            data:{id:<?php echo $id; ?>}
+            type: 'POST',
+            data:JSON.parse('<?php echo json_encode($options);?>')
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
@@ -37,61 +72,77 @@ $CI = & get_instance();
         {
             var element = $(defaultHtml);
             element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-            if(column=='quantity_acres' && <?php if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))){echo 'true';}else{echo 'false';} ?>)
+            if(record[column+'_editable'])
             {
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
+                console.log(value);
             }
-
             return element[0].outerHTML;
-
         };
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
             {
                 width: '100%',
+                height:'300',
                 source: dataAdapter,
-                filterable: true,
-                sortable: true,
-                showfilterrow: true,
                 columnsresize: true,
-                selectionmode: 'singlerow',
-                enablebrowserselection: true,
                 columnsreorder: true,
+                enablebrowserselection: true,
                 altrows: true,
-                autoheight: true,
                 rowsheight: 35,
                 editable:true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'division_name',filtertype: 'list',width:'200',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'zone_name',filtertype: 'list',width:'200',editable:false},
-                    { text: 'Min <?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'territory_name',filtertype: 'list',width:'200',editable:false},
-                    { text: 'Max <?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'district_name',filtertype: 'list',width:'200',editable:false},
-                    { text: 'Quantity Acres', dataField: 'quantity_acres',cellsalign: 'right',cellsrenderer: cellsrenderer
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'200',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'200',editable:false}
                     <?php
                         if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
                         {
                         ?>
-                        ,columntype:'custom',
+                    ,
+                    {
+                        text: 'Min <?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'quantity_min', width:'200', cellsrenderer: cellsrenderer, columntype:'custom',
+                        editable:true,
+                        cellbeginedit: function (row)
+                        {
+                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected
+                            return selectedRowData['quantity_min'];
+                        },
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
                             editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
                         },
-                        geteditorvalue: function (row, cellvalue, editor) {
+                        geteditorvalue: function (row, cellvalue, editor)
+                        {
                             // return the editor's value.
                             var value=editor.find('input').val();
                             var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
                             return editor.find('input').val();
                         }
-                    <?php
-                    }
-                    else
+                    },
                     {
-                        ?>
-                        ,editable:false
+                        text: 'Mix <?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'quantity_max',width:'200',cellsrenderer: cellsrenderer, columntype:'custom',
+                        editable:true,
+                        cellbeginedit: function (row)
+                        {
+                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected
+                            return selectedRowData['quantity_max'];
+                        },
+                        initeditor: function (row, cellvalue, editor, celltext, pressedkey)
+                        {
+                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
+                        },
+                        geteditorvalue: function (row, cellvalue, editor)
+                        {
+                            // return the editor's value.
+                            var value=editor.find('input').val();
+                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
+                            return editor.find('input').val();
+                        }
+                    }
                         <?php
-                    }
+                        }
                     ?>
-                    }
+
                 ]
             });
     });

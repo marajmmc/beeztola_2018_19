@@ -26,6 +26,10 @@ class Setup_stock_min_max extends Root_Controller
         {
             $this->system_get_items();
         }
+        elseif($action=="save")
+        {
+            $this->system_save();
+        }
         else
         {
             $this->system_search();
@@ -73,8 +77,7 @@ class Setup_stock_min_max extends Root_Controller
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
-            $data['customer_id']=$this->input->post('customer_id');
-            $data['crop_id']=$this->input->post('crop_id');
+            $data['options']=$this->input->post();
 
             $data['title']="Variety Current Stock Report";
             $ajax['status']=true;
@@ -95,22 +98,104 @@ class Setup_stock_min_max extends Root_Controller
     }
     private function system_get_items()
     {
-        /*$this->db->from($this->config->item('table_login_setup_bank').' bank');
-        $this->db->where('bank.status !=',$this->config->item('system_status_delete'));
-        $this->db->order_by('bank.name','ASC');
-        $items=$this->db->get()->result_array();*/
-        $this->db->from($this->config->item('table_ems_setup_classification_variety_price').' variety_price');
-        $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_setup_classification_varieties').' v','v.id = vp.variety_id','INNER');
-        $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_setup_classification_crop_types').' type','type.id = v.crop_type_id','INNER');
-        $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_setup_classification_vpack_size').' pack','pack.id = vp.pack_size_id','INNER');
-        $this->db->where('vp.revision',1);
-        $this->db->where('type.crop_id',$data['crop_id']);
-        $this->db->order_by('type.ordering ASC');
-        $this->db->order_by('v.ordering ASC');
-        $data['varieties']=$this->db->get()->result_array();
+        $outlet_id=$this->input->post('outlet_id');
+        $crop_id=$this->input->post('crop_id');
+        $data=array();
+        $results=Query_helper::get_info($this->config->item('table_pos_setup_stock_min_max'),'*',array('customer_id ='.$outlet_id));
+        foreach($results as $result)
+        {
+            $data[$result['variety_id']][$result['pack_size_id']]=$result;
+        }
+        $this->db->from($this->config->item('table_login_setup_classification_variety_price').' variety_price');
+        $this->db->select('variety_price.id');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = variety_price.variety_id','INNER');
         $this->db->select('v.id variety_id,v.name variety_name');
-        $this->db->select('pack.name pack_name,pack.id pack_size_id');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = variety_price.pack_size_id','INNER');
+        $this->db->select('pack.name pack_size,pack.id pack_size_id');
+        $this->db->select('variety_price.variety_id quantity_min, variety_price.variety_id quantity_max');
+        $this->db->where('variety_price.revision',1);
+        $this->db->where('crop_type.crop_id',$crop_id);
+        $this->db->order_by('crop_type.ordering ASC');
+        $this->db->order_by('v.ordering ASC');
+        $results=$this->db->get()->result_array();
         $items=array();
+        foreach($results as $result)
+        {
+            $item=array();
+            $item['id']=$result['id'];
+            $item['variety_id']=$result['variety_id'];
+            $item['pack_size_id']=$result['pack_size_id'];
+            $item['variety_name']=$result['variety_name'];
+            $item['pack_size']=$result['pack_size'];
+            $item['quantity_min']=$result['quantity_min'];
+            if(isset($data[$result['variety_id']][$result['pack_size_id']]))
+            {
+                $item['quantity_min']=$data[$result['variety_id']][$result['pack_size_id']]['quantity_min'];
+                $item['quantity_max']=$data[$result['variety_id']][$result['pack_size_id']]['quantity_max'];
+            }
+            else
+            {
+                $item['quantity_min']=0;
+                $item['quantity_max']=0;
+            }
+            $items[]=$item;
+        }
         $this->json_return($items);
+    }
+    private function system_save()
+    {
+        $user = User_helper::get_user();
+        $time=time();
+        $item_head=$this->input->post('item');
+        $items=$this->input->post('items');
+        if(!(isset($this->permissions['action1']) && ($this->permissions['action1']==1)) || !(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        if(!$this->check_validation())
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->message;
+            $this->json_return($ajax);
+        }
+        $data=array();
+        $results=Query_helper::get_info($this->config->item('table_pos_setup_stock_min_max'),'*',array('customer_id ='.$item_head['outlet_id']));
+        foreach($results as $result)
+        {
+            $data[$result['variety_id']][$result['pack_size_id']]=$result;
+        }
+        if(sizeof($items)>0)
+        {
+            foreach($items['quantity_min'] as $variety_id=>$pack_size_id)
+            {
+                echo "<pre>";
+                print_r($pack_size_id);
+                echo "</pre>";
+
+                //echo $variety_id.' == '.$pack_size_id.'<br />';
+                //$data[$item['variety_id']][$item['pack_size_id']]
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->message;
+            $this->json_return($ajax);
+        }
+    }
+    private function check_validation()
+    {
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET_NAME'),'required');
+        $this->form_validation->set_rules('item[crop_id]',$this->lang->line('LABEL_CROP_NAME'),'required');
+        if($this->form_validation->run() == FALSE)
+        {
+            $this->message=validation_errors();
+            return false;
+        }
+        return true;
     }
 }
