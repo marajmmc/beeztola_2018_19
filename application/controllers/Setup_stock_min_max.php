@@ -169,27 +169,15 @@ class Setup_stock_min_max extends Root_Controller
         }
         $this->db->trans_start();  //DB Transaction Handle START
 
-        /*if(sizeof($items)>0)
+        foreach($items as $variety_id=>$pack_sizes)
         {
-
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']='Invalid Input.';
-            $this->json_return($ajax);
-        }*/
-
-        foreach($items['quantity_min'] as $variety_id=>$pack_sizes)
-        {
-            foreach($pack_sizes as $pack_size_id=>$quantity_min)
+            foreach($pack_sizes as $pack_size_id=>$quantity)
             {
-                $quantity_max=isset($items['quantity_max'][$variety_id][$pack_size_id])?$items['quantity_max'][$variety_id][$pack_size_id]:0;
-                if($stock_old[$variety_id][$pack_size_id])
+                if(isset($stock_old[$variety_id][$pack_size_id]))
                 {
                     $data=array();
-                    $data['quantity_min']=$quantity_min;
-                    $data['quantity_max']=$quantity_max;
+                    $data['quantity_min']=$quantity['quantity_min'];
+                    $data['quantity_max']=$quantity['quantity_max'];
                     $data['date_updated']=$time;
                     $data['user_updated']=$user->user_id;
                     $this->db->set('revision_count', 'revision_count+1', FALSE);
@@ -201,8 +189,8 @@ class Setup_stock_min_max extends Root_Controller
                     $data['customer_id']=$item_head['outlet_id'];
                     $data['variety_id']=$variety_id;
                     $data['pack_size_id']=$pack_size_id;
-                    $data['quantity_min']=$quantity_min;
-                    $data['quantity_max']=$quantity_max;
+                    $data['quantity_min']=$quantity['quantity_min'];
+                    $data['quantity_max']=$quantity['quantity_max'];
                     $data['revision_count']=1;
                     $data['date_updated']=$time;
                     $data['user_updated']=$user->user_id;

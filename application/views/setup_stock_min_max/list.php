@@ -32,8 +32,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var data=$('#system_jqx_container').jqxGrid('getrows');
             for(var i=0;i<data.length;i++)
             {
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items[quantity_min]['+data[i]['variety_id']+']['+data[i]['pack_size_id']+']" value="'+data[i]['quantity_min']+'">');
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items[quantity_max]['+data[i]['variety_id']+']['+data[i]['pack_size_id']+']" value="'+data[i]['quantity_max']+'">');
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][quantity_min]" value="'+data[i]['quantity_min']+'">');
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][quantity_max]" value="'+data[i]['quantity_max']+'">');
             }
             var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
             if(sure)
@@ -81,69 +81,58 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         };
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
-            {
-                width: '100%',
-                height:'300',
-                source: dataAdapter,
-                columnsresize: true,
-                columnsreorder: true,
-                enablebrowserselection: true,
-                altrows: true,
-                rowsheight: 35,
-                editable:true,
-                columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'200',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'200',editable:false}
-                    <?php
-                        if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
-                        {
-                        ?>
-                    ,
+        {
+            width: '100%',
+            height:'300',
+            source: dataAdapter,
+            columnsresize: true,
+            columnsreorder: true,
+            enablebrowserselection: true,
+            altrows: true,
+            rowsheight: 35,
+            editable:true,
+            columns: [
+                { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'200',editable:false},
+                { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'200',editable:false},
+                {
+                    text: 'Min <?php echo $CI->lang->line('LABEL_QUANTITY'); ?> (<?php echo $CI->lang->line('LABEL_KG'); ?>)', dataField: 'quantity_min', width:'200',cellsalign: 'right', cellsrenderer: cellsrenderer, columntype:'custom',
+                    editable:true,
+                    cellbeginedit: function (row)
                     {
-                        text: 'Min <?php echo $CI->lang->line('LABEL_QUANTITY'); ?> (<?php echo $CI->lang->line('LABEL_KG'); ?>)', dataField: 'quantity_min', width:'200',cellsalign: 'right', cellsrenderer: cellsrenderer, columntype:'custom',
-                        editable:true,
-                        cellbeginedit: function (row)
-                        {
-                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected
-                            return selectedRowData['quantity_min'];
-                        },
-                        initeditor: function (row, cellvalue, editor, celltext, pressedkey)
-                        {
-                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
-                        },
-                        geteditorvalue: function (row, cellvalue, editor)
-                        {
-                            // return the editor's value.
-                            var value=editor.find('input').val();
-                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
-                            return editor.find('input').val();
-                        }
+                        return <?php if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))){ echo 'true';}else{echo 'false';}?>;
                     },
+                    initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                     {
-                        text: 'Max <?php echo $CI->lang->line('LABEL_QUANTITY'); ?> (<?php echo $CI->lang->line('LABEL_KG'); ?>)', dataField: 'quantity_max',width:'200',cellsalign: 'right',cellsrenderer: cellsrenderer, columntype:'custom',
-                        editable:true,
-                        cellbeginedit: function (row)
-                        {
-                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected
-                            return selectedRowData['quantity_max'];
-                        },
-                        initeditor: function (row, cellvalue, editor, celltext, pressedkey)
-                        {
-                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
-                        },
-                        geteditorvalue: function (row, cellvalue, editor)
-                        {
-                            // return the editor's value.
-                            var value=editor.find('input').val();
-                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
-                            return editor.find('input').val();
-                        }
+                        editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
+                    },
+                    geteditorvalue: function (row, cellvalue, editor)
+                    {
+                        // return the editor's value.
+                        var value=editor.find('input').val();
+                        var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
+                        return editor.find('input').val();
                     }
-                        <?php
-                        }
-                    ?>
-
-                ]
-            });
+                },
+                {
+                    text: 'Max <?php echo $CI->lang->line('LABEL_QUANTITY'); ?> (<?php echo $CI->lang->line('LABEL_KG'); ?>)', dataField: 'quantity_max',width:'200',cellsalign: 'right',cellsrenderer: cellsrenderer, columntype:'custom',
+                    editable:true,
+                    cellbeginedit: function (row)
+                    {
+                        return <?php if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))){ echo 'true';}else{echo 'false';}?>;
+                    },
+                    initeditor: function (row, cellvalue, editor, celltext, pressedkey)
+                    {
+                        editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
+                    },
+                    geteditorvalue: function (row, cellvalue, editor)
+                    {
+                        // return the editor's value.
+                        var value=editor.find('input').val();
+                        var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
+                        return editor.find('input').val();
+                    }
+                }
+            ]
+        });
     });
 </script>
