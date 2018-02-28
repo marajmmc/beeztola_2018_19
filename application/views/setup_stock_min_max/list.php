@@ -51,7 +51,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var source =
         {
             dataType: "json",
-            type:'POST',
             dataFields: [
                 { name: 'id', type: 'int' },
                 { name: 'variety_id', type: 'string' },
@@ -72,10 +71,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             var element = $(defaultHtml);
             element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-            if(record[column+'_editable'])
+            //if(record[column+'_editable'])
+            if(column=='quantity_min' || column=='quantity_max')
             {
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
-                console.log(value);
+                //console.log(value);
             }
             return element[0].outerHTML;
         };
@@ -100,7 +100,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         ?>
                     ,
                     {
-                        text: 'Min <?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'quantity_min', width:'200', cellsrenderer: cellsrenderer, columntype:'custom',
+                        text: 'Min <?php echo $CI->lang->line('LABEL_QUANTITY'); ?> (<?php echo $CI->lang->line('LABEL_KG'); ?>)', dataField: 'quantity_min', width:'200',cellsalign: 'right', cellsrenderer: cellsrenderer, columntype:'custom',
                         editable:true,
                         cellbeginedit: function (row)
                         {
@@ -120,7 +120,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         }
                     },
                     {
-                        text: 'Mix <?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'quantity_max',width:'200',cellsrenderer: cellsrenderer, columntype:'custom',
+                        text: 'Max <?php echo $CI->lang->line('LABEL_QUANTITY'); ?> (<?php echo $CI->lang->line('LABEL_KG'); ?>)', dataField: 'quantity_max',width:'200',cellsalign: 'right',cellsrenderer: cellsrenderer, columntype:'custom',
                         editable:true,
                         cellbeginedit: function (row)
                         {

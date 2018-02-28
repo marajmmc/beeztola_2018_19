@@ -161,28 +161,67 @@ class Setup_stock_min_max extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
-        $data=array();
+        $stock_old=array();
         $results=Query_helper::get_info($this->config->item('table_pos_setup_stock_min_max'),'*',array('customer_id ='.$item_head['outlet_id']));
         foreach($results as $result)
         {
-            $data[$result['variety_id']][$result['pack_size_id']]=$result;
+            $stock_old[$result['variety_id']][$result['pack_size_id']]=$result;
         }
-        if(sizeof($items)>0)
-        {
-            foreach($items['quantity_min'] as $variety_id=>$pack_size_id)
-            {
-                echo "<pre>";
-                print_r($pack_size_id);
-                echo "</pre>";
+        $this->db->trans_start();  //DB Transaction Handle START
 
-                //echo $variety_id.' == '.$pack_size_id.'<br />';
-                //$data[$item['variety_id']][$item['pack_size_id']]
-            }
+        /*if(sizeof($items)>0)
+        {
+
         }
         else
         {
             $ajax['status']=false;
-            $ajax['system_message']=$this->message;
+            $ajax['system_message']='Invalid Input.';
+            $this->json_return($ajax);
+        }*/
+
+        foreach($items['quantity_min'] as $variety_id=>$pack_sizes)
+        {
+            foreach($pack_sizes as $pack_size_id=>$quantity_min)
+            {
+                $quantity_max=isset($items['quantity_max'][$variety_id][$pack_size_id])?$items['quantity_max'][$variety_id][$pack_size_id]:0;
+                if($stock_old[$variety_id][$pack_size_id])
+                {
+                    $data=array();
+                    $data['quantity_min']=$quantity_min;
+                    $data['quantity_max']=$quantity_max;
+                    $data['date_updated']=$time;
+                    $data['user_updated']=$user->user_id;
+                    $this->db->set('revision_count', 'revision_count+1', FALSE);
+                    Query_helper::update($this->config->item('table_pos_setup_stock_min_max'),$data,array('id='.$stock_old[$variety_id][$pack_size_id]['id']));
+                }
+                else
+                {
+                    $data=array();
+                    $data['customer_id']=$item_head['outlet_id'];
+                    $data['variety_id']=$variety_id;
+                    $data['pack_size_id']=$pack_size_id;
+                    $data['quantity_min']=$quantity_min;
+                    $data['quantity_max']=$quantity_max;
+                    $data['revision_count']=1;
+                    $data['date_updated']=$time;
+                    $data['user_updated']=$user->user_id;
+                    Query_helper::add($this->config->item('table_pos_setup_stock_min_max'),$data);
+                }
+            }
+        }
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
             $this->json_return($ajax);
         }
     }
