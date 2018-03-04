@@ -337,4 +337,8 @@ $lang['LABEL_CUSTOMER_TYPE'] = 'Customer Type';
 $lang['LABEL_MAP_ADDRESS'] = 'Google Map Link';
 $lang['LABEL_INCHARGE'] = 'In-charge';
 
-// se
+// setup ->
+/*  farmer type  */
+$lang['LABEL_DISCOUNT_SELF_PERCENTAGE'] = 'Self Discount (Percentage)';
+$lang['LABEL_DISCOUNT_REFERRAL_PERCENTAGE'] = 'Referral Discount (Percentage)';
+$lang['LABEL_COMMISSION_DISTRIBUTOR'] = 'Distributor Commission (Percentage)';
