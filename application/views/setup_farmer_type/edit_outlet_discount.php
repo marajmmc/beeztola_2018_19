@@ -36,6 +36,36 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="clearfix"></div>
         </div>
+
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="fiscal_year_id" class="form-control" name="item[fiscal_year_id]">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <?php
+                    $time=time();
+                    $selected='';
+                    foreach($fiscal_years as $year)
+                    {
+                        if($time>=$year['date_start'] && $time<=$year['date_end'])
+                        {
+                            ?>
+                            <option value="<?php echo $year['value']?>" selected="selected"><?php echo $year['text'];?></option>
+                        <?php
+                        }
+                        else
+                        {
+                            ?>
+                            <option value="<?php echo $year['value']?>"><?php echo $year['text'];?></option>
+                        <?php
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_NAME');?><span style="color:#FF0000">*</span></label>

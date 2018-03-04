@@ -151,8 +151,10 @@ class Setup_farmer_type extends Root_Controller
     }
     private function system_edit_outlet_discount($id)
     {
-        if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
+        if((isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
         {
+            $user = User_helper::get_user();
+
             if($id>0)
             {
                 $item_id=$id;
@@ -173,10 +175,12 @@ class Setup_farmer_type extends Root_Controller
             $data['user_outlets']=Query_helper::get_info($this->config->item('table_pos_setup_user_outlet'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
 
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-            $this->db->select('user_outlet.*');
-            $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.','INNER');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet','','INNER');
-
+            $this->db->select('user_outlet.customer_id value, outlet_info.name text');
+            $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->where('user_outlet.revision',1);
+            $this->db->where('user_outlet.user_id',$user->id);
+            $data['user_outlets']=$this->db->get()->result();
             $data['title']="Outlet Discount :: ". $data['item']['name'];
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_outlet_discount",$data,true));
