@@ -53,7 +53,7 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
         'type'=>'button',
         'label'=>'Outlet Discount',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/edit_outlet_discount')
+        'data-action-link'=>site_url($CI->controller_url.'/index/outlet_discount_list')
     );
 }
 $action_buttons[]=array(

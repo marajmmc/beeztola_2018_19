@@ -34,13 +34,29 @@ class Setup_farmer_type extends Root_Controller
         {
             $this->system_save();
         }
-        elseif($action=="edit_outlet_discount")
+        elseif($action=="outlet_discount_list")
         {
-            $this->system_edit_outlet_discount($id);
+            $this->system_outlet_discount_list($id);
+        }
+        elseif($action=="get_outlet_discount_items")
+        {
+            $this->system_get_outlet_discount_items();
+        }
+        elseif($action=='outlet_discount_edit')
+        {
+            $this->system_outlet_discount_edit($id);
+        }
+        elseif($action=="save_outlet_discount")
+        {
+            $this->system_save_outlet_discount();
         }
         elseif($action=="set_preference")
         {
             $this->system_set_preference();
+        }
+        elseif($action=="save_preference")
+        {
+            System_helper::save_preference();
         }
         elseif($action=="save_preference")
         {
@@ -140,55 +156,6 @@ class Setup_farmer_type extends Root_Controller
                 $ajax['system_message']=$this->message;
             }
             $ajax['system_page_url']=site_url($this->controller_url.'/index/edit/'.$item_id);
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
-    private function system_edit_outlet_discount($id)
-    {
-        if((isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
-        {
-            $user = User_helper::get_user();
-
-            if($id>0)
-            {
-                $item_id=$id;
-            }
-            else
-            {
-                $item_id=$this->input->post('id');
-            }
-
-            $data['item']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
-            if(!$data['item'])
-            {
-                System_helper::invalid_try('Edit Discount Non Exists',$item_id);
-                $ajax['status']=false;
-                $ajax['system_message']='Invalid Farmer Type.';
-                $this->json_return($ajax);
-            }
-            $data['user_outlets']=Query_helper::get_info($this->config->item('table_pos_setup_user_outlet'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
-
-            $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-            $this->db->select('user_outlet.customer_id value, outlet_info.name text');
-            $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-            $this->db->where('user_outlet.revision',1);
-            $this->db->where('user_outlet.user_id',$user->id);
-            $data['user_outlets']=$this->db->get()->result();
-            $data['title']="Outlet Discount :: ". $data['item']['name'];
-            $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_outlet_discount",$data,true));
-            if($this->message)
-            {
-                $ajax['system_message']=$this->message;
-            }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit_outlet_discount/'.$item_id);
             $this->json_return($ajax);
         }
         else
@@ -305,6 +272,223 @@ class Setup_farmer_type extends Root_Controller
             $this->message=validation_errors();
             return false;
         }
+        return true;
+    }
+    private function system_outlet_discount_list($id)
+    {
+        if(isset($this->permissions['action7'])&&($this->permissions['action7']==1))
+        {
+            if($id>0)
+            {
+                $data['farmer_type_id']=$id;
+            }
+            else
+            {
+                $data['farmer_type_id']=$this->input->post('id');
+            }
+
+            $valid_farmer_type=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),'*',array('id ='.$data['farmer_type_id']),1);
+            if(!$valid_farmer_type)
+            {
+                System_helper::invalid_try('List Outlet Discount Non Exists',$data['farmer_type_id']);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            //$data['system_preference_items']= $this->get_preference();
+            $data['title']="Farmer Type Outlet Discount List";
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/outlet_discount_list",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/outlet_discount_list/'.$data['farmer_type_id']);
+
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_get_outlet_discount_items()
+    {
+        $farmer_type_id=$this->input->post('farmer_type_id');
+        $time=time();
+        $user = User_helper::get_user();
+        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
+        $this->db->select('user_outlet.customer_id id, outlet_info.name');
+        $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('outlet_discount.discount_percentage, outlet_discount.expire_day, outlet_discount.expire_time, outlet_discount.farmer_type_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_type_outlet_discount').' outlet_discount','outlet_discount.outlet_id=user_outlet.customer_id AND outlet_discount.farmer_type_id='.$farmer_type_id,'LEFT');
+        $this->db->where('user_outlet.revision',1);
+        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->order_by('user_outlet.customer_id','ASC');
+        $items=$this->db->get()->result_array();
+        foreach($items as &$item)
+        {
+            if($item['expire_time']>$time)
+            {
+                $item['expire_day']=ceil(($item['expire_time']-$time)/(3600*24));
+            }
+            else
+            {
+                $item['expire_day']=0;
+            }
+            if(!(isset($item['discount_percentage'])))
+            {
+                $item['discount_percentage']=0;
+            }
+        }
+        $this->json_return($items);
+    }
+    private function system_outlet_discount_edit($farmer_type_id)
+    {
+        if(isset($this->permissions['action7']) && ($this->permissions['action7']==1))
+        {
+
+            $outlet_id=$this->input->post('id');
+
+            $user = User_helper::get_user();
+            $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
+            $this->db->select('outlet_info.name outlet_name');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=user_outlet.customer_id','INNER');
+            $this->db->where('user_outlet.revision',1);
+            $this->db->where('user_outlet.user_id',$user->id);
+            $this->db->where('user_outlet.customer_id',$outlet_id);
+            $valid_outlet=$this->db->get()->row_array();
+            if(!$valid_outlet)
+            {
+                System_helper::invalid_try('Edit Outlet Discount Non Exists',$outlet_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+
+            $this->db->from($this->config->item('table_pos_setup_farmer_type_outlet_discount').' outlet_discount');
+            $this->db->select('outlet_discount.*');
+            $this->db->where('outlet_discount.outlet_id',$outlet_id);
+            $this->db->where('outlet_discount.farmer_type_id',$farmer_type_id);
+            $data['item']=$this->db->get()->row_array();
+
+            if(!$data['item'])
+            {
+                $data['item']['outlet_id']=$outlet_id;
+                $data['item']['farmer_type_id']=$farmer_type_id;
+                $data['item']['discount_percentage']=0;
+                $data['item']['expire_day']=0;
+            }
+            $data['item']['outlet_name']=$valid_outlet['outlet_name'];
+            $data['title']="Outlet Discount";
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/outlet_discount_edit",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/outlet_discount_edit/'.$outlet_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_outlet_discount()
+    {
+        $item=$this->input->post('item');
+        $user = User_helper::get_user();
+        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
+        $this->db->where('user_outlet.revision',1);
+        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->where('user_outlet.customer_id',$item['outlet_id']);
+        $valid_outlet=$this->db->get()->result_array();
+        if(!$valid_outlet)
+        {
+            System_helper::invalid_try('Save Outlet Discount Non Exists',$item['outlet_id']);
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Try.';
+            $this->json_return($ajax);
+        }
+        $old_item=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type_outlet_discount'),array('*'),array('outlet_id ='.$item['outlet_id'],'farmer_type_id ='.$item['farmer_type_id']),1);
+        $time=time();
+
+        /*--Start-- Permission Checking */
+        if(!(isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        if(!$this->check_validation_discount())
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->message;
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $this->db->trans_start();  //DB Transaction Handle START
+
+            $data_history=array();
+            $data_history['date_updated'] = $time;
+            $data_history['user_updated'] = $user->user_id;
+            Query_helper::update($this->config->item('table_pos_setup_farmer_type_outlet_discount_histories'),$data_history,array('outlet_id='.$item['outlet_id'],'farmer_type_id='.$item['farmer_type_id'],'revision=1'));
+
+            $this->db->where('outlet_id',$item['outlet_id']);
+            $this->db->where('farmer_type_id',$item['farmer_type_id']);
+            $this->db->set('revision', 'revision+1', FALSE);
+            $this->db->update($this->config->item('table_pos_setup_farmer_type_outlet_discount_histories'));
+            if(count($old_item)>0)
+            {
+                $data=array();
+                $data['discount_percentage']=$item['discount_percentage'];
+                $data['expire_day']=$item['expire_day'];
+                $data['expire_time']=$time+$item['expire_day']*3600*24;
+                $data['user_updated']=$user->user_id;
+                $data['date_updated']=$time;
+                $this->db->set('revision_count', 'revision_count+1', FALSE);
+                Query_helper::update($this->config->item('table_pos_setup_farmer_type_outlet_discount'),$data,array('outlet_id='.$old_item['outlet_id'],'farmer_type_id='.$old_item['farmer_type_id']),false);
+            }
+            $data=array();
+            $data['outlet_id']=$item['outlet_id'];
+            $data['farmer_type_id']=$item['farmer_type_id'];
+            $data['discount_percentage']=$item['discount_percentage'];
+            $data['expire_day']=$item['expire_day'];
+            $data['expire_time']=$time+$item['expire_day']*3600*24;
+            $data['revision']=1;
+            $data['user_created']=$user->user_id;
+            $data['date_created']=$time;
+            Query_helper::add($this->config->item('table_pos_setup_farmer_type_outlet_discount_histories'),$data,false);
+            if(!(isset($old_item['outlet_id'])))
+            {
+                unset($data['revision']);
+                $data['revision_count']=1;
+                Query_helper::add($this->config->item('table_pos_setup_farmer_type_outlet_discount'),$data,false);
+            }
+
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_outlet_discount_list($item['farmer_type_id']);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function check_validation_discount()
+    {
         return true;
     }
     private function system_set_preference()
