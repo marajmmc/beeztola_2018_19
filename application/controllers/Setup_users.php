@@ -150,7 +150,7 @@ class Setup_users extends Root_Controller
         $user = User_helper::get_user();
 
         $this->db->from($this->config->item('table_pos_setup_user').' user');
-        $this->db->select('user.id,user.user_name,user.status');
+        $this->db->select('user.id,user.employee_id,user.user_name,user.status');
 
         $this->db->join($this->config->item('table_pos_setup_user_info').' user_info','user.id = user_info.user_id','INNER');
         $this->db->select('user_info.name,user_info.ordering,user_info.blood_group,user_info.mobile_no');
@@ -1146,6 +1146,7 @@ class Setup_users extends Root_Controller
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
         $data['id']= 1;
+        $data['employee_id']=1;
         $data['user_name']= 1;
         $data['name']= 1;
         $data['user_group']= 1;

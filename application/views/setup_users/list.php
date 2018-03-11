@@ -136,6 +136,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             dataType: "json",
             dataFields: [
                 { name: 'id', type: 'int' },
+                { name: 'employee_id', type: 'string' },
                 { name: 'user_name', type: 'string' },
                 { name: 'name', type: 'string' },
                 { name: 'user_group', type: 'string' },
@@ -169,11 +170,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 altrows: true,
                 autoheight: true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('ID'); ?>', dataField: 'id',width:'50',cellsAlign:'right', hidden:<?php echo $system_preference_items['id']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_USERNAME'); ?>', dataField: 'user_name',width:'150', hidden:<?php echo $system_preference_items['user_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('ID'); ?>', dataField: 'id',pinned:true,width:'50',cellsAlign:'right', hidden:<?php echo $system_preference_items['id']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_EMPLOYEE_ID'); ?>', dataField: 'employee_id',pinned:true,width:'40', hidden: <?php echo $system_preference_items['employee_id']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_USERNAME'); ?>', dataField: 'user_name',pinned:true,width:'100', hidden:<?php echo $system_preference_items['user_name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name',width:'300', hidden:<?php echo $system_preference_items['name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_USER_GROUP'); ?>', dataField: 'user_group',filtertype: 'list', hidden:<?php echo $system_preference_items['user_group']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_OUTLET'); ?>', dataField: 'total_outlet',width:'50',cellsalign: 'right', hidden:<?php echo $system_preference_items['total_outlet']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_OUTLET'); ?>', dataField: 'total_outlet',width:'50',filtertype: 'list',cellsalign: 'right', hidden:<?php echo $system_preference_items['total_outlet']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DESIGNATION_NAME'); ?>', dataField: 'designation_name',width:'200', filtertype: 'list', hidden:<?php echo $system_preference_items['designation_name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:'100', hidden:<?php echo $system_preference_items['mobile_no']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_BLOOD_GROUP'); ?>', dataField: 'blood_group', width:'50',filtertype: 'list', hidden:<?php echo $system_preference_items['blood_group']?0:1;?>},
