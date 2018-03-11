@@ -4,8 +4,7 @@ $CI=& get_instance();
 $action_buttons=array();
 $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_BACK"),
-    'href'=>site_url($CI->controller_url)
-//    'href'=>site_url($CI->controller_url.'/index/outlet_discount_list/'.$item['farmer_type_id'])
+    'href'=>site_url($CI->controller_url.'/index/outlet_discount_list/'.$item['farmer_type_id'])
 );
 $action_buttons[]=array(
     'type'=>'button',
@@ -45,7 +44,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('ACTION_DISCOUNT'); ?> (<?php echo $this->lang->line('LABEL_PERCENTAGE'); ?>)<span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Discount (Percentage)<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[discount_percentage]" class="form-control float_type_positive " value="<?php echo $item['discount_percentage']?>"/>

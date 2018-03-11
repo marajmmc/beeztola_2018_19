@@ -97,9 +97,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsreorder: true,
                 columns:
                     [
+                        { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id',width:'50',cellsAlign:'right'},
                         { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name'},
-                        { text: 'Discount Percentage', dataField: 'discount_percentage', width:'100', cellsAlign:'right'},
-                        { text: 'Expire Days', dataField: 'expire_day', width:'100', cellsAlign:'right'}
+                        { text: 'Discount Percentage', dataField: 'discount_percentage',filterType:'list',width:'100', cellsAlign:'right'},
+                        { text: 'Expire Days', dataField: 'expire_day',filterType:'list',width:'100', cellsAlign:'right'}
                     ]
             });
     });

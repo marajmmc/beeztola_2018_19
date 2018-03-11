@@ -12,7 +12,7 @@ class Setup_farmer_type extends Root_Controller
         $this->permissions=User_helper::get_permission('Setup_farmer_type');
         $this->controller_url='setup_farmer_type';
     }
-    public function index($action="list",$id=0)
+    public function index($action="list",$id=0,$id1=0)
     {
         if($action=="list")
         {
@@ -44,7 +44,7 @@ class Setup_farmer_type extends Root_Controller
         }
         elseif($action=='outlet_discount_edit')
         {
-            $this->system_outlet_discount_edit($id);
+            $this->system_outlet_discount_edit($id,$id1);
         }
         elseif($action=="save_outlet_discount")
         {
@@ -93,7 +93,8 @@ class Setup_farmer_type extends Root_Controller
     {
         $this->db->from($this->config->item('table_pos_setup_farmer_type').' farmer_type');
         $this->db->where('farmer_type.status !=',$this->config->item('system_status_delete'));
-        $this->db->order_by('farmer_type.name','ASC');
+        $this->db->order_by('farmer_type.ordering','ASC');
+        $this->db->order_by('farmer_type.id','ASC');
         $items=$this->db->get()->result_array();
         $this->json_return($items);
     }
@@ -338,22 +339,26 @@ class Setup_farmer_type extends Root_Controller
             else
             {
                 $item['expire_day']=0;
-            }
-            if(!(isset($item['discount_percentage'])))
-            {
                 $item['discount_percentage']=0;
             }
+
         }
         $this->json_return($items);
     }
-    private function system_outlet_discount_edit($farmer_type_id)
+    private function system_outlet_discount_edit($farmer_type_id,$id)
     {
         if(isset($this->permissions['action7']) && ($this->permissions['action7']==1))
         {
-
-            $outlet_id=$this->input->post('id');
-
+            if($id>0)
+            {
+                $outlet_id=$id;
+            }
+            else
+            {
+                $outlet_id=$this->input->post('id');
+            }
             $user = User_helper::get_user();
+            $time=time();
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=user_outlet.customer_id','INNER');
@@ -363,9 +368,9 @@ class Setup_farmer_type extends Root_Controller
             $valid_outlet=$this->db->get()->row_array();
             if(!$valid_outlet)
             {
-                System_helper::invalid_try('Edit Outlet Discount Non Exists',$outlet_id);
+                System_helper::invalid_try('Edit Outlet Discount Non Assigned',$outlet_id);
                 $ajax['status']=false;
-                $ajax['system_message']='Invalid Try.';
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
 
@@ -382,6 +387,18 @@ class Setup_farmer_type extends Root_Controller
                 $data['item']['discount_percentage']=0;
                 $data['item']['expire_day']=0;
             }
+            else
+            {
+                if($data['item']['expire_time']>$time)
+                {
+                    $item['expire_day']=ceil(($data['item']['expire_time']-$time)/(3600*24));
+                }
+                else
+                {
+                    $data['item']['discount_percentage']=0;
+                    $data['item']['expire_day']=0;
+                }
+            }
             $data['item']['outlet_name']=$valid_outlet['outlet_name'];
             $data['title']="Outlet Discount";
             $ajax['status']=true;
@@ -390,7 +407,7 @@ class Setup_farmer_type extends Root_Controller
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/outlet_discount_edit/'.$outlet_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/outlet_discount_edit/'.$farmer_type_id.'/'.$outlet_id);
             $this->json_return($ajax);
         }
         else
@@ -411,9 +428,9 @@ class Setup_farmer_type extends Root_Controller
         $valid_outlet=$this->db->get()->result_array();
         if(!$valid_outlet)
         {
-            System_helper::invalid_try('Save Outlet Discount Non Exists',$item['outlet_id']);
+            System_helper::invalid_try('Save Outlet Discount Non Assigned',$item['outlet_id']);
             $ajax['status']=false;
-            $ajax['system_message']='Invalid Try.';
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
         $old_item=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type_outlet_discount'),array('*'),array('outlet_id ='.$item['outlet_id'],'farmer_type_id ='.$item['farmer_type_id']),1);
@@ -445,7 +462,7 @@ class Setup_farmer_type extends Root_Controller
             $this->db->where('farmer_type_id',$item['farmer_type_id']);
             $this->db->set('revision', 'revision+1', FALSE);
             $this->db->update($this->config->item('table_pos_setup_farmer_type_outlet_discount_histories'));
-            if(count($old_item)>0)
+            if($old_item)
             {
                 $data=array();
                 $data['discount_percentage']=$item['discount_percentage'];
@@ -466,7 +483,7 @@ class Setup_farmer_type extends Root_Controller
             $data['user_created']=$user->user_id;
             $data['date_created']=$time;
             Query_helper::add($this->config->item('table_pos_setup_farmer_type_outlet_discount_histories'),$data,false);
-            if(!(isset($old_item['outlet_id'])))
+            if(!($old_item))
             {
                 unset($data['revision']);
                 $data['revision_count']=1;
@@ -513,6 +530,7 @@ class Setup_farmer_type extends Root_Controller
     {
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
+        $data['id']= 1;
         $data['name']= 1;
         $data['discount_self_percentage']= 1;
         $data['discount_referral_percentage']= 1;

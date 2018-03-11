@@ -123,10 +123,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsreorder: true,
                 columns:
                 [
+                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name', hidden: <?php echo $system_preference_items['name']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_SELF_PERCENTAGE'); ?>', dataField: 'discount_self_percentage', width:'100', cellsAlign:'right',hidden: <?php echo $system_preference_items['discount_self_percentage']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_REFERRAL_PERCENTAGE'); ?>', dataField: 'discount_referral_percentage', width:'100', cellsAlign:'right',hidden: <?php echo $system_preference_items['discount_referral_percentage']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_COMMISSION_DISTRIBUTOR'); ?>', dataField: 'commission_distributor', width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['commission_distributor']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_SELF_PERCENTAGE'); ?>',dataField: 'discount_self_percentage',filterType:'list',width:'100', cellsAlign:'right',hidden: <?php echo $system_preference_items['discount_self_percentage']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_REFERRAL_PERCENTAGE'); ?>',dataField: 'discount_referral_percentage',filterType:'list',width:'100', cellsAlign:'right',hidden: <?php echo $system_preference_items['discount_referral_percentage']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_COMMISSION_DISTRIBUTOR'); ?>',dataField: 'commission_distributor',filterType:'list',width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['commission_distributor']?0:1;?>}
                 ]
             });
     });
