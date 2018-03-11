@@ -83,12 +83,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $("#system_jqx_container").jqxGrid(
         {
             width: '100%',
-            height:'300',
             source: dataAdapter,
             columnsresize: true,
             columnsreorder: true,
             enablebrowserselection: true,
             altrows: true,
+            autoheight: true,
             rowsheight: 35,
             editable:true,
             columns: [

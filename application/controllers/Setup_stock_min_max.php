@@ -114,7 +114,6 @@ class Setup_stock_min_max extends Root_Controller
         $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = variety_price.pack_size_id','INNER');
         $this->db->select('pack.name pack_size,pack.id pack_size_id');
         $this->db->select('variety_price.variety_id quantity_min, variety_price.variety_id quantity_max');
-        $this->db->where('variety_price.revision',1);
         $this->db->where('crop_type.crop_id',$crop_id);
         $this->db->order_by('crop_type.ordering ASC');
         $this->db->order_by('v.ordering ASC');
