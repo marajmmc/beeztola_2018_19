@@ -15,4 +15,7 @@ $config['table_pos_stock_summary_variety'] = 'arm_beeztola_2018_19.pos_stock_sum
 $config['table_pos_setup_farmer_type_outlet_discount'] = 'arm_beeztola_2018_19.pos_setup_farmer_type_outlet_discount';
 $config['table_pos_setup_farmer_type_outlet_discount_histories'] = 'arm_beeztola_2018_19.pos_setup_farmer_type_outlet_discount_histories';
 
+$config['table_pos_payment'] = 'arm_beeztola_2018_19.pos_payment';
+
+
 

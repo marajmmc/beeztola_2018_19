@@ -342,3 +342,15 @@ $lang['LABEL_INCHARGE'] = 'In-charge';
 $lang['LABEL_DISCOUNT_SELF_PERCENTAGE'] = 'Self Discount (Percentage)';
 $lang['LABEL_DISCOUNT_REFERRAL_PERCENTAGE'] = 'Referral Discount (Percentage)';
 $lang['LABEL_COMMISSION_DISTRIBUTOR'] = 'Distributor Commission (Percentage)';
+
+// Label Lang Added By Saiful
+$lang['LABEL_DATE_PAYMENT'] = 'Payment Date';
+$lang['LABEL_DATE_SALE'] = 'Sale Date';
+$lang['LABEL_OUTLET'] = 'Outlet';
+$lang['LABEL_TYPE_PAYMENT'] = 'Payment Type';
+$lang['LABEL_REFERENCE_NO'] = 'Reference No';
+$lang['LABEL_AMOUNT_PAYMENT'] = 'Payment Amount';
+$lang['LABEL_BRANCH_NAME'] = 'Branch Name';
+$lang['LABEL_PAYMENT_STATUS'] = 'Payment Status';
+
+//Label Lang

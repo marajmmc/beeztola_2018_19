@@ -21,3 +21,12 @@ $config['system_base_url_customer_document']='http://180.234.223.205/login_2018_
 // Outlet Type Config
 $config['system_customer_type_outlet_id']=1;
 $config['system_customer_type_customer_id']=2;
+
+// Payment Type Config (added by saiful)
+
+$config['system_payment_way_cash']='Cash';
+$config['system_payment_way_pay_order']='Pay Order';
+$config['system_payment_way_cheque']='Cheque';
+$config['system_payment_way_tt']='TT';
+$config['system_payment_way_dd']='DD';
+$config['system_payment_way_online_payment']='Online Payment';
