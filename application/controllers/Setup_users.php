@@ -884,10 +884,11 @@ class Setup_users extends Root_Controller
             }
 
             $this->db->from($this->config->item('table_login_csetup_customer').' customer');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id=customer.id AND customer_info.revision=1','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id=customer.id','INNER');
             $this->db->select('customer_info.customer_id outlet_id, CONCAT_WS(" - ",customer_info.customer_code, customer_info.name) outlet_name');
             $this->db->where('customer.status !="'.$this->config->item('system_status_delete').'"');
             $this->db->where('customer_info.type',$this->config->item('system_customer_type_outlet_id'));
+            $this->db->where(' customer_info.revision',1);
             $this->db->order_by('customer.id');
             $data['outlets']=$this->db->get()->result_array();
 
