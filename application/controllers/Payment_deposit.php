@@ -213,7 +213,7 @@ class Payment_deposit extends Root_Controller
             $this->db->where('user_outlet.user_id',$user->id);
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
-            $this->db->last_query();
+            echo $this->db->last_query();
             exit;
             $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'));
             $ajax['status']=true;
