@@ -42,6 +42,26 @@ class Payment_deposit extends Root_Controller
         {
             $this->system_save();
         }
+        elseif($action=="details")
+        {
+            $this->system_details($id);
+        }
+        elseif($action=="details_all_payment")
+        {
+            $this->system_details_all_payment($id);
+        }
+        elseif($action=="delete")
+        {
+            $this->system_delete($id);
+        }
+        elseif($action=="forward")
+        {
+            $this->system_payment_forward($id);
+        }
+        elseif($action=="save_forward")
+        {
+            $this->system_save_payment_forward();
+        }
         elseif($action=="set_preference")
         {
             $this->system_set_preference();
@@ -98,7 +118,7 @@ class Payment_deposit extends Root_Controller
             $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
-            $item['amount_payment']=number_format($item['amount_payment'],2,'.','');
+            $item['amount_payment']=number_format($item['amount_payment'],2);
             $item['branch_name']=$item['bank_branch_source'];
         }
         $this->json_return($items);
@@ -141,7 +161,6 @@ class Payment_deposit extends Root_Controller
         {
             $pagesize=$pagesize*2;
         }
-
         $this->db->from($this->config->item('table_pos_payment').' payment');
         $this->db->select('payment.*');
         $this->db->select('outlet_info.name outlet');
@@ -157,7 +176,7 @@ class Payment_deposit extends Root_Controller
             $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
-            $item['amount_payment']=number_format($item['amount_payment'],2,'.','');
+            $item['amount_payment']=number_format($item['amount_payment'],2);
             $item['branch_name']=$item['bank_branch_source'];
             $item['payment_status']=$item['status_payment_forward'];
         }
@@ -184,8 +203,8 @@ class Payment_deposit extends Root_Controller
                 'image_name'=>''
 
             );
-
             $user = User_helper::get_user();
+            //Getting Assigned Outlet
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
@@ -195,8 +214,6 @@ class Payment_deposit extends Root_Controller
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
             $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'));
-
-
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
             if($this->message)
@@ -230,11 +247,18 @@ class Payment_deposit extends Root_Controller
             {
                 System_helper::invalid_try('Edit Non Exists',$item_id);
                 $ajax['status']=false;
-                $ajax['system_message']='Invalid Payment Deposit.';
+                $ajax['system_message']='Invalid Payment.';
                 $this->json_return($ajax);
             }
-
             $user = User_helper::get_user();
+            // Checking Valid Outlet
+            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Edit Non Exists',$message='Invalid Payment Edit'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
+            //Getting Assigned Outlet
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
@@ -243,10 +267,7 @@ class Payment_deposit extends Root_Controller
             $this->db->where('user_outlet.user_id',$user->id);
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
-
-            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'));
-
-
+            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status !="'.$this->config->item('system_status_delete').'"'));
             $data['title']="Edit Payment:: ". Barcode_helper::get_barcode_payment($data['item']['id']);
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
@@ -278,13 +299,12 @@ class Payment_deposit extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-
             $result=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$id,'status !="'.$this->config->item('system_status_delete').'"','status_payment_forward ="'.$this->config->item('system_status_pending').'"'),1);
             if(!$result)
             {
                 System_helper::invalid_try('Update Non Exists',$id);
                 $ajax['status']=false;
-                $ajax['system_message']='Invalid Payment Deposit.';
+                $ajax['system_message']='Invalid Payment.';
                 $this->json_return($ajax);
             }
         }
@@ -303,31 +323,13 @@ class Payment_deposit extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
-        
         // Checking Valid Outlet
-        $user = User_helper::get_user();
-        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-        $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
-        $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-        $this->db->where('user_outlet.revision',1);
-        $this->db->where('user_outlet.user_id',$user->id);
-        $this->db->order_by('user_outlet.customer_id','ASC');
-        $result_outlet=$this->db->get()->result_array();
-        $assigned_outlet=array();
-        foreach($result_outlet as $outlet)
+        if(!$this->check_valid_outlet($item['outlet_id'],$invalid_try='Save Non Exists',$message='Invalid Payment Save'))
         {
-            $assigned_outlet[]=$outlet['outlet_id'];
-        }
-
-        if(!(in_array($item['outlet_id'],$assigned_outlet)))
-        {
-            System_helper::invalid_try('Save Non Exists',$item['outlet_id']);
             $ajax['status']=false;
-            $ajax['system_message']='Invalid Payment Deposit.';
+            $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
-
         //Uploading attachment
         $path='images/payment/'.$item['date_payment'];
         $dir=(FCPATH).$path;
@@ -350,9 +352,7 @@ class Payment_deposit extends Root_Controller
                 $this->json_return($ajax);
             }
         }
-
         $this->db->trans_start();  //DB Transaction Handle START
-
         if($id>0)
         {
             $item['date_payment']=System_helper::get_time($item['date_payment']);
@@ -370,7 +370,6 @@ class Payment_deposit extends Root_Controller
             $item['user_updated']=$user->user_id;
             Query_helper::add($this->config->item('table_pos_payment'),$item, true);
         }
-
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
@@ -410,6 +409,310 @@ class Payment_deposit extends Root_Controller
         }
         return true;
     }
+    private function system_details($id)
+    {
+        if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_payment').' payment');
+            $this->db->select('payment.*');
+            $this->db->select('outlet_info.name outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('bank_source.name bank_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->where('payment.id',$item_id);
+            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Details Payment Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment Details.';
+                $this->json_return($ajax);
+            }
+            //Checking Valid Outlet
+            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Details Non Exists',$message='Invalid Payment Details'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
+            $data['title']="Payment Details :: ".Barcode_helper::get_barcode_payment($item_id);
+
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_details_all_payment($id)
+    {
+        if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_payment').' payment');
+            $this->db->select('payment.*');
+            $this->db->select('outlet_info.name outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('bank_source.name bank_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->where('payment.id',$item_id);
+            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Details Payment Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment Details.';
+                $this->json_return($ajax);
+            }
+            //Checking Valid Outlet
+            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Details Non Exists',$message='Invalid Payment Details'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
+            $data['title']="Payment Details :: ".Barcode_helper::get_barcode_payment($item_id);
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details_all_payment",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_delete($id)
+    {
+        if(isset($this->permissions['action3']) && ($this->permissions['action3']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $result=Query_helper::get_info($this->config->item('table_pos_payment'),'*',array('id ='.$item_id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
+            if(!$result)
+            {
+                System_helper::invalid_try('Delete Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment.';
+                $this->json_return($ajax);
+            }
+            if($result['status_payment_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Payment already forwarded. You can not delete it';
+                $this->json_return($ajax);
+            }
+            //Checking Valid Outlet
+            if(!$this->check_valid_outlet($result['outlet_id'],$invalid_try='Delete Non Exists',$message='Invalid Payment Delete'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
+            $this->db->trans_start();  //DB Transaction Handle START
+            Query_helper::update($this->config->item('table_pos_payment'),array('status'=>$this->config->item('system_status_delete')),array("id = ".$item_id));
+            $this->db->trans_complete();   //DB Transaction Handle END
+
+            if ($this->db->trans_status() === TRUE)
+            {
+                $this->message=$this->lang->line("MSG_DELETED_SUCCESS");
+                $this->system_list();
+            }
+            else
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+                $this->json_return($ajax);
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_payment_forward($id)
+    {
+        if((isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_payment').' payment');
+            $this->db->select('payment.*');
+            $this->db->select('outlet_info.name outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('bank_source.name bank_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->where('payment.id',$item_id);
+            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_pending'));
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Edit Forwarded Payment Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment Forward.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_payment_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Already forwarded this Payment :: '. Barcode_helper::get_barcode_payment($item_id);
+                $this->json_return($ajax);
+            }
+            //Checking Valid Outlet
+            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Forward Non Exists',$message='Invalid Payment Forward'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
+            $data['title']="Payment Forward :: ".Barcode_helper::get_barcode_payment($item_id);
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/forward",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/forward/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_payment_forward()
+    {
+        $id = $this->input->post("id");
+        $user = User_helper::get_user();
+        $time=time();
+        $item=$this->input->post('item');
+        if(!((isset($this->permissions['action7']) && ($this->permissions['action7']==1))))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        if($item['status_payment_forward']!=$this->config->item('system_status_forwarded'))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Forward Payment is required.';
+            $this->json_return($ajax);
+        }
+        $result=Query_helper::get_info($this->config->item('table_pos_payment'),'*',array('id ='.$id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
+        if(!$result)
+        {
+            System_helper::invalid_try('Forwarded Payment Non Exists',$id);
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Payment Forward.';
+            $this->json_return($ajax);
+        }
+        if($result['status_payment_forward']==$this->config->item('system_status_forwarded'))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Already Payment Forwarded.';
+            $this->json_return($ajax);
+        }
+        //Checking Valid Outlet
+        if(!$this->check_valid_outlet($result['outlet_id'],$invalid_try='Save Forward Non Exists',$message='Invalid Payment Forward Save'))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->message;
+            $this->json_return($ajax);
+        }
+        $this->db->trans_start();  //DB Transaction Handle START
+        $item['date_updated_forward']=$time;
+        $item['user_updated_forward']=$user->user_id;
+        Query_helper::update($this->config->item('table_pos_payment'),$item,array('id='.$id));
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function check_valid_outlet($outlet_id,$invalid_try,$message)
+    {
+        $user = User_helper::get_user();
+        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
+        $this->db->select('user_outlet.customer_id outlet_id');
+        $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->where('user_outlet.revision',1);
+        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->order_by('user_outlet.customer_id','ASC');
+        $result_outlet=$this->db->get()->result_array();
+        $assigned_outlet=array();
+        foreach($result_outlet as $outlet)
+        {
+            $assigned_outlet[]=$outlet['outlet_id'];
+        }
+        if(!(in_array($outlet_id,$assigned_outlet)))
+        {
+            System_helper::invalid_try($invalid_try,$outlet_id);
+            $this->message=$message;
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
     private function system_set_preference()
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
@@ -441,7 +744,6 @@ class Payment_deposit extends Root_Controller
         $data['amount_payment']= 1;
         $data['bank_name']= 1;
         $data['branch_name']= 1;
-
         if($result)
         {
             if($result['preferences']!=null)
@@ -494,7 +796,6 @@ class Payment_deposit extends Root_Controller
         $data['bank_name']= 1;
         $data['branch_name']= 1;
         $data['payment_status']= 1;
-
         if($result)
         {
             if($result['preferences']!=null)
