@@ -225,17 +225,29 @@ class Payment_deposit extends Root_Controller
             {
                 $item_id=$this->input->post('id');
             }
-
-            $data['item']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
+            $data['item']=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"','status_payment_forward ="'.$this->config->item('system_status_pending').'"'),1);
             if(!$data['item'])
             {
                 System_helper::invalid_try('Edit Non Exists',$item_id);
                 $ajax['status']=false;
-                $ajax['system_message']='Invalid Farmer Type.';
+                $ajax['system_message']='Invalid Payment Deposit.';
                 $this->json_return($ajax);
             }
 
-            $data['title']="Edit Farmer Type :: ". $data['item']['name'];
+            $user = User_helper::get_user();
+            $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
+            $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
+            $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->where('user_outlet.revision',1);
+            $this->db->where('user_outlet.user_id',$user->id);
+            $this->db->order_by('user_outlet.customer_id','ASC');
+            $data['assigned_outlet']=$this->db->get()->result_array();
+
+            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'));
+
+
+            $data['title']="Edit Payment:: ". Barcode_helper::get_barcode_payment($data['item']['id']);
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
             if($this->message)
@@ -260,7 +272,21 @@ class Payment_deposit extends Root_Controller
         $item=$this->input->post('item');
         if($id>0)
         {
-            // have to code
+            if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+            }
+
+            $result=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$id,'status !="'.$this->config->item('system_status_delete').'"','status_payment_forward ="'.$this->config->item('system_status_pending').'"'),1);
+            if(!$result)
+            {
+                System_helper::invalid_try('Update Non Exists',$id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment Deposit.';
+                $this->json_return($ajax);
+            }
         }
         else
         {
@@ -271,6 +297,31 @@ class Payment_deposit extends Root_Controller
                 $this->json_return($ajax);
             }
         }
+
+        // Checking Valid Outlet
+        $user = User_helper::get_user();
+        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
+        $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
+        $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->where('user_outlet.revision',1);
+        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->order_by('user_outlet.customer_id','ASC');
+        $result_outlet=$this->db->get()->result_array();
+        $assigned_outlet=array();
+        foreach($result_outlet as $outlet)
+        {
+            $assigned_outlet[]=$outlet['outlet_id'];
+        }
+
+        if(!(in_array($item['outlet_id'],$assigned_outlet)))
+        {
+            System_helper::invalid_try('Save Non Exists',$item['outlet_id']);
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Payment Deposit.';
+            $this->json_return($ajax);
+        }
+
         if(!$this->check_validation())
         {
             $ajax['status']=false;
@@ -305,7 +356,12 @@ class Payment_deposit extends Root_Controller
 
         if($id>0)
         {
-
+            $item['date_payment']=System_helper::get_time($item['date_payment']);
+            $item['date_sale']=System_helper::get_time($item['date_sale']);
+            $item['date_updated']=$time;
+            $item['user_updated']=$user->user_id;
+            $this->db->set('revision_count_payment', 'revision_count_payment+1', FALSE);
+            Query_helper::update($this->config->item('table_pos_payment'),$item,array('id='.$id), true);
         }
         else
         {
@@ -313,7 +369,7 @@ class Payment_deposit extends Root_Controller
             $item['date_sale']=System_helper::get_time($item['date_sale']);
             $item['date_updated']=$time;
             $item['user_updated']=$user->user_id;
-            Query_helper::add($this->config->item('table_pos_payment'),$item, false);
+            Query_helper::add($this->config->item('table_pos_payment'),$item, true);
         }
 
         $this->db->trans_complete();   //DB Transaction Handle END
