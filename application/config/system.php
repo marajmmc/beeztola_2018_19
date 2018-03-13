@@ -8,6 +8,8 @@ $config['system_status_no']='No';
 $config['system_status_active']='Active';
 $config['system_status_inactive']='In-Active';
 $config['system_status_delete']='Deleted';
+$config['system_status_pending']='Pending';
+$config['system_status_complete']='Complete';
 
 $config['USER_TYPE_EMPLOYEE']=1;
 

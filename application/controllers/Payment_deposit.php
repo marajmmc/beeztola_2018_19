@@ -90,6 +90,7 @@ class Payment_deposit extends Root_Controller
         $this->db->select('bank_source.name bank_name');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
         $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_pending'));
         $this->db->order_by('payment.id','DESC');
         $items=$this->db->get()->result_array();
         foreach($items as &$item)

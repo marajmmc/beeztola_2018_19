@@ -153,6 +153,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 altrows: true,
                 autoheight: true,
                 autorowheight: true,
+                enablebrowserselection:true,
                 columnsreorder: true,
                 columns:
                     [
