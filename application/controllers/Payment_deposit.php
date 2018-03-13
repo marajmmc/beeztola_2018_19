@@ -297,7 +297,13 @@ class Payment_deposit extends Root_Controller
                 $this->json_return($ajax);
             }
         }
-
+        if(!$this->check_validation())
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->message;
+            $this->json_return($ajax);
+        }
+        
         // Checking Valid Outlet
         $user = User_helper::get_user();
         $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
@@ -319,13 +325,6 @@ class Payment_deposit extends Root_Controller
             System_helper::invalid_try('Save Non Exists',$item['outlet_id']);
             $ajax['status']=false;
             $ajax['system_message']='Invalid Payment Deposit.';
-            $this->json_return($ajax);
-        }
-
-        if(!$this->check_validation())
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
 
