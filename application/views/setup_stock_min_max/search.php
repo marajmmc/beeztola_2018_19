@@ -28,7 +28,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <?php
                     foreach($user_outlets as $row)
                     {?>
-                        <option value="<?php echo $row['id']?>"><?php echo $row['name'];?></option>
+                        <option value="<?php echo $row['customer_id']?>"><?php echo $row['name'];?></option>
                     <?php
                     }
                     ?>
