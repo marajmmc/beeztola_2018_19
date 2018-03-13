@@ -204,21 +204,15 @@ class Payment_deposit extends Root_Controller
 
             );
             $user = User_helper::get_user();
-            echo "<pre>";
-            print_r($user);
-            echo "</pre>";
-            die();
             //Getting Assigned Outlet
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->where('user_outlet.revision',1);
-            $this->db->where('user_outlet.user_id',$user->id);
+            $this->db->where('user_outlet.user_id',$user->user_id);
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
-            echo $this->db->last_query();
-            exit;
             $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'));
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
@@ -270,7 +264,7 @@ class Payment_deposit extends Root_Controller
             $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->where('user_outlet.revision',1);
-            $this->db->where('user_outlet.user_id',$user->id);
+            $this->db->where('user_outlet.user_id',$user->user_id);
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
             $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status !="'.$this->config->item('system_status_delete').'"'));
@@ -700,7 +694,7 @@ class Payment_deposit extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->where('user_outlet.revision',1);
-        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->where('user_outlet.user_id',$user->user_id);
         $this->db->order_by('user_outlet.customer_id','ASC');
         $result_outlet=$this->db->get()->result_array();
         $assigned_outlet=array();
