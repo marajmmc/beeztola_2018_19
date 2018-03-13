@@ -94,7 +94,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?>:</label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <?php echo $item['remarks_payment'];?>
+            <?php echo nl2br($item['remarks_payment']);?>
         </div>
     </div>
     <div class="row show-grid">
