@@ -204,6 +204,10 @@ class Payment_deposit extends Root_Controller
 
             );
             $user = User_helper::get_user();
+            echo "<pre>";
+            print_r($user);
+            echo "</pre>";
+            die();
             //Getting Assigned Outlet
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
