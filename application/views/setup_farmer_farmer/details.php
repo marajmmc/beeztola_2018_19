@@ -44,10 +44,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div class="row show-grid">
         <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE');?></label>
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['type_name'];?></label>
+            <label class="control-label"><?php echo $item['farmer_type_name'];?></label>
+        </div>
+    </div>
+    <div class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT_SELF_PERCENTAGE');?></label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo $item['discount_self_percentage'];?></label>
         </div>
     </div>
     <div class="row show-grid">
@@ -56,22 +64,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="col-sm-4 col-xs-8">
             <label class="control-label"><?php echo $item['mobile_no'];?></label>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right">Coupon Discount %</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['discount_coupon'];?></label>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right">Non Coupon/Card Discount %</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['discount_non_coupon'];?></label>
         </div>
     </div>
     <div class="row show-grid">
@@ -90,6 +82,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label"><?php echo $item['address'];?></label>
         </div>
     </div>
+
     <div style="" class="row show-grid">
         <div class="col-xs-4">
             <label class="control-label pull-right">Assigned Outlet(s)</label>

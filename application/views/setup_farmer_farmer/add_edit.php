@@ -39,18 +39,38 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_NAME');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select name="item[type_id]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                <input type="text" name="item[name]" id="name" class="form-control" value="<?php echo $item['name'];?>"/>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select name="item[farmer_type_id]" class="form-control">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
-                    foreach($types as $row)
+                    foreach($farmer_types as $row)
                     {?>
-                        <option value="<?php echo $row['value']?>" <?php if($row['value']==$item['type_id']){ echo "selected";}?>><?php echo $row['text'];?></option>
+                        <option value="<?php echo $row['value']?>" <?php if($row['value']==$item['farmer_type_id']){ echo "selected";}?>><?php echo $row['text'];?></option>
                     <?php
                     }
                     ?>
+                </select>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS_CARD_REQUIRE');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select name="item[status_card_require]" class="form-control">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <option value="<?php echo $CI->config->item('system_status_yes');?>" <?php if($CI->config->item('system_status_yes')==$item['status_card_require']){ echo "selected";}?>><?php echo $CI->config->item('system_status_yes');?></option>
+                    <option value="<?php echo $CI->config->item('system_status_no');?>" <?php if($CI->config->item('system_status_no')==$item['status_card_require']){ echo "selected";}?>><?php echo $CI->config->item('system_status_no');?></option>
                 </select>
             </div>
         </div>
@@ -65,17 +85,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label">Hour(s)</label>
             </div>
         </div>
+
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_NAME');?><span style="color:#FF0000">*</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[name]" id="name" class="form-control" value="<?php echo $item['name'];?>"/>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_MOBILE_NO');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MOBILE_NO');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[mobile_no]"  class="form-control" value="<?php echo $item['mobile_no'];?>"/>
@@ -83,7 +96,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_NID');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_NID');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[nid]"  class="form-control" value="<?php echo $item['nid'];?>"/>
@@ -104,6 +117,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[ordering]" id="ordering" class="form-control" value="<?php echo $item['ordering'] ?>" >
+            </div>
+        </div>
+        <div style="" class="row show-grid">
+            <div class="col-xs-4">
+                <label for="status" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="status" name="item[status]" class="form-control">
+                    <option value="<?php echo $CI->config->item('system_status_active'); ?>" <?php if ($item['status'] == $CI->config->item('system_status_active')) { echo "selected='selected'"; } ?> ><?php echo $CI->lang->line('ACTIVE') ?></option>
+                    <option value="<?php echo $CI->config->item('system_status_inactive'); ?>" <?php if ($item['status'] == $CI->config->item('system_status_inactive')) { echo "selected='selected'"; } ?> ><?php echo $CI->lang->line('INACTIVE') ?></option>
+                </select>
             </div>
         </div>
     </div>

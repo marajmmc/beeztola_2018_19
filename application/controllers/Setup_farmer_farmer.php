@@ -2,7 +2,7 @@
 
 class Setup_farmer_farmer extends Root_Controller
 {
-    private  $message;
+    public $message;
     public $permissions;
     public $controller_url;
     public function __construct()
@@ -23,7 +23,7 @@ class Setup_farmer_farmer extends Root_Controller
         {
             $this->system_get_items();
         }
-        /*elseif($action=="add")
+        elseif($action=="add")
         {
             $this->system_add();
         }
@@ -31,22 +31,25 @@ class Setup_farmer_farmer extends Root_Controller
         {
             $this->system_edit($id);
         }
-        elseif($action=="edit_outlet")
-        {
-            $this->system_edit_outlet($id);
-        }
-        elseif($action=="details")
-        {
-            $this->system_details($id);
-        }
         elseif($action=="save")
         {
             $this->system_save();
         }
+        elseif($action=="edit_outlet")
+        {
+            $this->system_edit_outlet($id);
+        }
         elseif($action=="save_outlet")
         {
             $this->system_save_outlet();
-        }*/
+        }
+
+        elseif($action=="details")
+        {
+            $this->system_details($id);
+        }
+
+
         elseif($action=="set_preference")
         {
             $this->system_set_preference();
@@ -137,13 +140,15 @@ class Setup_farmer_farmer extends Root_Controller
             $data["item"] = Array(
                 'id' => 0,
                 'name' => '',
-                'type_id' => '',
+                'farmer_type_id' => '',
+                'status_card_require' => $this->config->item('system_status_no'),
                 'mobile_no' => '',
                 'nid' => '',
                 'address' => '',
+                'status' => $this->config->item('system_status_active'),
                 'ordering' => 999
             );
-            $data['types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
             $ajax['system_page_url']=site_url($this->controller_url."/index/add");
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
@@ -164,18 +169,26 @@ class Setup_farmer_farmer extends Root_Controller
     {
         if(isset($this->permissions['action2']) && ($this->permissions['action2']==1))
         {
-            if(($this->input->post('id')))
-            {
-                $item_id=$this->input->post('id');
-            }
-            else
+            if($id>0)
             {
                 $item_id=$id;
             }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
 
             $data['item']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$item_id),1);
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Edit Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer Selection.';
+                $this->json_return($ajax);
+            }
+
             $data['title']="Edit Farmer (".$data['item']['name'].')';
-            $data['types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
             if($this->message)
@@ -192,93 +205,11 @@ class Setup_farmer_farmer extends Root_Controller
             $this->json_return($ajax);
         }
     }
-
-    private function system_edit_outlet($id)
-    {
-        if(isset($this->permissions['action2']) && ($this->permissions['action2']==1))
-        {
-            if(($this->input->post('id')))
-            {
-                $item_id=$this->input->post('id');
-            }
-            else
-            {
-                $item_id=$id;
-            }
-            $data['item']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$item_id),1);
-            $data['title']="Assign Outlet For(".$data['item']['name'].')';
-            $ajax['status']=true;
-            $data['outlets']=Query_helper::get_info($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_csetup_customers'),array('id value','CONCAT(customer_code," - ",name) text'),array('status ="'.$this->config->item('system_status_active').'"','type ="Outlet"'));
-            $results=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),array('customer_id'),array('farmer_id ='.$item_id,'revision =1'));
-            $data['assigned_outlets']=array();
-            foreach($results as $result)
-            {
-                $data['assigned_outlets'][]=$result['customer_id'];
-            }
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_outlet",$data,true));
-            if($this->message)
-            {
-                $ajax['system_message']=$this->message;
-            }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit_outlet/'.$item_id);
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
-    private function system_details($id)
-    {
-        if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
-        {
-            if(($this->input->post('id')))
-            {
-                $item_id=$this->input->post('id');
-            }
-            else
-            {
-                $item_id=$id;
-            }
-            $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
-            $this->db->select('f.*');
-            $this->db->select('ft.name type_name,ft.discount_coupon,ft.discount_non_coupon');
-            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.type_id','INNER');
-            $this->db->where('f.id',$item_id);
-
-            $data['item']=$this->db->get()->row_array();
-            $data['title']="Details of Framer (".$data['item']['name'].')';
-
-            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' fo');
-            $this->db->select('CONCAT(cus.customer_code," - ",cus.name) text');
-            $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_csetup_customers').' cus','cus.id = fo.customer_id','INNER');
-            $this->db->where('fo.revision',1);
-            $this->db->where('fo.farmer_id',$item_id);
-            $data['assigned_outlets']=$this->db->get()->result_array();
-
-            $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
-            if($this->message)
-            {
-                $ajax['system_message']=$this->message;
-            }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$item_id);
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
-
     private function system_save()
     {
         $id = $this->input->post("id");
         $user = User_helper::get_user();
+        $item=$this->input->post('item');
         $time=time();
         if($id>0)
         {
@@ -288,6 +219,14 @@ class Setup_farmer_farmer extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
                 die();
+            }
+            $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
+            if(!$result)
+            {
+                System_helper::invalid_try('Update Non Exists',$id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer.';
+                $this->json_return($ajax);
             }
         }
         else
@@ -310,26 +249,29 @@ class Setup_farmer_farmer extends Root_Controller
         else
         {
             $duration_card_off=$this->input->post('duration_card_off');
-            $data=$this->input->post('item');
             if($duration_card_off>0)
             {
-                $data['time_card_off_end']=$time+$duration_card_off*60*60;
+                $item['time_card_off_end']=$time+$duration_card_off*60*60;//hour
+            }
+            else
+            {
+                $item['time_card_off_end']=0;
             }
             $this->db->trans_start();  //DB Transaction Handle START
             if($id>0)
             {
-                $data['user_updated'] = $user->user_id;
-                $data['date_updated'] = $time;
+                $item['user_updated'] = $user->user_id;
+                $item['date_updated'] = $time;
 
-                Query_helper::update($this->config->item('table_pos_setup_farmer_farmer'),$data,array("id = ".$id));
+                Query_helper::update($this->config->item('table_pos_setup_farmer_farmer'),$item,array("id = ".$id));
 
             }
             else
             {
 
-                $data['user_created'] = $user->user_id;
-                $data['date_created'] = $time;
-                Query_helper::add($this->config->item('table_pos_setup_farmer_farmer'),$data);
+                $item['user_created'] = $user->user_id;
+                $item['date_created'] = $time;
+                Query_helper::add($this->config->item('table_pos_setup_farmer_farmer'),$item);
             }
             $this->db->trans_complete();   //DB Transaction Handle END
             if ($this->db->trans_status() === TRUE)
@@ -353,6 +295,91 @@ class Setup_farmer_farmer extends Root_Controller
             }
         }
     }
+    private function check_validation()
+    {
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('item[name]',$this->lang->line('LABEL_NAME'),'required');
+        $this->form_validation->set_rules('item[farmer_type_id]',$this->lang->line('LABEL_FARMER_TYPE_NAME'),'required');
+        $this->form_validation->set_rules('item[status_card_require]',$this->lang->line('LABEL_STATUS_CARD_REQUIRE'),'required');
+        $this->form_validation->set_rules('item[mobile_no]',$this->lang->line('LABEL_MOBILE_NO'),'required');
+
+        if($this->form_validation->run() == FALSE)
+        {
+            $this->message=validation_errors();
+            return false;
+        }
+        $item=$this->input->post('item');
+        $id = $this->input->post("id");
+        $exists=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('id'),array('mobile_no ="'.$item['mobile_no'].'"','id !='.$id),1);
+        if($exists)
+        {
+            $this->message="Mobile No already Exists";
+            return false;
+        }
+        $duration_card_off=$this->input->post('duration_card_off');
+        if($duration_card_off>0 && $item['status_card_require']==$this->config->item('system_status_no'))
+        {
+            $this->message="If you allow without card you must Set Card Required?= Yes";
+            return false;
+        }
+        return true;
+    }
+
+    private function system_edit_outlet($id)
+    {
+        if(isset($this->permissions['action2']) && ($this->permissions['action2']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $data['item']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$item_id),1);
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('edit outlet Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer.';
+                $this->json_return($ajax);
+            }
+            $data['title']="Assign Outlet For(".$data['item']['name'].')';
+            $ajax['status']=true;
+
+            $this->db->from($this->config->item('table_login_csetup_customer').' outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id = outlet.id','INNER');
+            $this->db->select('outlet.id value');
+            $this->db->select('CONCAT(customer_code," - ",name) text');
+            $this->db->where('outlet.status',$this->config->item('system_status_active'));
+            $this->db->where('outlet_info.type',$this->config->item('system_customer_type_outlet_id'));
+            $this->db->where('outlet_info.revision',1);
+            $this->db->order_by('outlet.id','ASC');
+            $data['outlets']=$this->db->get()->result_array();
+
+            //$data['outlets']=Query_helper::get_info($this->config->item('table_ems_csetup_customers'),array('id value','CONCAT(customer_code," - ",name) text'),array('status ="'.$this->config->item('system_status_active').'"','type ="Outlet"'));
+            $results=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),array('outlet_id'),array('farmer_id ='.$item_id,'revision =1'));
+            $data['assigned_outlets']=array();
+            foreach($results as $result)
+            {
+                $data['assigned_outlets'][]=$result['outlet_id'];
+            }
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_outlet",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit_outlet/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
     private function system_save_outlet()
     {
         $id = $this->input->post("id");
@@ -363,35 +390,42 @@ class Setup_farmer_farmer extends Root_Controller
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
-            die();
+
+            $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
+            if(!$result)
+            {
+                System_helper::invalid_try('Svae Outlet Non Exists',$id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer.';
+                $this->json_return($ajax);
+            }
         }
         {
 
             $this->db->trans_start();  //DB Transaction Handle START
-            $this->db->where('farmer_id',$id);
-            $this->db->where('revision >',1);
-            $this->db->set('revision', 'revision+1', FALSE);
-            $this->db->update($this->config->item('table_pos_setup_farmer_outlet'));
 
             $this->db->where('farmer_id',$id);
             $this->db->where('revision',1);
-            $this->db->set('revision',2);
             $this->db->set('user_updated',$user->user_id);
             $this->db->set('date_updated',$time);
+            $this->db->update($this->config->item('table_pos_setup_farmer_outlet'));
+
+            $this->db->where('farmer_id',$id);
+            $this->db->set('revision', 'revision+1', FALSE);
             $this->db->update($this->config->item('table_pos_setup_farmer_outlet'));
 
             $items=$this->input->post('items');
             if(is_array($items))
             {
-                foreach($items as $customer_id)
+                foreach($items as $outlet_id)
                 {
                     $data=array();
                     $data['farmer_id']=$id;
-                    $data['customer_id']=$customer_id;
+                    $data['outlet_id']=$outlet_id;
                     $data['user_created'] = $user->user_id;
                     $data['date_created'] = $time;
                     $data['revision'] = 1;
-                    Query_helper::add($this->config->item('table_pos_setup_farmer_outlet'),$data);
+                    Query_helper::add($this->config->item('table_pos_setup_farmer_outlet'),$data,false);
                 }
             }
 
@@ -410,28 +444,64 @@ class Setup_farmer_farmer extends Root_Controller
             }
         }
     }
-    private function check_validation()
-    {
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('item[type_id]',$this->lang->line('LABEL_TYPE'),'required');
-        $this->form_validation->set_rules('item[name]',$this->lang->line('LABEL_NAME'),'required');
-        $this->form_validation->set_rules('item[mobile_no]',$this->lang->line('LABEL_MOBILE_NO'),'required');
 
-        if($this->form_validation->run() == FALSE)
+    private function system_details($id)
+    {
+        if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
         {
-            $this->message=validation_errors();
-            return false;
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+
+            $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
+            $this->db->select('f.*');
+            $this->db->select('ft.name farmer_type_name,ft.discount_self_percentage');
+            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
+            $this->db->where('f.id',$item_id);
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Details Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer.';
+                $this->json_return($ajax);
+            }
+            $data['title']="Details of Framer (".$data['item']['name'].')';
+
+            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id = farmer_outlet.outlet_id','INNER');
+            $this->db->select('CONCAT(customer_code," - ",name) text');
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where('farmer_outlet.farmer_id',$item_id);
+            $this->db->where('outlet_info.revision',1);
+            $data['assigned_outlets']=$this->db->get()->result_array();
+
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$item_id);
+            $this->json_return($ajax);
         }
-        $item=$this->input->post('item');
-        $id = $this->input->post("id");
-        $exists=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('id'),array('mobile_no ="'.$item['mobile_no'].'"','id !='.$id),1);
-        if($exists)
+        else
         {
-            $this->message="Mobile No already Exists";
-            return false;
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
         }
-        return true;
     }
+
+
+
+
     private function system_set_preference()
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
