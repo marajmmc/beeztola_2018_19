@@ -327,6 +327,7 @@ class Setup_farmer_type extends Root_Controller
         $this->db->select('outlet_discount.discount_percentage, outlet_discount.expire_day, outlet_discount.expire_time, outlet_discount.farmer_type_id');
         $this->db->join($this->config->item('table_pos_setup_farmer_type_outlet_discount').' outlet_discount','outlet_discount.outlet_id=user_outlet.customer_id AND outlet_discount.farmer_type_id='.$farmer_type_id,'LEFT');
         $this->db->where('user_outlet.revision',1);
+        $this->db->where('outlet_info.revision',1);
         $this->db->where('user_outlet.user_id',$user->id);
         $this->db->order_by('user_outlet.customer_id','ASC');
         $items=$this->db->get()->result_array();
