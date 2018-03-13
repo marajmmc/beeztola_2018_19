@@ -7,5 +7,8 @@ class Barcode_helper
     {
         return 'F-'.str_pad($id,6,0,STR_PAD_LEFT);
     }
-
+    public static function get_barcode_payment($id)
+    {
+        return 'P-'.str_pad($id,6,0,STR_PAD_LEFT);
+    }
 }

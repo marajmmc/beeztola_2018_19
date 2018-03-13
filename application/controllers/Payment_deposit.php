@@ -83,7 +83,23 @@ class Payment_deposit extends Root_Controller
     }
     private function system_get_items()
     {
-        $items=array();
+        $this->db->from($this->config->item('table_pos_payment').' payment');
+        $this->db->select('payment.*');
+        $this->db->select('outlet_info.name outlet');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('bank_source.name bank_name');
+        $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+        $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+        $this->db->order_by('payment.id','DESC');
+        $items=$this->db->get()->result_array();
+        foreach($items as &$item)
+        {
+            $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
+            $item['date_payment']=System_helper::display_date($item['date_payment']);
+            $item['date_sale']=System_helper::display_date($item['date_sale']);
+            $item['amount_payment']=number_format($item['amount_payment'],2,'.','');
+            $item['branch_name']=$item['bank_branch_source'];
+        }
         $this->json_return($items);
     }
     private function system_list_all()
@@ -110,7 +126,40 @@ class Payment_deposit extends Root_Controller
     }
     private function system_get_items_all()
     {
-        $items=array();
+        $current_records = $this->input->post('total_records');
+        if(!$current_records)
+        {
+            $current_records=0;
+        }
+        $pagesize = $this->input->post('pagesize');
+        if(!$pagesize)
+        {
+            $pagesize=100;
+        }
+        else
+        {
+            $pagesize=$pagesize*2;
+        }
+
+        $this->db->from($this->config->item('table_pos_payment').' payment');
+        $this->db->select('payment.*');
+        $this->db->select('outlet_info.name outlet');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('bank_source.name bank_name');
+        $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+        $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+        $this->db->order_by('payment.id','DESC');
+        $this->db->limit($pagesize,$current_records);
+        $items=$this->db->get()->result_array();
+        foreach($items as &$item)
+        {
+            $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
+            $item['date_payment']=System_helper::display_date($item['date_payment']);
+            $item['date_sale']=System_helper::display_date($item['date_sale']);
+            $item['amount_payment']=number_format($item['amount_payment'],2,'.','');
+            $item['branch_name']=$item['bank_branch_source'];
+            $item['payment_status']=$item['status_payment_forward'];
+        }
         $this->json_return($items);
     }
     private function system_add()
@@ -139,7 +188,7 @@ class Payment_deposit extends Root_Controller
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->where('user_outlet.revision',1);
             $this->db->where('user_outlet.user_id',$user->id);
             $this->db->order_by('user_outlet.customer_id','ASC');
@@ -259,6 +308,8 @@ class Payment_deposit extends Root_Controller
         }
         else
         {
+            $item['date_payment']=System_helper::get_time($item['date_payment']);
+            $item['date_sale']=System_helper::get_time($item['date_sale']);
             $item['date_updated']=$time;
             $item['user_updated']=$user->user_id;
             Query_helper::add($this->config->item('table_pos_payment'),$item, false);
@@ -287,7 +338,20 @@ class Payment_deposit extends Root_Controller
     }
     private function check_validation()
     {
-        // have to code
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('item[date_payment]',$this->lang->line('LABEL_DATE_PAYMENT'),'required');
+        $this->form_validation->set_rules('item[date_sale]',$this->lang->line('LABEL_DATE_SALE'),'required');
+        $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET'),'required');
+        $this->form_validation->set_rules('item[type_payment]',$this->lang->line('LABEL_TYPE_PAYMENT'),'required');
+        $this->form_validation->set_rules('item[reference_no]',$this->lang->line('LABEL_REFERENCE_NO'),'required');
+        $this->form_validation->set_rules('item[amount_payment]',$this->lang->line('LABEL_AMOUNT_PAYMENT'),'required');
+        $this->form_validation->set_rules('item[bank_id_source]',$this->lang->line('LABEL_BANK_NAME'),'required');
+        $this->form_validation->set_rules('item[bank_branch_source]',$this->lang->line('LABEL_BRANCH_NAME'),'required');
+        if($this->form_validation->run() == FALSE)
+        {
+            $this->message=validation_errors();
+            return false;
+        }
         return true;
     }
     private function system_set_preference()
