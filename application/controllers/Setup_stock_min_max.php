@@ -44,7 +44,7 @@ class Setup_stock_min_max extends Root_Controller
             $data['user_outlet_ids']=array();
             //$data['user_outlets']=User_helper::get_assigned_outlets();
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = user_outlet.customer_id AND customer_info.revision=1','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = user_outlet.customer_id','INNER');
             $this->db->select('customer_info.*');
             $this->db->where('user_outlet.revision',1);
             $this->db->where('customer_info.revision',1);

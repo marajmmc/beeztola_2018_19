@@ -328,7 +328,7 @@ class Setup_farmer_type extends Root_Controller
         $this->db->join($this->config->item('table_pos_setup_farmer_type_outlet_discount').' outlet_discount','outlet_discount.outlet_id=user_outlet.customer_id AND outlet_discount.farmer_type_id='.$farmer_type_id,'LEFT');
         $this->db->where('user_outlet.revision',1);
         $this->db->where('outlet_info.revision',1);
-        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->where('user_outlet.user_id',$user->user_id);
         $this->db->order_by('user_outlet.customer_id','ASC');
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
@@ -364,7 +364,7 @@ class Setup_farmer_type extends Root_Controller
             $this->db->select('outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=user_outlet.customer_id','INNER');
             $this->db->where('user_outlet.revision',1);
-            $this->db->where('user_outlet.user_id',$user->id);
+            $this->db->where('user_outlet.user_id',$user->user_id);
             $this->db->where('user_outlet.customer_id',$outlet_id);
             $valid_outlet=$this->db->get()->row_array();
             if(!$valid_outlet)
@@ -424,7 +424,7 @@ class Setup_farmer_type extends Root_Controller
         $user = User_helper::get_user();
         $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
         $this->db->where('user_outlet.revision',1);
-        $this->db->where('user_outlet.user_id',$user->id);
+        $this->db->where('user_outlet.user_id',$user->user_id);
         $this->db->where('user_outlet.customer_id',$item['outlet_id']);
         $valid_outlet=$this->db->get()->result_array();
         if(!$valid_outlet)
