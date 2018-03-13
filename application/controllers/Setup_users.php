@@ -888,6 +888,7 @@ class Setup_users extends Root_Controller
             $this->db->select('customer_info.customer_id outlet_id, CONCAT_WS(" - ",customer_info.customer_code, customer_info.name) outlet_name');
             $this->db->where('customer.status !="'.$this->config->item('system_status_delete').'"');
             $this->db->where('customer_info.type',$this->config->item('system_customer_type_outlet_id'));
+            $this->db->order_by('customer.id');
             $data['outlets']=$this->db->get()->result_array();
 
             $results=Query_helper::get_info($this->config->item('table_pos_setup_user_outlet'),'*',array('user_id ='.$user_id,'revision =1'));
