@@ -348,11 +348,19 @@ $lang['LABEL_STATUS_CARD_REQUIRE'] = 'Card Required?';
 // Label Lang Added By Saiful
 $lang['LABEL_DATE_PAYMENT'] = 'Payment Date';
 $lang['LABEL_DATE_SALE'] = 'Sale Date';
+$lang['LABEL_DATE_RECEIVE'] = 'Receive Date';
 $lang['LABEL_OUTLET'] = 'Outlet';
 $lang['LABEL_TYPE_PAYMENT'] = 'Payment Type';
 $lang['LABEL_REFERENCE_NO'] = 'Reference No';
 $lang['LABEL_AMOUNT_PAYMENT'] = 'Payment Amount';
+$lang['LABEL_AMOUNT_RECEIVE'] = 'Receive Amount';
+$lang['LABEL_AMOUNT_BANK_CHARGE'] = 'Bank Charge';
+$lang['LABEL_AMOUNT_ACTUAL'] = 'Actual Amount';
+$lang['LABEL_BANK_PAYMENT'] = 'Payment Bank';
+$lang['LABEL_BANK_PAYMENT_BRANCH'] = 'Payment Bank Branch';
+$lang['LABEL_BANK_RECEIVE'] = 'Receive Bank';
 $lang['LABEL_BRANCH_NAME'] = 'Branch Name';
 $lang['LABEL_PAYMENT_STATUS'] = 'Payment Status';
+$lang['LABEL_RECEIVE_STATUS'] = 'Receive Status';
 
 //Label Lang

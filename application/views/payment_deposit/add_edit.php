@@ -135,14 +135,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <textarea name="item[remarks_payment]" class="form-control"><?php echo $item['remarks_payment'] ?></textarea>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
                 <label class="control-label pull-right">Attachment</label>
             </div>
             <div class="col-xs-4">
@@ -154,6 +146,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-xs-4" id="image_payment">
                 <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_profile_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <textarea name="item[remarks_payment]" class="form-control"><?php echo $item['remarks_payment'] ?></textarea>
             </div>
         </div>
     </div>

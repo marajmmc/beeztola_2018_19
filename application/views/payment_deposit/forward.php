@@ -95,7 +95,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <?php echo $item['amount_payment'];?>
+                <?php echo number_format($item['amount_payment'],2);?>
             </div>
         </div>
         <div class="row show-grid">
