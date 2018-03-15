@@ -76,10 +76,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE_PAYMENT');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PAYMENT_WAY');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <?php echo $item['type_payment'];?>
+                <?php echo $item['payment_way'];?>
             </div>
         </div>
         <div class="row show-grid">
@@ -116,10 +116,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <?php echo nl2br($item['remarks_payment']);?>
+                <?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?>
             </div>
         </div>
         <div class="row show-grid">
@@ -128,6 +128,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-xs-4" id="image_payment">
                 <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_profile_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?>:</label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <?php echo nl2br($item['remarks_payment']);?>
             </div>
         </div>
     </div>

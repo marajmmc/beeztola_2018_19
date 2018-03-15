@@ -32,6 +32,7 @@ $lang['MSG_OUTLET_NOT_ASSIGNED'] = 'Outlet not assign.';
 $lang['ACTION_DASHBOARD'] = 'Dashboard';
 $lang['ACTION_NEW'] = 'New';
 $lang['ACTION_EDIT'] = 'Edit';
+$lang['ACTION_RECEIVE'] = 'Receive';
 $lang['ACTION_SAVE'] = 'Save';
 $lang['ACTION_SAVE_NEW'] = 'Save and New';
 $lang['ACTION_DELETE'] = 'Delete';
@@ -350,7 +351,7 @@ $lang['LABEL_DATE_PAYMENT'] = 'Payment Date';
 $lang['LABEL_DATE_SALE'] = 'Sale Date';
 $lang['LABEL_DATE_RECEIVE'] = 'Receive Date';
 $lang['LABEL_OUTLET'] = 'Outlet';
-$lang['LABEL_TYPE_PAYMENT'] = 'Payment Type';
+$lang['LABEL_PAYMENT_WAY'] = 'Payment Way';
 $lang['LABEL_REFERENCE_NO'] = 'Reference No';
 $lang['LABEL_AMOUNT_PAYMENT'] = 'Payment Amount';
 $lang['LABEL_AMOUNT_RECEIVE'] = 'Receive Amount';
@@ -361,6 +362,6 @@ $lang['LABEL_BANK_PAYMENT_BRANCH'] = 'Payment Bank Branch';
 $lang['LABEL_BANK_RECEIVE'] = 'Receive Bank';
 $lang['LABEL_BRANCH_NAME'] = 'Branch Name';
 $lang['LABEL_PAYMENT_STATUS'] = 'Payment Status';
-$lang['LABEL_RECEIVE_STATUS'] = 'Receive Status';
+$lang['LABEL_STATUS_RECEIVE'] = 'Receive Status';
 
 //Label Lang

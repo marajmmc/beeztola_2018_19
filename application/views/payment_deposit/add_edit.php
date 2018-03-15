@@ -78,17 +78,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE_PAYMENT');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PAYMENT_WAY');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select name="item[type_payment]" class="form-control">
+                <select name="item[payment_way_id]" class="form-control">
                     <option value=""><?php echo $this->lang->line('SELECT');?></option>
-                    <option value="<?php echo $CI->config->item('system_payment_way_cash');?>" <?php if(isset($item['type_payment'])){if($item['type_payment']==$CI->config->item('system_payment_way_cash')){echo "selected";}}?>><?php echo $CI->config->item('system_payment_way_cash');?></option>
-                    <option value="<?php echo $CI->config->item('system_payment_way_pay_order');?>" <?php if(isset($item['type_payment'])){if($item['type_payment']==$CI->config->item('system_payment_way_pay_order')){echo "selected";}}?>><?php echo $CI->config->item('system_payment_way_pay_order');?></option>
-                    <option value="<?php echo $CI->config->item('system_payment_way_cheque');?>" <?php if(isset($item['type_payment'])){if($item['type_payment']==$CI->config->item('system_payment_way_cheque')){echo "selected";}}?>><?php echo $CI->config->item('system_payment_way_cheque');?></option>
-                    <option value="<?php echo $CI->config->item('system_payment_way_tt');?>" <?php if(isset($item['type_payment'])){if($item['type_payment']==$CI->config->item('system_payment_way_tt')){echo "selected";}}?>><?php echo $CI->config->item('system_payment_way_tt');?></option>
-                    <option value="<?php echo $CI->config->item('system_payment_way_dd');?>" <?php if(isset($item['type_payment'])){if($item['type_payment']==$CI->config->item('system_payment_way_dd')){echo "selected";}}?>><?php echo $CI->config->item('system_payment_way_dd');?></option>
-                    <option value="<?php echo $CI->config->item('system_payment_way_online_payment');?>" <?php if(isset($item['type_payment'])){if($item['type_payment']==$CI->config->item('system_payment_way_online_payment')){echo "selected";}}?>><?php echo $CI->config->item('system_payment_way_online_payment');?></option>
+                    <?php
+                    foreach($payment_way as $way)
+                    {?>
+                        <option value="<?php echo $way['value']?>" <?php if($way['value']==$item['payment_way_id']){ echo "selected";}?>><?php echo $way['text'];?></option>
+                    <?php
+                    }
+                    ?>
                 </select>
             </div>
         </div>
@@ -110,7 +111,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME').' (Source)';?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[bank_id_source]" class="form-control">
@@ -135,17 +136,34 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER').' (Destination)';?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select name="item[bank_account_id_destination]" class="form-control">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <?php
+                    foreach($bank_account_number_destination as $account_destination)
+                    {?>
+                        <option value="<?php echo $account_destination['value']?>" <?php if($account_destination['value']==$item['bank_account_id_destination']){ echo "selected";}?>><?php echo $account_destination['text'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
                 <label class="control-label pull-right">Attachment</label>
             </div>
             <div class="col-xs-4">
-                <input type="file" class="browse_button" data-preview-container="#image_payment" name="image_payment">
+                <input type="file" class="browse_button" data-preview-container="#image_payment" data-preview-width="300" name="image_payment">
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
             </div>
             <div class="col-xs-4" id="image_payment">
-                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_profile_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
             </div>
         </div>
         <div class="row show-grid">

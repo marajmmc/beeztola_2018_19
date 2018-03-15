@@ -64,23 +64,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE_PAYMENT');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PAYMENT_WAY');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <?php echo $item['type_payment'];?>
+                <?php echo $item['payment_way'];?>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[reference_no]" class="form-control" value="<?php echo $item['reference_no'];?>"/>
+                <?php echo $item['reference_no'];?>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME').' (Source)';?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['bank_name_source'];?>
@@ -88,7 +88,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BRANCH_NAME');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BRANCH_NAME').' (Source)';?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['bank_branch_source'];?>
@@ -112,7 +112,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Forward Entry Time:</span></label>
+                <label class="control-label pull-right">Payment Forward Time:</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo System_helper::display_date_time($item['date_updated_forward']);?>
@@ -128,7 +128,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?>:</label>
+                <label id="amount_payment" data-amount-payment-id="<?php echo $item['amount_payment'];?>" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo number_format($item['amount_payment'],2);?>
@@ -136,18 +136,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[amount_receive]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_receive'];?>"/>
+                <input type="text" id="amount_bank_charge" name="item[amount_bank_charge]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_bank_charge'];?>"/>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[amount_bank_charge]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_bank_charge'];?>"/>
+                <label id="amount_receive"><?php echo ($item['amount_payment']-$item['amount_bank_charge']);?></label>
             </div>
         </div>
         <div class="row show-grid">
@@ -155,16 +155,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right">Payment Receive Bank<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select name="item[bank_account_id_destination]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
-                    <?php
-                    foreach($bank_accounts as $bank)
-                    {?>
-                        <option value="<?php echo $bank['value']?>" <?php if($bank['value']==$item['bank_account_id_destination']){ echo "selected";}?>><?php echo $bank['text'];?></option>
-                    <?php
-                    }
-                    ?>
-                </select>
+                <?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?>
             </div>
         </div>
         <div class="row show-grid">
@@ -193,5 +184,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
+        $(document).off('input','#amount_bank_charge');
+        $(document).on('input', '#amount_bank_charge', function()
+        {
+            var amount_payment=$('#amount_payment').attr('data-amount-payment-id');
+            var amount_bank_charge=$('#amount_bank_charge').val();
+            var amount_receive=(amount_payment-amount_bank_charge);
+            $('#amount_receive').html(amount_receive);
+        });
     });
 </script>
