@@ -260,6 +260,7 @@ class Payment_receive extends Root_Controller
             $this->db->select('user_info_forwarded.name payment_forwarded_by');
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','INNER');
             $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('payment.status_payment_forward !=',$this->config->item('system_status_forwarded'));
             $this->db->where('payment.id',$item_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
