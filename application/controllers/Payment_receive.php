@@ -124,6 +124,7 @@ class Payment_receive extends Root_Controller
         $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
         $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_forwarded'));
         $this->db->where('payment.status_receive =',$this->config->item('system_status_pending'));
         $this->db->where_in('payment.outlet_id',$assigned_outlet);
         $this->db->order_by('payment.id','DESC');
@@ -211,6 +212,7 @@ class Payment_receive extends Root_Controller
         $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
         $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_forwarded'));
         $this->db->where_in('payment.outlet_id',$assigned_outlet);
         $this->db->order_by('payment.id','DESC');
         $this->db->limit($pagesize,$current_records);
