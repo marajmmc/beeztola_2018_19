@@ -23,10 +23,9 @@ $lang['MSG_NO_FILE_UPLOADED'] = 'No file uploaded';
 $lang['MSG_ALREADY_FORWARDED'] = 'Already Forwarded.';
 $lang['MSG_SUCCESSFULLY_FORWARDED'] = 'Forwarded Successfully.';
 $lang['MSG_ALREADY_FINALIZED'] = 'Already Finalized.';
-
 $lang['MSG_QC_EDIT_WARNING'] = 'If currency price, packing or direct cost changed, please save this budget again to get lastest COGS and Total COGS.';
-
-$lang['MSG_OUTLET_NOT_ASSIGNED'] = 'Outlet not assign.';
+$lang['MSG_OUTLET_NOT_ASSIGNED'] = 'Outlet not assigned.';
+$lang['MSG_NOT_FOUND'] = 'Not Found';
 
 //Action buttons
 $lang['ACTION_DASHBOARD'] = 'Dashboard';
@@ -365,3 +364,4 @@ $lang['LABEL_PAYMENT_STATUS'] = 'Payment Status';
 $lang['LABEL_STATUS_RECEIVE'] = 'Receive Status';
 
 //Label Lang
+$lang['LABEL_INVOICE_NO'] = 'Invoice No';

@@ -164,5 +164,29 @@ class User_helper
         $result=$CI->db->get()->row_array();
         return $result;
     }
+    public static function get_assigned_outlets()
+    {
+        $CI = & get_instance();
+        $user=User_helper::get_user();
+        $CI->db->from($CI->config->item('table_pos_setup_user_outlet').' user_outlet');
+        $CI->db->join($CI->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = user_outlet.customer_id','INNER');
+        $CI->db->select('customer_info.*');
+
+        $CI->db->join($CI->config->item('table_login_setup_location_districts').' district','district.id = customer_info.district_id','INNER');
+        $CI->db->select('district.id district_id,district.name district_name');
+
+        $CI->db->join($CI->config->item('table_login_setup_location_territories').' territory','territory.id = district.territory_id','INNER');
+        $CI->db->select('territory.id territory_id,territory.name territory_name');
+
+        $CI->db->join($CI->config->item('table_login_setup_location_zones').' zone','zone.id = territory.zone_id','INNER');
+        $CI->db->select('zone.id zone_id,zone.name zone_name');
+        $CI->db->join($CI->config->item('table_login_setup_location_divisions').' division','division.id = zone.division_id','INNER');
+        $CI->db->select('division.id division_id,division.name division_name');
+        $CI->db->where('user_outlet.revision',1);
+        $CI->db->where('user_outlet.user_id',$user->user_id);
+        $CI->db->where('customer_info.revision',1);
+        $CI->db->order_by('customer_info.ordering ASC');
+        return $CI->db->get()->result_array();
+    }
 
 }
