@@ -42,6 +42,10 @@ class Payment_receive extends Root_Controller
         {
             $this->system_details($id);
         }
+        elseif($action=="details_all_receive")
+        {
+            $this->system_details_all_receive($id);
+        }
         elseif($action=="set_preference")
         {
             $this->system_set_preference();
@@ -118,7 +122,7 @@ class Payment_receive extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('payment_way.name payment_way');
         $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
-        $this->db->select('bank_source.name bank_payment');
+        $this->db->select('bank_source.name bank_payment_source');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
         $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
         $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
@@ -139,10 +143,10 @@ class Payment_receive extends Root_Controller
             $item['amount_payment']=number_format($item['amount_payment'],2);
             $item['amount_receive']=number_format($item['amount_receive'],2);
             $item['amount_bank_charge']=number_format($item['amount_bank_charge'],2);
-            $item['bank_payment_branch']=$item['bank_branch_source'];
+            $item['bank_payment_branch_source']=$item['bank_branch_source'];
             if($item['bank_account_id_destination'])
             {
-                $item['bank_receive']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
+                $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
             }
         }
         $this->json_return($items);
@@ -206,7 +210,7 @@ class Payment_receive extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('payment_way.name payment_way');
         $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
-        $this->db->select('bank_source.name bank_payment');
+        $this->db->select('bank_source.name bank_payment_source');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
         $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
         $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
@@ -226,10 +230,10 @@ class Payment_receive extends Root_Controller
             $item['amount_payment']=number_format($item['amount_payment'],2);
             $item['amount_receive']=number_format($item['amount_receive'],2);
             $item['amount_bank_charge']=number_format($item['amount_bank_charge'],2);
-            $item['bank_payment_branch']=$item['bank_branch_source'];
+            $item['bank_payment_branch_source']=$item['bank_branch_source'];
             if($item['bank_account_id_destination'])
             {
-                $item['bank_receive']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
+                $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
             }
         }
         $this->json_return($items);
@@ -277,6 +281,10 @@ class Payment_receive extends Root_Controller
                 $ajax['status']=false;
                 $ajax['system_message']='Payment already received.';
                 $this->json_return($ajax);
+            }
+            if($data['item']['amount_bank_charge']==0)
+            {
+                $data['item']['amount_bank_charge']='';
             }
             // Checking Valid Outlet
             if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Receive Outlet Non Assigned',$message='You are trying to receive payment from an outlet which is not assigned to you.'))
@@ -401,6 +409,8 @@ class Payment_receive extends Root_Controller
             $this->db->select('outlet_info.name outlet');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->select('bank_source.name bank_name_source');
+            $this->db->select('payment_way.name payment_way');
+            $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
             $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
             $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
@@ -409,13 +419,15 @@ class Payment_receive extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment.user_updated','INNER');
             $this->db->select('user_info_forwarded.name payment_forwarded_by');
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','INNER');
+            $this->db->select('user_info_received.name payment_received_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_received','user_info_received.user_id = payment.user_updated_receive','LEFT');
             $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
             $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_forwarded'));
             $this->db->where('payment.id',$item_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('Edit Non Exists',$item_id);
+                System_helper::invalid_try('Details Non Exists',$item_id);
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Payment Receive.';
                 $this->json_return($ajax);
@@ -445,6 +457,72 @@ class Payment_receive extends Root_Controller
             $this->json_return($ajax);
         }
     }
+    private function system_details_all_receive($id)
+    {
+        if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_payment').' payment');
+            $this->db->select('payment.*');
+            $this->db->select('outlet_info.name outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('bank_source.name bank_name_source');
+            $this->db->select('payment_way.name payment_way');
+            $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
+            $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
+            $this->db->select('user_info.name payment_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment.user_updated','INNER');
+            $this->db->select('user_info_forwarded.name payment_forwarded_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','INNER');
+            $this->db->select('user_info_received.name payment_received_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_received','user_info_received.user_id = payment.user_updated_receive','LEFT');
+            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_forwarded'));
+            $this->db->where('payment.id',$item_id);
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Details_all_receive Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment Receive.';
+                $this->json_return($ajax);
+            }
+            //Checking Valid Outlet
+            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Details Non Exists',$message='Invalid Payment Receive Details'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
+            $data['title']="Payment Receive Details :: ".Barcode_helper::get_barcode_payment($item_id);
+
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details_all_receive.php",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details_all_receive/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+
     private function check_valid_outlet($outlet_id,$invalid_try,$message)
     {
         $user = User_helper::get_user();
@@ -503,9 +581,9 @@ class Payment_receive extends Root_Controller
         $data['amount_payment']= 1;
         $data['amount_receive']= 1;
         $data['amount_bank_charge']= 1;
-        $data['bank_payment']= 1;
-        $data['bank_payment_branch']= 1;
-        $data['bank_receive']= 1;
+        $data['bank_payment_source']= 1;
+        $data['bank_payment_branch_source']= 1;
+        $data['bank_account_number_destination']= 1;
         if($result)
         {
             if($result['preferences']!=null)
@@ -558,9 +636,9 @@ class Payment_receive extends Root_Controller
         $data['amount_payment']= 1;
         $data['amount_receive']= 1;
         $data['amount_bank_charge']= 1;
-        $data['bank_payment']= 1;
-        $data['bank_payment_branch']= 1;
-        $data['bank_receive']= 1;
+        $data['bank_payment_source']= 1;
+        $data['bank_payment_branch_source']= 1;
+        $data['bank_account_number_destination']= 1;
         $data['status_receive']= 1;
         if($result)
         {

@@ -8,6 +8,13 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'label'=>'Pending Payment Receive',
         'href'=>site_url($CI->controller_url.'/index/list')
     );
+    $action_buttons[]=array
+    (
+        'type'=>'button',
+        'label'=>$CI->lang->line('ACTION_DETAILS'),
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/details_all_receive')
+    );
 }
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
 {
@@ -86,9 +93,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'amount_payment', type: 'string'},
                 { name: 'amount_receive', type: 'string'},
                 { name: 'amount_bank_charge', type: 'string'},
-                { name: 'bank_payment', type: 'string'},
-                { name: 'bank_payment_branch', type: 'string'},
-                { name: 'bank_receive', type: 'string'},
+                { name: 'bank_payment_source', type: 'string'},
+                { name: 'bank_payment_branch_source', type: 'string'},
+                { name: 'bank_account_number_destination', type: 'string'},
                 { name: 'status_receive', type: 'string'}
             ],
             id: 'id',
@@ -123,9 +130,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT'); ?>',dataField: 'amount_payment',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_payment']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE'); ?>',dataField: 'amount_receive',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_receive']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE'); ?>',dataField: 'amount_bank_charge',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_bank_charge']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT'); ?>',dataField: 'bank_payment',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH'); ?>',dataField: 'bank_payment_branch',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_branch']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_RECEIVE'); ?>',dataField: 'bank_receive',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_receive']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE'); ?>',dataField: 'bank_payment_source',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_source']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE'); ?>',dataField: 'bank_payment_branch_source',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_branch_source']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'); ?>',dataField: 'bank_account_number_destination',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_account_number_destination']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_STATUS_RECEIVE'); ?>',dataField: 'status_receive',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['status_receive']?0:1;?>}
                     ]
             });

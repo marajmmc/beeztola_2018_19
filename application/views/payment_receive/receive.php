@@ -80,7 +80,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME').' (Source)';?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['bank_name_source'];?>
@@ -88,7 +88,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BRANCH_NAME').' (Source)';?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['bank_branch_source'];?>
@@ -147,12 +147,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <label id="amount_receive"><?php echo ($item['amount_payment']-$item['amount_bank_charge']);?></label>
+                <label id="amount_receive"><?php echo number_format(($item['amount_payment']-$item['amount_bank_charge']),2);?></label>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Receive Bank<span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?>
@@ -163,7 +163,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right">Attachment:</label>
             </div>
             <div class="col-xs-4" id="image_payment">
-                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_profile_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
             </div>
         </div>
         <div class="row show-grid">
@@ -189,7 +189,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             var amount_payment=$('#amount_payment').attr('data-amount-payment-id');
             var amount_bank_charge=$('#amount_bank_charge').val();
-            var amount_receive=(amount_payment-amount_bank_charge);
+            var amount_receive=number_format((amount_payment-amount_bank_charge),2);
             $('#amount_receive').html(amount_receive);
         });
     });

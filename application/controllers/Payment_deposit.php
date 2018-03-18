@@ -109,8 +109,11 @@ class Payment_deposit extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('payment_way.name payment_way');
         $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
-        $this->db->select('bank_source.name bank_name');
+        $this->db->select('bank_source.name bank_payment_source');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+        $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
+        $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
+        $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
         $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
         $this->db->where('payment.status_payment_forward =',$this->config->item('system_status_pending'));
         $this->db->order_by('payment.id','DESC');
@@ -121,7 +124,8 @@ class Payment_deposit extends Root_Controller
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
             $item['amount_payment']=number_format($item['amount_payment'],2);
-            $item['branch_name']=$item['bank_branch_source'];
+            $item['bank_payment_branch_source']=$item['bank_branch_source'];
+            $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
         }
         $this->json_return($items);
     }
@@ -169,9 +173,11 @@ class Payment_deposit extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('payment_way.name payment_way');
         $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
-        $this->db->select('bank_source.name bank_name');
+        $this->db->select('bank_source.name bank_payment_source');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
-        $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+        $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
+        $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
+        $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
         $this->db->order_by('payment.id','DESC');
         $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
@@ -181,7 +187,8 @@ class Payment_deposit extends Root_Controller
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
             $item['amount_payment']=number_format($item['amount_payment'],2);
-            $item['branch_name']=$item['bank_branch_source'];
+            $item['bank_payment_branch_source']=$item['bank_branch_source'];
+            $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
             $item['payment_status']=$item['status_payment_forward'];
         }
         $this->json_return($items);
@@ -217,15 +224,17 @@ class Payment_deposit extends Root_Controller
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
             $data['payment_way']=Query_helper::get_info($this->config->item('table_login_setup_payment_way'),array('id value, name text'),array('status ="'.$this->config->item('system_status_active').'"'));
-            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'));
+            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering'));
             //getting bank account
             $this->db->from($this->config->item('table_login_setup_bank_account').' ba');
             $this->db->select('ba.id value');
             $this->db->select("CONCAT_WS(' ( ',ba.account_number,  CONCAT_WS('', bank.name,' - ',ba.branch_name,')')) text");
             $this->db->join($this->config->item('table_login_setup_bank').' bank','bank.id=ba.bank_id','INNER');
             $this->db->join($this->config->item('table_login_setup_bank_account_purpose').' bap','bap.bank_account_id=ba.id AND bap.revision=1 AND bap.purpose ="sale_receive"','INNER');
-            $this->db->where('ba.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('ba.status =',$this->config->item('system_status_active'));
             $this->db->where('ba.account_type_receive = 1');
+            $this->db->where('bank.status =',$this->config->item('system_status_active'));
+            $this->db->order_by('bank.ordering','ASC');
             $data['bank_account_number_destination']=$this->db->get()->result_array();
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
@@ -287,7 +296,7 @@ class Payment_deposit extends Root_Controller
             $this->db->order_by('user_outlet.customer_id','ASC');
             $data['assigned_outlet']=$this->db->get()->result_array();
             $data['payment_way']=Query_helper::get_info($this->config->item('table_login_setup_payment_way'),array('id value, name text'),array('status ="'.$this->config->item('system_status_active').'"'));
-            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status !="'.$this->config->item('system_status_delete').'"'));
+            $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering'));
             //getting bank account
             $this->db->from($this->config->item('table_login_setup_bank_account').' ba');
             $this->db->select('ba.id value');
@@ -296,6 +305,8 @@ class Payment_deposit extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_bank_account_purpose').' bap','bap.bank_account_id=ba.id AND bap.revision=1 AND bap.purpose ="sale_receive"','INNER');
             $this->db->where('ba.status !=',$this->config->item('system_status_delete'));
             $this->db->where('ba.account_type_receive = 1');
+            $this->db->where('bank.status !=',$this->config->item('system_status_delete'));
+            $this->db->order_by('bank.ordering','ASC');
             $data['bank_account_number_destination']=$this->db->get()->result_array();
             $data['title']="Edit Payment:: ". Barcode_helper::get_barcode_payment($data['item']['id']);
             $ajax['status']=true;
@@ -438,7 +449,6 @@ class Payment_deposit extends Root_Controller
         $this->form_validation->set_rules('item[reference_no]',$this->lang->line('LABEL_REFERENCE_NO'),'required');
         $this->form_validation->set_rules('item[amount_payment]',$this->lang->line('LABEL_AMOUNT_PAYMENT'),'required');
         $this->form_validation->set_rules('item[bank_id_source]',$this->lang->line('LABEL_BANK_NAME'),'required');
-        $this->form_validation->set_rules('item[bank_branch_source]',$this->lang->line('LABEL_BRANCH_NAME'),'required');
         $this->form_validation->set_rules('item[bank_account_id_destination]',$this->lang->line('LABEL_BANK_ACCOUNT_NUMBER'),'required');
         if($this->form_validation->run() == FALSE)
         {
@@ -463,16 +473,30 @@ class Payment_deposit extends Root_Controller
             $this->db->select('payment.*');
             $this->db->select('outlet_info.name outlet');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('payment_way.name payment_way');
+            $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
             $this->db->select('bank_source.name bank_name');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
+            $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
+            $this->db->select('user_info.name payment_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment.user_updated','LEFT');
+            $this->db->select('user_info_forwarded.name payment_forwarded_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','LEFT');
             $this->db->where('payment.id',$item_id);
-            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
                 System_helper::invalid_try('Details Payment Non Exists',$item_id);
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Payment Details.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status']==$this->config->item('system_status_delete'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Payment Deleted. You can not view details';
                 $this->json_return($ajax);
             }
             //Checking Valid Outlet
@@ -516,16 +540,30 @@ class Payment_deposit extends Root_Controller
             $this->db->select('payment.*');
             $this->db->select('outlet_info.name outlet');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('payment_way.name payment_way');
+            $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
             $this->db->select('bank_source.name bank_name');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
+            $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
+            $this->db->select('user_info.name payment_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment.user_updated','LEFT');
+            $this->db->select('user_info_forwarded.name payment_forwarded_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','LEFT');
             $this->db->where('payment.id',$item_id);
-            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('Details Payment Non Exists',$item_id);
+                System_helper::invalid_try('Details_all Payment Non Exists',$item_id);
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Payment Details.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status']==$this->config->item('system_status_delete'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Payment Deleted. You can not view details';
                 $this->json_return($ajax);
             }
             //Checking Valid Outlet
@@ -542,7 +580,7 @@ class Payment_deposit extends Root_Controller
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$item_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details_all_payment/'.$item_id);
             $this->json_return($ajax);
         }
         else
@@ -785,8 +823,9 @@ class Payment_deposit extends Root_Controller
         $data['payment_way']= 1;
         $data['reference_no']= 1;
         $data['amount_payment']= 1;
-        $data['bank_name']= 1;
-        $data['branch_name']= 1;
+        $data['bank_payment_source']= 1;
+        $data['bank_payment_branch_source']= 1;
+        $data['bank_account_number_destination']= 1;
         if($result)
         {
             if($result['preferences']!=null)
@@ -836,9 +875,11 @@ class Payment_deposit extends Root_Controller
         $data['payment_way']= 1;
         $data['reference_no']= 1;
         $data['amount_payment']= 1;
-        $data['bank_name']= 1;
-        $data['branch_name']= 1;
+        $data['bank_payment_source']= 1;
+        $data['bank_payment_branch_source']= 1;
+        $data['bank_account_number_destination']= 1;
         $data['payment_status']= 1;
+        $data['status']= 1;
         if($result)
         {
             if($result['preferences']!=null)

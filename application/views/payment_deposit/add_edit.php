@@ -16,13 +16,6 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)) || (
         'id'=>'button_action_save',
         'data-form'=>'#save_form'
     );
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_SAVE_NEW"),
-        'id'=>'button_action_save_new',
-        'data-form'=>'#save_form'
-    );
 }
 $action_buttons[]=array(
     'type'=>'button',
@@ -111,7 +104,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME').' (Source)';?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[bank_id_source]" class="form-control">
@@ -128,7 +121,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BRANCH_NAME');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[bank_branch_source]" class="form-control" value="<?php echo $item['bank_branch_source'];?>"/>
@@ -136,7 +129,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER').' (Destination)';?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER').' (Receive)';?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[bank_account_id_destination]" class="form-control">
@@ -153,7 +146,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Attachment</label>
+                <label class="control-label pull-right">Attachment(Document)</label>
             </div>
             <div class="col-xs-4">
                 <input type="file" class="browse_button" data-preview-container="#image_payment" data-preview-width="300" name="image_payment">

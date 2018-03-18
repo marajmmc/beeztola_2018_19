@@ -90,9 +90,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'payment_way', type: 'string'},
                 { name: 'reference_no', type: 'string'},
                 { name: 'amount_payment', type: 'string'},
-                { name: 'bank_name', type: 'string'},
-                { name: 'branch_name', type: 'string'},
-                { name: 'payment_status', type: 'string'}
+                { name: 'bank_payment_source', type: 'string'},
+                { name: 'bank_payment_branch_source', type: 'string'},
+                { name: 'bank_account_number_destination', type: 'string'},
+                { name: 'payment_status', type: 'string'},
+                { name: 'status', type: 'string'}
             ],
             id: 'id',
             url: url
@@ -123,9 +125,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         { text: '<?php echo $CI->lang->line('LABEL_PAYMENT_WAY'); ?>',dataField: 'payment_way',width:'100',filterType:'list',hidden: <?php echo $system_preference_items['payment_way']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_REFERENCE_NO'); ?>',dataField: 'reference_no',width:'100',hidden: <?php echo $system_preference_items['reference_no']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT'); ?>',dataField: 'amount_payment',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_payment']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_NAME'); ?>',dataField: 'bank_name',filterType:'list',hidden: <?php echo $system_preference_items['bank_name']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BRANCH_NAME'); ?>',dataField: 'branch_name',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['branch_name']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_PAYMENT_STATUS'); ?>',dataField: 'payment_status',width:'130',filterType:'list',hidden: <?php echo $system_preference_items['payment_status']?0:1;?>}
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE'); ?>',dataField: 'bank_payment_source',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_source']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE'); ?>',dataField: 'bank_payment_branch_source',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_branch_source']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'); ?>',dataField: 'bank_account_number_destination',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_account_number_destination']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_PAYMENT_STATUS'); ?>',dataField: 'payment_status',width:'130',filterType:'list',hidden: <?php echo $system_preference_items['payment_status']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>',dataField: 'status',width:'130',filterType:'list',hidden: <?php echo $system_preference_items['payment_status']?0:1;?>}
                     ]
             });
     });

@@ -24,86 +24,69 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="clearfix"></div>
     </div>
-
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_PAYMENT');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo System_helper::display_date($item['date_payment']);?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_SALE');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo System_helper::display_date($item['date_sale']);?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo $item['outlet'];?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE_PAYMENT');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo $item['type_payment'];?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo $item['reference_no'];?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo number_format($item['amount_payment'],2);?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_NAME');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo $item['bank_name'];?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BRANCH_NAME');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo $item['bank_branch_source'];?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?>:</label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php echo nl2br($item['remarks_payment']);?>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right">Attachment:</label>
-        </div>
-        <div class="col-xs-4" id="image_payment">
-            <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_profile_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
-        </div>
+    <div class="col-md-12">
+        <table class="table table-bordered table-responsive system_table_details_view">
+            <thead>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_ID');?></label></th>
+                <th class=""><label class="control-label"><?php echo Barcode_helper::get_barcode_payment($item['id']);?></label></th>
+                <th colspan="2">&nbsp;</th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_OUTLET');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo $item['outlet'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_PAYMENT');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo System_helper::display_date($item['date_payment']);?></label></th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_PAYMENT_WAY');?></label></th>
+                <th class="header_value"><label class="control-label"><?php echo $item['payment_way'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_SALE');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo System_helper::display_date($item['date_sale']);?></label></th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REFERENCE_NO');?></label></th>
+                <th class=" header_value"><label class="control-label"><?php echo $item['reference_no'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_PAYMENT');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_PAYMENT_SOURCE');?></label></th>
+                <th class=" header_value"><label class="control-label"><?php echo $item['bank_name'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?></label></th>
+                <th class=" header_value"><label class="control-label"><?php echo $item['bank_branch_source'];?></label></th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label></th>
+                <th class=" header_value"><label class="control-label"><?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?></label></th>
+                <th colspan="2">&nbsp;</th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By:</label></th>
+                <th class=" header_value"><label class="control-label"><?php echo $item['payment_by'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry Time:</label></th>
+                <th class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
+            </tr>
+            <?php if($item['date_updated_forward']){?>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Forwarded By:</label></th>
+                <th class="header_value"><label class="control-label"><?php echo $item['payment_forwarded_by'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Forward Time:</label></th>
+                <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
+            </tr>
+            <?php } ?>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Attachment(Document):</label></th>
+                <th class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></th>
+                <th colspan="2">&nbsp;</th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REMARKS');?></label></th>
+                <th class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_payment']);?></label></th>
+                <th colspan="2">&nbsp;</th>
+            </tr>
+            </thead>
+        </table>
     </div>
 </div>
 <div class="clearfix"></div>
