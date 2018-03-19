@@ -160,7 +160,7 @@ class Payment_edit_request extends Root_Controller
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
         {
-            $data['system_preference_items']=$this->get_preference_all_payment();
+            $data['system_preference_items']=$this->get_preference_all_payment_edit_request();
             $data['preference_method_name']='list_all';
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
