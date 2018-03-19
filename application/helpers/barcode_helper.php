@@ -10,7 +10,6 @@ class Barcode_helper
     public static function get_id_farmer($code)
     {
         $CI =& get_instance();
-        $result=array();
         if((substr($code,0,2)=='F-'))
         {
             $result=Query_helper::get_info($CI->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.intval(substr($code,2))),1);

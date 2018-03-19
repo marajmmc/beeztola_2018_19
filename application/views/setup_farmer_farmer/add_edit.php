@@ -50,7 +50,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select name="item[farmer_type_id]" class="form-control">
+                <select name="item[farmer_type_id]" id="farmer_type_id" class="form-control">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     foreach($farmer_types as $row)
@@ -67,7 +67,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS_CARD_REQUIRE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select name="item[status_card_require]" class="form-control">
+                <select name="item[status_card_require]" id="status_card_require" class="form-control">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <option value="<?php echo $CI->config->item('system_status_yes');?>" <?php if($CI->config->item('system_status_yes')==$item['status_card_require']){ echo "selected";}?>><?php echo $CI->config->item('system_status_yes');?></option>
                     <option value="<?php echo $CI->config->item('system_status_no');?>" <?php if($CI->config->item('system_status_no')==$item['status_card_require']){ echo "selected";}?>><?php echo $CI->config->item('system_status_no');?></option>
@@ -134,3 +134,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
     <div class="clearfix"></div>
 </form>
+<script type="text/javascript">
+
+    jQuery(document).ready(function()
+    {
+        $(document).off("change", "#farmer_type_id");
+        $(document).on("change","#farmer_type_id",function()
+        {
+            var farmer_type_id=$('#farmer_type_id').val();
+            if(farmer_type_id>1)
+            {
+                $('#status_card_require').val('<?php echo $CI->config->item('system_status_yes');?>');
+            }
+            else
+            {
+                $('#status_card_require').val('<?php echo $CI->config->item('system_status_no');?>');
+            }
+        });
+
+    });
+</script>

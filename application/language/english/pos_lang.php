@@ -342,6 +342,7 @@ $lang['LABEL_INCHARGE'] = 'In-charge';
 $lang['LABEL_DISCOUNT_SELF_PERCENTAGE'] = 'Self Discount (Percentage)';
 $lang['LABEL_DISCOUNT_REFERRAL_PERCENTAGE'] = 'Referral Discount (Percentage)';
 $lang['LABEL_COMMISSION_DISTRIBUTOR'] = 'Distributor Commission (Percentage)';
+$lang['LABEL_DISCOUNT'] = 'Discount';
 $lang['LABEL_FARMER_TYPE_NAME'] = 'Farmer Type';
 $lang['LABEL_STATUS_CARD_REQUIRE'] = 'Card Required?';
 

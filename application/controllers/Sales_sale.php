@@ -200,10 +200,17 @@ class Sales_sale extends Root_Controller
                     $ajax['system_message']='Scan Dealers Card';
                     $this->json_return($ajax);
                 }
-                else
+                if($info['farmer_type_id']>1)
                 {
-                    $this->system_load_sale_from($farmer_id,$outlet_id);
+                    $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$farmer_id,'revision =1','outlet_id ='.$outlet_id),1);
+                    if(!$result)
+                    {
+                        $ajax['status']=false;
+                        $ajax['system_message']='This Customer Cannot Buy Product from this outlet.<br>Please Contact with admin';
+                        $this->json_return($ajax);
+                    }
                 }
+                $this->system_load_sale_from($farmer_id,$outlet_id);
 
             }
         }
@@ -301,9 +308,32 @@ class Sales_sale extends Root_Controller
     }
     private function system_load_sale_from($farmer_id,$outlet_id)
     {
-        $info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$farmer_id),1);
-
+        $data=array();
         $data['title']="New Sale";
+        $data['item']['outlet_id']=$outlet_id;
+        $data['item']['farmer_id']=$farmer_id;
+
+        $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
+        $this->db->select('f.*');
+        $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
+        $this->db->select('ft.name farmer_type_name,ft.discount_self_percentage');
+        $this->db->where('f.id',$farmer_id);
+        $result=$this->db->get()->row_array();
+        $data['item']['farmer_name']=$result['name'];
+        $data['item']['farmer_type_id']=$result['farmer_type_id'];
+        $data['item']['mobile_no']=$result['mobile_no'];
+        $data['item']['nid']=$result['nid'];
+        $data['item']['address']=$result['address'];
+        $data['item']['farmer_type_name']=$result['farmer_type_name'];
+        $data['item']['discount_self_percentage']=$result['discount_self_percentage'];
+        $data['item']['discount_message']='';
+
+        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type_outlet_discount'),'*',array('farmer_type_id ='.$data['item']['farmer_type_id'],'expire_time >'.time(),'outlet_id ='.$outlet_id),1);
+        if($result)
+        {
+            $data['item']['discount_self_percentage']=$result['discount_percentage'];
+            $data['item']['discount_message']='Outlet Special Discount';
+        }
 
         $ajax['status']=true;
         $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add",$data,true));

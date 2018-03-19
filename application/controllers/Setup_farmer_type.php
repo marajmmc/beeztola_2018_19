@@ -297,7 +297,7 @@ class Setup_farmer_type extends Root_Controller
                 $this->json_return($ajax);
             }
             //$data['system_preference_items']= $this->get_preference();
-            $data['title']="Farmer Type Outlet Discount List";
+            $data['title']="Outlet Discount for-".$valid_farmer_type['name'];
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/outlet_discount_list",$data,true));
             if($this->message)
@@ -360,6 +360,14 @@ class Setup_farmer_type extends Root_Controller
             }
             $user = User_helper::get_user();
             $time=time();
+            $valid_farmer_type=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),'*',array('id ='.$farmer_type_id),1);
+            if(!$valid_farmer_type)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer Type Try.';
+                $this->json_return($ajax);
+            }
+
             $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
             $this->db->select('outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=user_outlet.customer_id','INNER');
@@ -401,7 +409,7 @@ class Setup_farmer_type extends Root_Controller
                 }
             }
             $data['item']['outlet_name']=$valid_outlet['outlet_name'];
-            $data['title']="Outlet Discount";
+            $data['title']="Outlet Discount for-".$valid_farmer_type['name'];
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/outlet_discount_edit",$data,true));
             if($this->message)
