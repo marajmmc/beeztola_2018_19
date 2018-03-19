@@ -669,6 +669,10 @@ class Payment_deposit extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
             $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
+            $this->db->select('user_info.name payment_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment.user_updated','LEFT');
+            $this->db->select('user_info_forwarded.name payment_forwarded_by');
+            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','LEFT');
             $this->db->where('payment.id',$item_id);
             $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
             $data['item']=$this->db->get()->row_array();

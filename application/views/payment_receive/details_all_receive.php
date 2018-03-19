@@ -7,6 +7,14 @@ $action_buttons[]=array
     'label'=>$CI->lang->line("ACTION_BACK"),
     'href'=>site_url($CI->controller_url.'/index/list_all')
 );
+if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line("ACTION_PRINT"),
+        'onClick'=>"window.print()"
+    );
+}
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 ?>
@@ -63,15 +71,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </tr>
 
             <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By:</label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By</label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['payment_by'];?></label></th>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry Time:</label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry Time</label></th>
                 <th class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
             </tr>
             <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Forwarded By:</label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Forwarded By</label></th>
                 <th class="header_value"><label class="control-label"><?php echo $item['payment_forwarded_by'];?></label></th>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Forward Time:</label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Forward Time</label></th>
                 <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
             </tr>
             <?php if($item['date_updated_receive']){?>
@@ -83,15 +91,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </tr>
             <?php } ?>
             <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Attachment(Document):</label></th>
-                <th class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></th>
-                <th colspan="2">&nbsp;</th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Attachment (Document)</label></th>
+                <th colspan="3" class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></th>
+
             </tr>
-            <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REMARKS');?></label></th>
-                <th class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_payment']);?></label></th>
-                <th colspan="2">&nbsp;</th>
-            </tr>
+            <?php if($item['remarks_payment']){?>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REMARKS').' (Payment)';?></label></th>
+                    <th colspan="3" class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_payment']);?></label></th>
+
+                </tr>
+            <?php }?>
+            <?php if($item['remarks_receive']){?>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REMARKS').' (Receive)';?></label></th>
+                    <th colspan="3" class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_receive']);?></label></th>
+                </tr>
+            <?php } ?>
             </thead>
         </table>
     </div>

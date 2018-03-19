@@ -62,21 +62,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th colspan="2">&nbsp;</th>
             </tr>
             <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By:</label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By</label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['payment_by'];?></label></th>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry Time:</label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry Time</label></th>
                 <th class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
             </tr>
             <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Attachment(Document):</label></th>
-                <th class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></th>
-                <th colspan="2">&nbsp;</th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Attachment(Document)</label></th>
+                <th colspan="3" class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></th>
             </tr>
-            <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REMARKS');?></label></th>
-                <th class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_payment']);?></label></th>
-                <th colspan="2">&nbsp;</th>
-            </tr>
+            <?php if($item['remarks_payment']){?>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REMARKS');?></label></th>
+                    <th colspan="3" class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_payment']);?></label></th>
+                </tr>
+            <?php } ?>
             </thead>
         </table>
     </div>

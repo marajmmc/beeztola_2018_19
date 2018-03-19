@@ -144,7 +144,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label id="amount_receive"><?php echo number_format(($item['amount_payment']-$item['amount_bank_charge']),2);?></label>
@@ -152,7 +152,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?>
@@ -166,6 +166,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
             </div>
         </div>
+        <?php if($item['remarks_payment']){?>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS').'(Payment)';?>:</label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <?php echo nl2br($item['remarks_payment']); ?>
+            </div>
+        </div>
+        <?php } ?>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label>
