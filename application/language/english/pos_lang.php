@@ -364,5 +364,7 @@ $lang['LABEL_BRANCH_NAME'] = 'Branch Name';
 $lang['LABEL_PAYMENT_STATUS'] = 'Payment Status';
 $lang['LABEL_STATUS_RECEIVE'] = 'Receive Status';
 
+$lang['LABEL_STATUS_PAYMENT_EDIT'] = 'Payment Edit Status';
+
 //Label Lang
 $lang['LABEL_INVOICE_NO'] = 'Invoice No';
