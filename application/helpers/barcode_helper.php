@@ -10,7 +10,8 @@ class Barcode_helper
     public static function get_id_farmer($code)
     {
         $CI =& get_instance();
-        if((substr($code,0,2)=='F-'))
+        //if((substr($code,0,2)=='F-'))
+        if(Barcode_helper::get_farmer_code_type($code)=='barcode')
         {
             $result=Query_helper::get_info($CI->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.intval(substr($code,2))),1);
             if($result)
@@ -22,7 +23,7 @@ class Barcode_helper
                 return 0;
             }
         }
-        else if((substr($code,0,2)=='I-'))
+        else if(Barcode_helper::get_farmer_code_type($code)=='invoice')
         {
             $CI->db->from($CI->config->item('table_pos_sale').' sale');
             $CI->db->select('sale.farmer_id');
@@ -50,6 +51,21 @@ class Barcode_helper
             }
         }
 
+    }
+    public static function get_farmer_code_type($code)
+    {
+        if((substr($code,0,2)=='F-'))
+        {
+            return 'barcode';
+        }
+        else if((substr($code,0,2)=='I-'))
+        {
+            return 'invoice';
+        }
+        else
+        {
+            return 'mobile';
+        }
     }
     public static function get_barcode_payment($id)
     {

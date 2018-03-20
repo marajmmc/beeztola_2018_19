@@ -132,6 +132,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     if(data['farmer_new']!==undefined && data['farmer_new']==true)
                     {
                         $('#container_farmer_new').show();
+                        if(data['hide_code']!==undefined && data['hide_code']==true)
+                        {
+                            $('#mobile_no').val('');
+                        }
+                        else
+                        {
+                            $('#mobile_no').val(code);
+                        }
+                    }
+                    if(data['hide_code']!==undefined && data['hide_code']==true)
+                    {
+                        $('#code').val('');
                     }
 
                 },

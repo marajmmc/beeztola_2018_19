@@ -182,13 +182,19 @@ class Sales_sale extends Root_Controller
     {
         $outlet_id=$this->input->post("outlet_id");
         $code=$this->input->post("code");
+        $code_type=Barcode_helper::get_farmer_code_type($code);
         $farmer_id=Barcode_helper::get_id_farmer($code);
         if($farmer_id>0)
         {
+
             $info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$farmer_id),1);
             if($info['status']==$this->config->item('system_status_inactive'))
             {
                 $ajax['status']=false;
+                if($code_type!='mobile')
+                {
+                    $ajax['hide_code']=true;
+                }
                 $ajax['system_message']='This Customer Cannot Buy Product.<br>Please Contact with admin';
                 $this->json_return($ajax);
             }
@@ -197,6 +203,10 @@ class Sales_sale extends Root_Controller
                 if(($info['status_card_require']==$this->config->item('system_status_yes'))&&($info['time_card_off_end']<=time())&&($code!=Barcode_helper::get_barcode_farmer($farmer_id)))
                 {
                     $ajax['status']=false;
+                    if($code_type!='mobile')
+                    {
+                        $ajax['hide_code']=true;
+                    }
                     $ajax['system_message']='Scan Dealers Card';
                     $this->json_return($ajax);
                 }
@@ -206,6 +216,10 @@ class Sales_sale extends Root_Controller
                     if(!$result)
                     {
                         $ajax['status']=false;
+                        if($code_type!='mobile')
+                        {
+                            $ajax['hide_code']=true;
+                        }
                         $ajax['system_message']='This Customer Cannot Buy Product from this outlet.<br>Please Contact with admin';
                         $this->json_return($ajax);
                     }
@@ -218,6 +232,10 @@ class Sales_sale extends Root_Controller
         {
             $ajax['status']=false;
             $ajax['farmer_new']=true;
+            if($code_type!='mobile')
+            {
+                $ajax['hide_code']=true;
+            }
             $ajax['system_message']='Customer '.$this->lang->line("MSG_NOT_FOUND");
             $this->json_return($ajax);
         }
