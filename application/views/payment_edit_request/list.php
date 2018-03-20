@@ -81,7 +81,7 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
         'type'=>'button',
         'label'=>'Forward',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/edit_payment_forward')
+        'data-action-link'=>site_url($CI->controller_url.'/index/edit_payment_request_forward')
     );
 }
 $action_buttons[]=array(

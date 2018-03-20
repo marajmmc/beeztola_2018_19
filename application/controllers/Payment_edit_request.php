@@ -50,9 +50,9 @@ class Payment_edit_request extends Root_Controller
         {
             $this->system_delete($id);
         }
-        elseif($action=="edit_payment_forward")
+        elseif($action=="edit_payment_request_forward")
         {
-            $this->system_edit_payment_forward($id);
+            $this->system_edit_payment_request_forward($id);
         }
         elseif($action=="set_preference")
         {
@@ -76,7 +76,7 @@ class Payment_edit_request extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= $this->get_preference();
-            $data['title']="Pending Payment Edit Request List";
+            $data['title']="Pending Edit Payment Request List";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -269,12 +269,22 @@ class Payment_edit_request extends Root_Controller
     {
         if(isset($this->permissions['action1'])&&($this->permissions['action1']==1))
         {
-            $barcode=$this->input->post('barcode');
-            if(!$barcode)
+            if($this->input->post('item'))
+            {
+                $item=$this->input->post('item');
+
+                if(!$item['barcode'])
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='This Barcode field is required.';
+                    $this->json_return($ajax);
+                }
+            }
+            else
             {
                 $this->system_search();
             }
-            $item_id=intval(substr($barcode,2));
+            $item_id=intval(substr($item['barcode'],2));
             $data['title']="New Payment Edit Request";
             $data['item']=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$item_id),1);
             if(!$data['item'])
@@ -444,6 +454,7 @@ class Payment_edit_request extends Root_Controller
         $user = User_helper::get_user();
         $time=time();
         $item=$this->input->post('item');
+//        print_r($item);exit;
 //        print_r($item);
 //        exit;
         if($id>0)
@@ -670,7 +681,7 @@ class Payment_edit_request extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_edit_payment_forward($id)
+    private function system_edit_payment_request_forward($id)
     {
         if((isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
         {
