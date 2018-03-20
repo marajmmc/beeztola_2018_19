@@ -102,20 +102,7 @@ class Payment_receive extends Root_Controller
         {
             $assigned_outlet[]=$outlet['outlet_id'];
         }
-        $current_records = $this->input->post('total_records');
-        if(!$current_records)
-        {
-            $current_records=0;
-        }
-        $pagesize = $this->input->post('pagesize');
-        if(!$pagesize)
-        {
-            $pagesize=100;
-        }
-        else
-        {
-            $pagesize=$pagesize*2;
-        }
+
         $this->db->from($this->config->item('table_pos_payment').' payment');
         $this->db->select('payment.*');
         $this->db->select('outlet_info.name outlet');
@@ -132,7 +119,6 @@ class Payment_receive extends Root_Controller
         $this->db->where('payment.status_receive =',$this->config->item('system_status_pending'));
         $this->db->where_in('payment.outlet_id',$assigned_outlet);
         $this->db->order_by('payment.id','DESC');
-        $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
@@ -522,7 +508,6 @@ class Payment_receive extends Root_Controller
             $this->json_return($ajax);
         }
     }
-
     private function check_valid_outlet($outlet_id,$invalid_try,$message)
     {
         $user = User_helper::get_user();
