@@ -44,6 +44,7 @@ $lang['ACTION_DOCUMENT'] = 'Documents';
 $lang['ACTION_CLEAR'] = 'Clear';
 $lang['ACTION_REFRESH'] = 'Refresh';
 $lang['ACTION_BACK'] = 'Back';
+$lang['ACTION_CANCEL'] = 'Cancel';
 $lang['ACTION_LOAD_MORE'] = 'Load More';
 $lang['ACTION_LOGOUT'] = 'Logout';
 $lang['ACTION_ASSIGN_GROUP_ROLE'] = 'Assign Group Role';
@@ -225,6 +226,7 @@ $lang['LABEL_QUANTITY_ORDER'] = 'Order Quantity';
 $lang['LABEL_QUANTITY_SUPPLY'] = 'Supply Quantity';
 $lang['LABEL_QUANTITY_RECEIVE'] = 'Receive Quantity';
 $lang['LABEL_QUANTITY_DIFFERENCE'] = 'Difference Quantity';
+$lang['LABEL_WEIGHT_KG'] = 'Weight(kg)';
 
 // Total, Currency, Percentage - kg/pkt/taka/currency
 /* Total */
@@ -276,6 +278,8 @@ $lang['LABEL_CROP_NAME']='Crop';
 $lang['LABEL_CROP_TYPE_NAME']='Crop Type';
 $lang['LABEL_VARIETY_NAME']='Variety';
 $lang['LABEL_PACK_SIZE'] = 'Pack Size(gm)';
+$lang['LABEL_PACK_SIZE_NAME'] = 'Pack Size(gm)';
+$lang['LABEL_PRICE_PER_PACK'] = 'Price/pack';
 $lang['LABEL_VARIETY_CATEGORY']='Variety Category';
 $lang['LABEL_HYBRID']='Hybrid';
 

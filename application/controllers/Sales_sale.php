@@ -52,14 +52,15 @@ class Sales_sale extends Root_Controller
         {
             $this->system_save_farmer();
         }
-        /*elseif($action=="edit")
-        {
-            $this->system_edit($id);
-        }
         elseif($action=="save")
         {
             $this->system_save();
         }
+        /*elseif($action=="edit")
+        {
+            $this->system_edit($id);
+        }
+
         elseif($action=="edit_outlet")
         {
             $this->system_edit_outlet($id);
@@ -159,6 +160,7 @@ class Sales_sale extends Root_Controller
 
     private function system_add()
     {
+        $this->system_load_sale_from(1,258);
         if(isset($this->permissions['action1']) && ($this->permissions['action1']==1))
         {
             $data['title']="New Sale";
@@ -328,7 +330,9 @@ class Sales_sale extends Root_Controller
     {
         $data=array();
         $data['title']="New Sale";
+        $result=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
         $data['item']['outlet_id']=$outlet_id;
+        $data['item']['outlet_name']=$result['name'];
         $data['item']['farmer_id']=$farmer_id;
 
         $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
@@ -353,7 +357,48 @@ class Sales_sale extends Root_Controller
             $data['item']['discount_message']='Outlet Special Discount';
         }
 
+        //getting current stock,price,discount of outlet
+        $this->db->from($this->config->item('table_pos_stock_summary_variety').' ssv');
+        $this->db->select('ssv.variety_id,ssv.pack_size_id,ssv.current_stock');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = ssv.variety_id','INNER');
+        $this->db->select('v.name variety_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' type','type.id = v.crop_type_id','INNER');
+        $this->db->select('type.name crop_type_name,type.id crop_type_id');
+        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
+        $this->db->select('crop.name crop_name,crop.id crop_id');
+        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = ssv.pack_size_id','INNER');
+        $this->db->select('pack.name pack_size');
+
+        $this->db->where('ssv.outlet_id',$outlet_id);
+        $results=$this->db->get()->result_array();
+        $varieties=array();
+        foreach($results as $result)
+        {
+            $result['price_unit_pack']=0;
+            $result['discount_percentage_variety']=10;
+            $varieties[$result['variety_id']][$result['pack_size_id']]=$result;
+        }
+        $results=Query_helper::get_info($this->config->item('table_login_setup_classification_variety_price'),'*',array());
+        foreach($results as $result)
+        {
+            if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
+            {
+                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=$result['price'];
+            }
+        }
+
+        $data['sale_varieties_info']=array();
+        foreach($varieties as $pack_sizes)
+        {
+            foreach($pack_sizes as $info)
+            {
+                $data['sale_varieties_info'][Barcode_helper::get_barcode_variety($info['crop_id'],$info['variety_id'],$info['pack_size_id'])]=$info;
+            }
+        }
+
+
         $ajax['status']=true;
+        $ajax['system_page_url']=site_url($this->controller_url."/index/add");
         $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add",$data,true));
         if($this->message)
         {
@@ -363,6 +408,12 @@ class Sales_sale extends Root_Controller
 
 
 
+    }
+    private function system_save()
+    {
+        echo '<pre>';
+        print_r($this->input->post());
+        echo '</pre>';
     }
     private function system_set_preference()
     {

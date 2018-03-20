@@ -71,4 +71,8 @@ class Barcode_helper
     {
         return 'P-'.str_pad($id,6,0,STR_PAD_LEFT);
     }
+    public static function get_barcode_variety($crop_id,$variety_id,$pack_id)
+    {
+        return str_pad($crop_id,2,0,STR_PAD_LEFT).str_pad($variety_id,4,0,STR_PAD_LEFT).str_pad($pack_id,2,0,STR_PAD_LEFT);
+    }
 }
