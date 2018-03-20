@@ -19,7 +19,7 @@ class Sales_sale extends Root_Controller
         {
             foreach($this->user_outlets as $row)
             {
-                $this->user_outlet_ids[]=$row['id'];
+                $this->user_outlet_ids[]=$row['customer_id'];
             }
         }
         else
@@ -160,7 +160,6 @@ class Sales_sale extends Root_Controller
 
     private function system_add()
     {
-        $this->system_load_sale_from(1,258);
         if(isset($this->permissions['action1']) && ($this->permissions['action1']==1))
         {
             $data['title']="New Sale";
@@ -375,7 +374,7 @@ class Sales_sale extends Root_Controller
         foreach($results as $result)
         {
             $result['price_unit_pack']=0;
-            $result['discount_percentage_variety']=10;
+            $result['discount_percentage_variety']=0;
             $varieties[$result['variety_id']][$result['pack_size_id']]=$result;
         }
         $results=Query_helper::get_info($this->config->item('table_login_setup_classification_variety_price'),'*',array());
@@ -384,6 +383,20 @@ class Sales_sale extends Root_Controller
             if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
             {
                 $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=$result['price'];
+            }
+        }
+        $this->db->from($this->config->item('table_login_setup_classification_variety_outlet_discount').' outlet_discount');
+        $this->db->select('variety_id,pack_size_id,discount_percentage');
+        $this->db->where_in('outlet_id',array(0,$outlet_id));
+        $this->db->where('farmer_type_id',$data['item']['farmer_type_id']);
+        $this->db->where('expire_time >',time());
+        $this->db->order_by('outlet_id','ASC');
+        $results=$this->db->get()->result_array();
+        foreach($results as $result)
+        {
+            if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
+            {
+                $varieties[$result['variety_id']][$result['pack_size_id']]['discount_percentage_variety']=$result['discount_percentage'];
             }
         }
 

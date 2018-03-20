@@ -170,7 +170,7 @@ class User_helper
         $user=User_helper::get_user();
         $CI->db->from($CI->config->item('table_pos_setup_user_outlet').' user_outlet');
         $CI->db->join($CI->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = user_outlet.customer_id','INNER');
-        $CI->db->select('customer_info.*');
+        $CI->db->select('customer_info.customer_id,customer_info.name,customer_info.type,customer_info.name_short,customer_info.customer_code');
 
         $CI->db->join($CI->config->item('table_login_setup_location_districts').' district','district.id = customer_info.district_id','INNER');
         $CI->db->select('district.id district_id,district.name district_name');

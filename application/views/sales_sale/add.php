@@ -311,7 +311,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $('#total_payable').html(number_format(total_payable,2));
         var total_payable_celling=Math.ceil(total_payable);
         $('#total_payable_celling').html(number_format(total_payable_celling,2));
-        var amount_paid=parseFloat($('#amount_paid').val());
+        var amount_paid=0;
+        if($('#amount_paid').val()==parseFloat($('#amount_paid').val()))
+        {
+            amount_paid=parseFloat($('#amount_paid').val());
+        }
+
         var amount_change=amount_paid-total_payable_celling;
         $('#amount_change').html(number_format(amount_change,2));
     }
