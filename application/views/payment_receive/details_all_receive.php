@@ -51,7 +51,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_PAYMENT');?></label></th>
                 <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></th>
             </tr>
-
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?></label></th>
@@ -69,7 +68,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['bank_branch_source'];?></label></th>
             </tr>
-
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By</label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['payment_by'];?></label></th>

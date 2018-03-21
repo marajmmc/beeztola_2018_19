@@ -17,7 +17,7 @@ $config['USER_TYPE_EMPLOYEE']=1;
 
 $config['system_status_not_done']='Not Done';
 $config['system_status_done']='Done';
-$config['system_base_url_payment_attachment']='http://127.0.0.1/beeztola_2018_19/';
+$config['system_base_url_payment_attachment']='http://localhost/beeztola_2018_19/';
 
 /*$config['system_base_url_profile_picture']='http://50.116.76.180/login/';
 //$config['system_base_url_profile_picture']='http://127.0.0.1/login_2018_19/';

@@ -13,7 +13,7 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'type'=>'button',
         'label'=>$CI->lang->line('ACTION_DETAILS'),
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/details_all_payment_edit_request')
+        'data-action-link'=>site_url($CI->controller_url.'/index/details_all')
     );
 }
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))

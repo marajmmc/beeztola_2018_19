@@ -5,24 +5,23 @@ $action_buttons=array();
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_BACK"),
-    'href'=>site_url($CI->controller_url)
+    'href'=>site_url($CI->controller_url.'/index/list_all')
 );
-if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
+if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
 {
-    $action_buttons[]=array
-    (
+    $action_buttons[]=array(
         'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_SAVE"),
-        'id'=>'button_action_save',
-        'data-form'=>'#save_form'
+        'label'=>$CI->lang->line("ACTION_PRINT"),
+        'onClick'=>"window.print()"
     );
 }
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
+
 ?>
 <div class="row widget">
     <div class="widget-header">
         <div class="title">
-            <?php echo 'Details ::'.Barcode_helper::get_barcode_payment($item['payment_id']); ?>
+            <?php echo $title; ?>
         </div>
         <div class="clearfix"></div>
     </div>
@@ -52,6 +51,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_PAYMENT');?></label></th>
                 <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></th>
             </tr>
+
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?></label></th>
@@ -70,10 +70,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th class=" header_value"><label class="control-label"><?php echo $item['bank_branch_source'];?></label></th>
             </tr>
             <tr>
-                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Entry By</label></th>
-                <th class=" header_value"><label class="control-label"><?php echo $item['payment_edit_by'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request By</label></th>
+                <th class=" header_value"><label class="control-label"><?php echo $item['edit_payment_request_by'];?></label></th>
                 <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Time</label></th>
                 <th class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
+            </tr>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forwarded By</label></th>
+                <th class="header_value"><label class="control-label"><?php echo $item['edit_payment_request_forward_by'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forward Time</label></th>
+                <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
             </tr>
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right">Attachment (Document)</label></th>
@@ -97,27 +103,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </table>
     </div>
 </div>
-<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward');?>" method="post">
-    <input type="hidden" id="id" name="id" value="<?php echo $item['id']; ?>" />
-    <div class="row widget">
-        <div class="widget-header">
-            <div class="title">
-                <?php echo $title; ?>
-            </div>
-            <div class="clearfix"></div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Forward<span style="color:#FF0000">*</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <select class="form-control" name="item[status_forward]">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
-                    <option value="<?php echo $this->config->item('system_status_forwarded')?>">Forward</option>
-                </select>
-            </div>
-        </div>
-        <div class="clearfix"></div>
-    </div>
-    <div class="clearfix"></div>
-</form>
+<div class="clearfix"></div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function()
+    {
+        system_preset({controller:'<?php echo $CI->router->class; ?>'});
+        $(".datepicker").datepicker({dateFormat : display_date_format});
+    });
+</script>
