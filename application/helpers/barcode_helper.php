@@ -75,4 +75,10 @@ class Barcode_helper
     {
         return str_pad($crop_id,2,0,STR_PAD_LEFT).str_pad($variety_id,4,0,STR_PAD_LEFT).str_pad($pack_id,2,0,STR_PAD_LEFT);
     }
+
+    /// SMS relational function
+    public static function get_barcode_transfer_warehouse_to_outlet($increment_id)
+    {
+        return 'TS'.str_pad($increment_id,6,0,STR_PAD_LEFT);
+    }
 }

@@ -124,6 +124,7 @@ $lang['LABEL_FULL_NAME'] = 'Full Name';
 $lang['LABEL_CUSTOMER_NAME'] = 'Customer Name';
 $lang['LABEL_SUPPLIER_NAME']='Supplier Name';
 $lang['LABEL_OUTLET_NAME'] = 'Outlet';
+$lang['LABEL_OUTLET_CODE'] = 'Outlet Code';
 $lang['LABEL_SHOWROOM_NAME'] = 'Showroom Name';
 
 // office, company, department
@@ -181,6 +182,15 @@ $lang['LABEL_DATE_STOCK_OUT']='Stock Out date';
 $lang['LABEL_DATE_TRANSFER']='Transfer date';
 $lang['LABEL_DATE_PURCHASE']='Purchase date';
 $lang['LABEL_DATE_CHALLAN']='Challan Date';
+$lang['LABEL_DATE_CREATED_TIME']='Created Time';
+$lang['LABEL_DATE_UPDATED_TIME']='Updated Time';
+$lang['LABEL_DATE_APPROVED_TIME']='Approved Time';
+$lang['LABEL_DATE_DELIVERED_TIME']='Delivered Time';
+$lang['LABEL_DATE_CONVERT']='Convert Date';
+$lang['LABEL_DATE_REQUEST']='Date for Request';
+$lang['LABEL_DATE_APPROVE']='Date for Approve';
+$lang['LABEL_DATE_DELIVERY']='Date for Delivery';
+$lang['LABEL_DATE_CHALLAN']='Date for Challan';
 
 //months array
 $lang['LABEL_MONTH'] = 'Month';
@@ -226,6 +236,19 @@ $lang['LABEL_QUANTITY_ORDER'] = 'Order Quantity';
 $lang['LABEL_QUANTITY_SUPPLY'] = 'Supply Quantity';
 $lang['LABEL_QUANTITY_RECEIVE'] = 'Receive Quantity';
 $lang['LABEL_QUANTITY_DIFFERENCE'] = 'Difference Quantity';
+$lang['LABEL_QUANTITY_TOTAL_RECEIVE'] = 'Total Quantity (Receive)';
+$lang['LABEL_QUANTITY_TOTAL_PKT']='Total Quantity (pkt)';
+$lang['LABEL_QUANTITY_TOTAL_KG']='Total Quantity (Kg)';
+$lang['LABEL_QUANTITY_TOTAL_PACK_KG']='Total Quantity (Pkt/Kg)';
+$lang['LABEL_QUANTITY_TOTAL_PIECES']='Total Quantity (Pcs)';
+$lang['LABEL_QUANTITY_KG_PACK']='Quantity (Pkt/Kg)';
+
+$lang['LABEL_QUANTITY_APPROVE'] = 'Approve Quantity';
+
+$lang['LABEL_QUANTITY_TOTAL_REQUEST'] = 'Total Request Quantity (Kg)';
+$lang['LABEL_QUANTITY_TOTAL_RECEIVE'] = 'Total Receive Quantity (Kg)';
+$lang['LABEL_QUANTITY_TOTAL_APPROVE'] = 'Total Approve Quantity (Kg)';
+
 $lang['LABEL_WEIGHT_KG'] = 'Weight(kg)';
 
 // Total, Currency, Percentage - kg/pkt/taka/currency
@@ -243,9 +266,7 @@ $lang['LABEL_STARTING_STOCK'] = 'Starting Stock';
 $lang['LABEL_TOTAL_STOCK_IN'] = 'Total Stock In';
 $lang['LABEL_TOTAL_STOCK_OUT'] = 'Total Stock Out';
 
-$lang['LABEL_QUANTITY_SUPPLY']='Supply Quantity';
-$lang['LABEL_QUANTITY_RECEIVE']='Receive Quantity';
-$lang['LABEL_QUANTITY_TOTAL_RECEIVE'] = 'Total Quantity (Receive)';
+
 /* Currency */
 $lang['LABEL_CURRENCY_SYMBOL'] = 'Currency Symbol';
 $lang['LABEL_CURRENCY_RATE'] = 'Currency Rate';
