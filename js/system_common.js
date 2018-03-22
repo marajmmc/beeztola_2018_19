@@ -105,7 +105,7 @@ $(document).ready(function()
     {
 
         $("#system_loading").hide();
-        animate_message("Request Error");
+        animate_message("Request/Internet Error");
 
     });
     //binds form submission with ajax

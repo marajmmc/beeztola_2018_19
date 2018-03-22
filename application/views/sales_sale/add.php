@@ -305,7 +305,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $('#total_discount_variety').html(number_format(total_discount_variety,2));
         $('#total_price_actual').html(number_format(total_price_actual,2));
 
-        var total_discount_farmer=(total_price_actual*<?php echo $item['discount_self_percentage'];?>)/1000;
+        var total_discount_farmer=(total_price_actual*<?php echo $item['discount_self_percentage'];?>)/100;
         $('#total_discount_farmer').html(number_format(total_discount_farmer,2));
         var total_payable=total_price_actual-total_discount_farmer;
         $('#total_payable').html(number_format(total_payable,2));

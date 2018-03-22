@@ -10,21 +10,6 @@ if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))
         'href'=>site_url($CI->controller_url.'/index/add')
     );
 }
-if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
-{
-    $action_buttons[]=array(
-        'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_EDIT"),
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/edit')
-    );
-    $action_buttons[]=array(
-        'type'=>'button',
-        'label'=>'Assign outlet',
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/edit_outlet')
-    );
-}
 $action_buttons[]=array(
     'type'=>'button',
     'label'=>$CI->lang->line("ACTION_DETAILS"),
