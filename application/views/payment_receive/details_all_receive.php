@@ -24,6 +24,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <?php echo $title; ?>
         </div>
         <div class="clearfix"></div>
+
     </div>
     <div class="col-md-12">
         <table class="table table-bordered table-responsive system_table_details_view">
@@ -48,25 +49,28 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_REFERENCE_NO');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['reference_no'];?></label></th>
-                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_PAYMENT');?></label></th>
-                <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_RECEIVE');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo System_helper::display_date($item['date_receive']);?></label></th>
+
             </tr>
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?></label></th>
-                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_BANK_CHARGE');?></label></th>
-                <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_bank_charge'],2);?></label></th>
-            </tr>
-            <tr>
-                <th colspan="2">&nbsp;</th>
-                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_RECEIVE');?></label></th>
-                <th class=" bg-danger"><label class="control-label"><?php echo number_format($item['amount_receive'],2);?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_PAYMENT');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></th>
             </tr>
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_PAYMENT_SOURCE');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['bank_name_source'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_BANK_CHARGE');?></label></th>
+                <th class="bg-danger"><label class="control-label"><?php echo number_format($item['amount_bank_charge'],2);?></label></th>
+
+            </tr>
+            <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?></label></th>
                 <th class=" header_value"><label class="control-label"><?php echo $item['bank_branch_source'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_AMOUNT_RECEIVE');?></label></th>
+                <th class=" bg-danger"><label class="control-label"><?php echo number_format($item['amount_receive'],2);?></label></th>
             </tr>
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By</label></th>

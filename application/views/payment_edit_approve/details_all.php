@@ -78,12 +78,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Time</label></th>
                 <th class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
             </tr>
-            <?php if($item['edit_payment_request_forward_by']){?>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forwarded By</label></th>
+                <th class="header_value"><label class="control-label"><?php echo $item['edit_payment_request_forward_by'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forward Time</label></th>
+                <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
+            </tr>
+            <?php if($item['edit_payment_request_approve_by']){?>
                 <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forwarded By</label></th>
-                    <th class="header_value"><label class="control-label"><?php echo $item['edit_payment_request_forward_by'];?></label></th>
-                    <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forward Time</label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
+                    <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Approved By</label></th>
+                    <th class="header_value"><label class="control-label"><?php echo $item['edit_payment_request_approve_by'];?></label></th>
+                    <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Approve Time</label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_approve_edit']);?></label></th>
                 </tr>
             <?php } ?>
             <tr>

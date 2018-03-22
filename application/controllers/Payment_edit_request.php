@@ -122,20 +122,6 @@ class Payment_edit_request extends Root_Controller
         {
             $assigned_outlet[]=$outlet['outlet_id'];
         }
-        $current_records = $this->input->post('total_records');
-        if(!$current_records)
-        {
-            $current_records=0;
-        }
-        $pagesize = $this->input->post('pagesize');
-        if(!$pagesize)
-        {
-            $pagesize=100;
-        }
-        else
-        {
-            $pagesize=$pagesize*2;
-        }
         $this->db->from($this->config->item('table_pos_payment_edit').' payment_edit');
         $this->db->select('payment_edit.*');
         $this->db->select('outlet_info.name outlet');
@@ -151,7 +137,6 @@ class Payment_edit_request extends Root_Controller
         $this->db->where('payment_edit.status_forward =',$this->config->item('system_status_pending'));
         $this->db->where_in('payment_edit.outlet_id',$assigned_outlet);
         $this->db->order_by('payment_edit.id','DESC');
-        $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
@@ -466,9 +451,7 @@ class Payment_edit_request extends Root_Controller
         $user = User_helper::get_user();
         $time=time();
         $item=$this->input->post('item');
-//        print_r($item);exit;
-//        print_r($item);
-//        exit;
+        $result_payment_edit='';
         if($id>0)
         {
             if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
@@ -477,7 +460,6 @@ class Payment_edit_request extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-
             $result_payment_edit=Query_helper::get_info($this->config->item('table_pos_payment_edit'),array('*'),array('id ='.$id),1);
             if(!$result_payment_edit)
             {
@@ -568,6 +550,19 @@ class Payment_edit_request extends Root_Controller
                 $this->json_return($ajax);
             }
         }
+        if(!(isset($item['image_name'])))
+        {
+            if($id>0)
+            {
+                $item['image_name']=$result_payment_edit['image_name'];
+                $item['image_location']=$result_payment_edit['image_location'];
+            }
+            else
+            {
+                $item['image_name']=$result['image_name'];
+                $item['image_location']=$result['image_location'];
+            }
+        }
         $this->db->trans_start();  //DB Transaction Handle START
         if($id>0)
         {
@@ -575,6 +570,7 @@ class Payment_edit_request extends Root_Controller
             $item['date_payment']=System_helper::get_time($item['date_payment']);
             $item['date_sale']=System_helper::get_time($item['date_sale']);
             $item['date_receive']=System_helper::get_time($item['date_receive']);
+            $item['amount_receive']=$item['amount_payment']-$item['amount_bank_charge'];
             $item['date_updated']=$time;
             $item['user_updated']=$user->user_id;
             $this->db->set('revision_count', 'revision_count+1', FALSE);
@@ -586,6 +582,7 @@ class Payment_edit_request extends Root_Controller
             $item['date_payment']=System_helper::get_time($item['date_payment']);
             $item['date_sale']=System_helper::get_time($item['date_sale']);
             $item['date_receive']=System_helper::get_time($item['date_receive']);
+            $item['amount_receive']=$item['amount_payment']-$item['amount_bank_charge'];
             $item['date_updated']=$time;
             $item['user_updated']=$user->user_id;
             Query_helper::add($this->config->item('table_pos_payment_edit'),$item, true);
@@ -720,13 +717,13 @@ class Payment_edit_request extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
             $this->db->select('user_info.name edit_payment_request_by');
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment_edit.user_updated','LEFT');
-            $this->db->select('user_info.name edit_payment_request_forward_by');
+            $this->db->select('user_info_forwarded.name edit_payment_request_forward_by');
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment_edit.user_updated_forward','LEFT');
             $this->db->where('payment_edit.id',$item_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('Details Edit Payment Request Non Exists',$item_id);
+                System_helper::invalid_try('Details_all Edit Payment Request Non Exists',$item_id);
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Edit Payment Request Details.';
                 $this->json_return($ajax);
@@ -846,7 +843,7 @@ class Payment_edit_request extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment_edit.bank_account_id_destination','LEFT');
             $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
-            $this->db->select('user_info.name payment_edit_by');
+            $this->db->select('user_info.name edit_payment_request_by');
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment_edit.user_updated','LEFT');
             $this->db->select('user_info_forwarded.name payment_edit_forwarded_by');
             $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment_edit.user_updated_forward','LEFT');

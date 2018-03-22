@@ -27,3 +27,9 @@ $config['table_pos_sale_details'] = 'arm_beeztola_2018_19.pos_sale_details';
 
 
 
+
+
+$config['table_pos_payment_edit_history'] = 'arm_beeztola_2018_19.pos_payment_edit_history';
+
+
+

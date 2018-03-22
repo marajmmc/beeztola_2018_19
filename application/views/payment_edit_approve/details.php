@@ -5,7 +5,7 @@ $action_buttons=array();
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_BACK"),
-    'href'=>site_url($CI->controller_url.'/index/list_all')
+    'href'=>site_url($CI->controller_url.'/index/list')
 );
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
 {
@@ -78,14 +78,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Time</label></th>
                 <th class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
             </tr>
-            <?php if($item['edit_payment_request_forward_by']){?>
-                <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forwarded By</label></th>
-                    <th class="header_value"><label class="control-label"><?php echo $item['edit_payment_request_forward_by'];?></label></th>
-                    <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forward Time</label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
-                </tr>
-            <?php } ?>
+            <tr>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forwarded By</label></th>
+                <th class="header_value"><label class="control-label"><?php echo $item['edit_payment_request_forward_by'];?></label></th>
+                <th class="widget-header header_caption"><label class="control-label pull-right">Edit Payment Request Forward Time</label></th>
+                <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
+            </tr>
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right">Attachment (Document)</label></th>
                 <th colspan="3" class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></th>
@@ -109,6 +107,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
 </div>
 <div class="clearfix"></div>
+
 <script type="text/javascript">
     jQuery(document).ready(function()
     {

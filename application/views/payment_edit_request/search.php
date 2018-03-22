@@ -26,7 +26,7 @@ $CI = & get_instance();
             </div>
             <div class="col-xs-4">
                 <div class="action_button pull-right">
-                    <button id="button_action_report" type="button" class="btn" data-form="#search_form">Load Form</button>
+                    <button id="button_action_report" type="button" class="btn" data-form="#search_form">Load Payment</button>
                 </div>
 
             </div>

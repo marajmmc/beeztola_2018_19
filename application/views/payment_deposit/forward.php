@@ -88,7 +88,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 <form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward');?>" method="post">
     <input type="hidden" id="id" name="id" value="<?php echo $item['id']; ?>" />
-    <input type="hidden" id="system_save_new_status" name="system_save_new_status" value="0" />
     <div class="row widget">
         <div class="widget-header">
             <div class="title">

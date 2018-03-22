@@ -5,7 +5,7 @@ $action_buttons=array();
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
     $action_buttons[]=array(
-        'label'=>'Pending Payment Edit Request',
+        'label'=>'Pending Edit Payment Request',
         'href'=>site_url($CI->controller_url.'/index/list')
     );
     $action_buttons[]=array
