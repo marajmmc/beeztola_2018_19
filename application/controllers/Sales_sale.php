@@ -646,11 +646,10 @@ class Sales_sale extends Root_Controller
             $this->db->select('cus.name outlet_name,cus.name_short outlet_short_name');
             $this->db->select('f.name farmer_name,f.mobile_no,f.nid,f.address');
             $this->db->select('ft.name type_name');
-            $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_csetup_customers').' cus','cus.id =sale.customer_id','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
             $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
-            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.type_id','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
             $this->db->where('sale.id',$item_id);
-
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
@@ -660,7 +659,7 @@ class Sales_sale extends Root_Controller
                 $this->json_return($ajax);
                 die();
             }
-            if(!in_array($data['item']['customer_id'],$this->user_outlet_ids))
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
             {
                 System_helper::invalid_try('Details',$item_id,'Trying to access other Outlets data');
                 $ajax['status']=false;
@@ -670,32 +669,39 @@ class Sales_sale extends Root_Controller
             }
             $this->db->from($this->config->item('table_pos_sale_details').' sd');
             $this->db->select('sd.*');
+
+            $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = sd.variety_id','INNER');
             $this->db->select('v.name variety_name');
-            $this->db->select('type.name type_name');
-            $this->db->select('crop.name crop_name');
-            $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_setup_classification_varieties').' v','v.id =sd.variety_id','INNER');
-            $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_setup_classification_crop_types').' type','type.id =v.crop_type_id','INNER');
-            $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_setup_classification_crops').' crop','crop.id =type.crop_id','INNER');
+            $this->db->join($this->config->item('table_login_setup_classification_crop_types').' type','type.id = v.crop_type_id','INNER');
+            $this->db->select('type.name crop_type_name,type.id crop_type_id');
+            $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
+            $this->db->select('crop.name crop_name,crop.id crop_id');
             $this->db->where('sd.sale_id',$item_id);
 
-            $data['details']=$this->db->get()->result_array();
+            $data['items']=$this->db->get()->result_array();
+            $data['has_variety_discount']=false;
+            foreach($data['items'] as $row)
+            {
+                if($row['amount_discount_variety']>0)
+                {
+                    $data['has_variety_discount']=true;
+                    break;
+                }
+            }
 
             $user_ids=array();
             $user_ids[$data['item']['user_created']]=$data['item']['user_created'];
-            if($data['item']['user_canceled']>0)
+            if($data['item']['user_cancel_approved']>0)
             {
-                $user_ids[$data['item']['user_canceled']]=$data['item']['user_canceled'];
+                $user_ids[$data['item']['user_cancel_approved']]=$data['item']['user_cancel_approved'];
+            }
+            if($data['item']['user_manual_approved']>0)
+            {
+                $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
 
             $data['users']=System_helper::get_users_info($user_ids);
-            $data['title']='Sale Details of ('.System_helper::get_invoice_barcode($item_id).')';
-
-            /*$this->db->from($this->config->item('table_pos_setup_farmer_outlet').' fo');
-            $this->db->select('CONCAT(cus.customer_code," - ",cus.name) text');
-            $this->db->join($this->config->item('system_db_ems').'.'.$this->config->item('table_ems_csetup_customers').' cus','cus.id = fo.farmer_id','INNER');
-            $this->db->where('fo.revision',1);
-            $this->db->where('fo.farmer_id',$item_id);
-            $data['assigned_outlets']=$this->db->get()->result_array();*/
+            $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($item_id).')';
 
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
