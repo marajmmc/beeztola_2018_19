@@ -368,6 +368,7 @@ $lang['LABEL_DISCOUNT_SELF_PERCENTAGE'] = 'Self Discount (Percentage)';
 $lang['LABEL_DISCOUNT_REFERRAL_PERCENTAGE'] = 'Referral Discount (Percentage)';
 $lang['LABEL_COMMISSION_DISTRIBUTOR'] = 'Distributor Commission (Percentage)';
 $lang['LABEL_DISCOUNT'] = 'Discount';
+$lang['LABEL_AMOUNT_DISCOUNT'] = 'Discount';
 $lang['LABEL_FARMER_TYPE_NAME'] = 'Farmer Type';
 $lang['LABEL_STATUS_CARD_REQUIRE'] = 'Card Required?';
 
@@ -382,6 +383,7 @@ $lang['LABEL_AMOUNT_PAYMENT'] = 'Payment Amount';
 $lang['LABEL_AMOUNT_RECEIVE'] = 'Receive Amount';
 $lang['LABEL_AMOUNT_BANK_CHARGE'] = 'Bank Charge';
 $lang['LABEL_AMOUNT_ACTUAL'] = 'Actual Amount';
+$lang['LABEL_AMOUNT_TOTAL'] = 'Total Amount';
 $lang['LABEL_BANK_PAYMENT_SOURCE'] = 'Bank (Payment)';
 $lang['LABEL_BANK_PAYMENT_BRANCH_SOURCE'] = 'Bank Branch(Payment)';
 $lang['LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'] = 'Account Number(Receive)';

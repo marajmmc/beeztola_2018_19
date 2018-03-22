@@ -85,22 +85,33 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             dataType: "json",
             dataFields: [
                 { name: 'id', type: 'int' },
-                { name: 'barcode', type: 'string' },
-                { name: 'name', type: 'string' },
-                { name: 'farmer_type_name', type: 'string' },
-                { name: 'status_card_require', type: 'string' },
                 { name: 'outlet_name', type: 'string' },
-                { name: 'total_outlet', type: 'string' },
-                { name: 'mobile_no', type: 'string' },
-                { name: 'nid', type: 'string' },
-                { name: 'address', type: 'string' },
+                { name: 'date_sale', type: 'string' },
+                { name: 'invoice_no', type: 'string' },
+                { name: 'customer_name', type: 'string' },
+                { name: 'amount_total', type: 'string' },
+                { name: 'amount_discount', type: 'string' },
+                { name: 'amount_actual', type: 'string' },
                 { name: 'status', type: 'string' }
             ],
             id: 'id',
             type: 'POST',
             url: url
         };
+        var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
+        {
+            var element = $(defaultHtml);
+            if ((record.status=='In-Active')&& (column!="outlet_name")&& (column!="date_sale")&& (column!="invoice_no"))
+            {
+                element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+            }
+            else
+            {
+                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+            }
+            return element[0].outerHTML;
 
+        };
         var dataAdapter = new $.jqx.dataAdapter(source);
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
@@ -117,19 +128,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 selectionmode: 'singlerow',
                 altrows: true,
                 height: '350px',
+                rowsheight: 35,
                 enablebrowserselection:true,
                 columnsreorder: true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_BARCODE'); ?>', dataField: 'barcode', width:80, hidden: <?php echo $system_preference_items['barcode']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name', width:200, hidden: <?php echo $system_preference_items['name']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME'); ?>', dataField: 'farmer_type_name', width:150,filtertype: 'list', hidden: <?php echo $system_preference_items['farmer_type_name']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS_CARD_REQUIRE'); ?>', dataField: 'status_card_require', width:50,filtertype: 'list', hidden: <?php echo $system_preference_items['status_card_require']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name', width:150,filtertype: 'list', hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_OUTLET'); ?>', dataField: 'total_outlet', width:50,filtertype: 'list',hidden: <?php echo $system_preference_items['total_outlet']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:150,hidden: <?php echo $system_preference_items['mobile_no']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_NID'); ?>', dataField: 'nid', width:150,hidden: <?php echo $system_preference_items['nid']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_ADDRESS'); ?>', dataField: 'address', width:150,hidden: <?php echo $system_preference_items['address']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>', dataField: 'status', width:100,filtertype: 'list', hidden: <?php echo $system_preference_items['status']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name',width:'200',cellsrenderer: cellsrenderer,filtertype: 'list', hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DATE'); ?>', dataField: 'date_sale',width:'200',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['date_sale']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_INVOICE_NO'); ?>', dataField: 'invoice_no',width:'100',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['invoice_no']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_CUSTOMER_NAME'); ?>', dataField: 'customer_name',width:'200',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['customer_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_TOTAL'); ?>', dataField: 'amount_total',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_total']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_DISCOUNT'); ?>', dataField: 'amount_discount',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_discount']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_ACTUAL'); ?>', dataField: 'amount_actual',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_actual']?0:1;?>}
                 ]
             });
     });

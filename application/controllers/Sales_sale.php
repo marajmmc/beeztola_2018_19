@@ -115,30 +115,24 @@ class Sales_sale extends Root_Controller
             $pagesize=$pagesize*2;
         }
 
-        $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
-        $this->db->select('f.*');
-        $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
-        $this->db->select('ft.name farmer_type_name');
-
-        /*$this->db->join($this->config->item('table_pos_setup_farmer_outlet').' fo','fo.farmer_id = f.id and fo.revision =1','LEFT');
-        $this->db->select('count(outlet_id) total_outlet',true);
-
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=fo.outlet_id and outlet_info.revision =1','LEFT');
-        $this->db->select('outlet_info.name outlet_name');*/
-
-        $this->db->order_by('f.id DESC');
-        $this->db->group_by('f.id');
+        $this->db->from($this->config->item('table_pos_sale').' sale');
+        $this->db->select('sale.*');
+        $this->db->select('cus.name outlet_name');
+        $this->db->select('f.name customer_name');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
+        $this->db->where_in('sale.outlet_id',$this->user_outlet_ids);
+        $this->db->order_by('sale.id DESC');
         $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
-        $time=time();
         foreach($items as &$item)
         {
-            $item['barcode']=Barcode_helper::get_barcode_farmer($item['id']);
-            if($item['time_card_off_end']>$time)
-            {
-                //echo 'here '.$item['id'];
-                $item['status_card_require']=$this->config->item('system_status_no');
-            }
+            $item['date_sale']=System_helper::display_date_time($item['date_sale']);
+            $item['invoice_no']=Barcode_helper::get_barcode_sales($item['id']);
+            $item['amount_discount']=number_format($item['amount_discount_variety']+$item['amount_discount_self'],2);
+            $item['amount_total']=number_format($item['amount_total'],2);
+            $item['amount_actual']=number_format($item['amount_payable_actual'],2);
+
         }
         $this->json_return($items);
     }
@@ -741,16 +735,13 @@ class Sales_sale extends Root_Controller
     {
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
-        $data['barcode']= 1;
-        $data['name']= 1;
-        $data['farmer_type_name']= 1;
-        $data['status_card_require']= 1;
         $data['outlet_name']= 1;
-        $data['total_outlet']= 1;
-        $data['mobile_no']= 1;
-        $data['nid']= 1;
-        $data['address']= 1;
-        $data['status']= 1;
+        $data['date_sale']= 1;
+        $data['invoice_no']= 1;
+        $data['customer_name']= 1;
+        $data['amount_total']= 1;
+        $data['amount_discount']= 1;
+        $data['amount_actual']= 1;
 
         if($result)
         {
