@@ -8,10 +8,14 @@ $config['system_status_no']='No';
 $config['system_status_active']='Active';
 $config['system_status_inactive']='In-Active';
 $config['system_status_delete']='Deleted';
+$config['system_status_closed']='Closed';
 $config['system_status_pending']='Pending';
-$config['system_status_complete']='Complete';
 $config['system_status_forwarded']='Forwarded';
+$config['system_status_complete']='Complete';
+$config['system_status_approved']='Approved';
+$config['system_status_delivered']='Delivered';
 $config['system_status_received']='Received';
+$config['system_status_rejected']='Rejected';
 
 $config['USER_TYPE_EMPLOYEE']=1;
 
