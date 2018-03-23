@@ -145,6 +145,8 @@ class System_helper
     }
     public static function get_users_info($user_ids)
     {
+        //can be upgrade select field from user_info
+        //but no more join query
         $CI =& get_instance();
         $CI->db->from($CI->config->item('table_pos_setup_user').' user');
         $CI->db->select('user.id,user.employee_id,user.user_name,user.status');
@@ -163,5 +165,4 @@ class System_helper
         }
         return $users;
     }
-
 }

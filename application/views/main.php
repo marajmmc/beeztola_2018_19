@@ -19,7 +19,7 @@ foreach($results as $result)
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Beeztola POS System V 2.0.1.8.19.1 </title>
+        <title>POS  2018_19.1 </title>
         <link rel="icon" type="image/ico" href="http://malikseeds.com/favicon.ico"/>
         <meta charset="utf-8">
         <link rel="stylesheet" href="<?php echo base_url('css/bootstrap.min.css');?>">
@@ -109,7 +109,7 @@ foreach($results as $result)
             <div>
                 All Rights Reserved & &copy; Copyright 2017 by A.R. Malik Seeds (Pvt.) Ltd. Design & Developed by :
                 <a href="http://disb.solutions/" target="_blank" class="external">
-                    <img src="<?php echo base_url()?>images/logo_disb.png" alt="DISB Logo" style="width: 50px"/>
+                    <img src="<?php echo base_url('images/logo_disb.png');?>" alt="DISB Logo" style="width: 50px"/>
                 </a>
             </div>
             <div class="clearfix"></div>
