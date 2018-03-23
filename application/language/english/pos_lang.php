@@ -103,6 +103,7 @@ $lang['LABEL_ITEM'] = 'Item';
 
 /* Status */
 $lang['LABEL_STATUS']='Status';
+$lang['LABEL_STATUS_APPROVE']='Approve Status';
 $lang['LABEL_STATUS_EXPENSE']='Expense Status';
 $lang['LABEL_STATUS_RELEASE']='Release Status';
 $lang['LABEL_STATUS_RECEIVED']='Received Status';
@@ -375,6 +376,7 @@ $lang['LABEL_STATUS_CARD_REQUIRE'] = 'Card Required?';
 // Label Lang Added By Saiful
 $lang['LABEL_DATE_PAYMENT'] = 'Payment Date';
 $lang['LABEL_DATE_SALE'] = 'Sale Date';
+$lang['LABEL_DATE_CANCEL'] = 'Cancel Date';
 $lang['LABEL_DATE_RECEIVE'] = 'Receive Date';
 $lang['LABEL_OUTLET'] = 'Outlet';
 $lang['LABEL_PAYMENT_WAY'] = 'Payment Way';

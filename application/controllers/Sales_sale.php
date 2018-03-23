@@ -633,13 +633,9 @@ class Sales_sale extends Root_Controller
             {
                 $item_id=$id;
             }
-            else if(($this->input->post('id')))
-            {
-                $item_id=$this->input->post('id');
-            }
             else
             {
-                $item_id=$id;
+                $item_id=$this->input->post('id');
             }
             $this->db->from($this->config->item('table_pos_sale').' sale');
             $this->db->select('sale.*');

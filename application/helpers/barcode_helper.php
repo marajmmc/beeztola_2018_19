@@ -79,6 +79,27 @@ class Barcode_helper
     {
         return 'I-'.str_pad($id,7,0,STR_PAD_LEFT);
     }
+    public static function get_id_sales($barcode)
+    {
+        $CI =& get_instance();
+        if((substr($barcode,0,2)=='I-'))
+        {
+            $result=Query_helper::get_info($CI->config->item('table_pos_sale'),'*',array('id ='.intval(substr($barcode,2))),1);
+            if($result)
+            {
+                return $result['id'];
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            return 0;
+        }
+
+    }
 
     /// SMS relational function
     public static function get_barcode_transfer_warehouse_to_outlet($increment_id)
