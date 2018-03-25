@@ -116,7 +116,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 {
                     ?>
                     <select id="user_group" name="user_info[user_group]" class="form-control">
-                        <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                        <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                         <?php
                         foreach($user_groups as $user_group)
                         {?>
@@ -137,7 +137,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select id="designation_id" name="user_info[designation_id]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     foreach($designations as $designation)
                     {?>
@@ -150,7 +150,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_BIRTH');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_BIRTH');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="user_info[date_birth]" id="date_birth" class="form-control date_large" value="<?php echo System_helper::display_date($user_info['date_birth']);?>"/>
@@ -158,7 +158,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_GENDER');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_GENDER');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <div class="radio-inline">
@@ -171,7 +171,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_MARITAL_STATUS');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MARITAL_STATUS');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <div class="radio-inline">
@@ -200,11 +200,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BLOOD_GROUP');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BLOOD_GROUP');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select id="blood_group" name="user_info[blood_group]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <option value="A+" <?php if($user_info['blood_group']=='A+'){ echo "selected";}?>>A+</option>
                     <option value="A-" <?php if($user_info['blood_group']=='A-'){ echo "selected";}?>>A-</option>
                     <option value="AB+" <?php if($user_info['blood_group']=='AB+'){ echo "selected";}?>>AB+</option>

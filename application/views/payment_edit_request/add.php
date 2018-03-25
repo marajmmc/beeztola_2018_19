@@ -60,7 +60,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[outlet_id]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     foreach($assigned_outlet as $outlet)
                     {?>
@@ -77,7 +77,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[payment_way_id]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     foreach($payment_way as $way)
                     {?>
@@ -126,7 +126,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[bank_id_source]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     foreach($bank_source as $bank)
                     {?>
@@ -151,7 +151,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[bank_account_id_destination]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     foreach($bank_account_number_destination as $account_destination)
                     {?>

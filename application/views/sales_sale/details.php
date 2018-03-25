@@ -162,21 +162,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <table class="table table-bordered table-responsive system_table_details_view">
         <tbody>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_OUTLET_NAME');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['outlet_name'];?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_CUSTOMER_NAME');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CUSTOMER_NAME');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['farmer_name'];?></label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_INVOICE_NO');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_INVOICE_NO');?></label></td>
                 <td class=""><label class="control-label"><?php echo Barcode_helper::get_barcode_sales($item['id']);?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_MOBILE_NO');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MOBILE_NO');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['mobile_no'];?></label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE');?></label></td>
                 <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_sale']);?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DISCOUNT');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['discount_self_percentage'];?>%</label></td>
             </tr>
             <tr>

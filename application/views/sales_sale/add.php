@@ -27,7 +27,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_OUTLET_NAME');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo $item['outlet_name'];?></label>
@@ -35,7 +35,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_NAME');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_NAME');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo $item['farmer_name'];?></label>
@@ -110,14 +110,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo 'Variety '.$this->lang->line('LABEL_BARCODE');?></label>
+                <label class="control-label pull-right"><?php echo 'Variety '.$CI->lang->line('LABEL_BARCODE');?></label>
             </div>
             <div class="col-sm-4 col-xs-4">
                 <input type="text" id="variety_barcode" class="form-control" value=""/>
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button">
-                    <button id="button_action_variety_add" type="button" class="btn"><?php echo $this->lang->line('LABEL_ACTION1');?></button>
+                    <button id="button_action_variety_add" type="button" class="btn"><?php echo $CI->lang->line('LABEL_ACTION1');?></button>
                 </div>
             </div>
         </div>
@@ -194,7 +194,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button">
-                    <button id="button_action_save" type="button" class="btn" data-form="#sale_form" data-message-confirm="Are you sure Save?"><?php echo $this->lang->line('ACTION_SAVE');?></button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#sale_form" data-message-confirm="Are you sure Save?"><?php echo $CI->lang->line('ACTION_SAVE');?></button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">

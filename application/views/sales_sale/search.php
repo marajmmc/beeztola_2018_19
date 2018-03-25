@@ -50,7 +50,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right">
-                    <?php echo $this->lang->line('LABEL_MOBILE_NO');?> |<br>
+                    <?php echo $CI->lang->line('LABEL_MOBILE_NO');?> |<br>
                     Scan Dealer Card |<br>
                     Scan Old Invoice
                 </label>
@@ -60,7 +60,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button">
-                    <button id="button_action_farmer_search" type="button" class="btn"><?php echo $this->lang->line('LABEL_SEARCH');?></button>
+                    <button id="button_action_farmer_search" type="button" class="btn"><?php echo $CI->lang->line('LABEL_SEARCH');?></button>
                 </div>
             </div>
         </div>
@@ -106,7 +106,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <div class="action_button">
-                    <button id="button_action_farmer_save" type="button" class="btn"><?php echo $this->lang->line('ACTION_SAVE');?></button>
+                    <button id="button_action_farmer_save" type="button" class="btn"><?php echo $CI->lang->line('ACTION_SAVE');?></button>
                 </div>
                 <div class="action_button">
                     <button id="button_action_farmer_cancel" type="button" class="btn">Cancel</button>

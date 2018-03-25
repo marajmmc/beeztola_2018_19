@@ -13,7 +13,7 @@ $CI = & get_instance();
         <div class="row show-grid">
             <div class="row show-grid">
                 <div class="col-xs-4">
-                    <label class="control-label pull-right"><?php echo 'Payment '.$this->lang->line('LABEL_BARCODE');?><span style="color:#FF0000">*</span></label>
+                    <label class="control-label pull-right"><?php echo 'Payment '.$CI->lang->line('LABEL_BARCODE');?><span style="color:#FF0000">*</span></label>
                 </div>
                 <div class="col-sm-4 col-xs-8">
                     <input type="text" name="item[barcode]" class="form-control" value=""/>

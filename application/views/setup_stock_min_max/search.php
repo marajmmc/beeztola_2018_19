@@ -17,7 +17,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div class="row show-grid">
         <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_OUTLET_NAME');?></label>
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
@@ -51,7 +51,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="col-sm-4 col-xs-8">
             <select id="crop_id" name="item['crop_id']" class="form-control">
-                <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                <option value=""><?php echo $CI->lang->line('SELECT');?></option>
             </select>
         </div>
     </div>

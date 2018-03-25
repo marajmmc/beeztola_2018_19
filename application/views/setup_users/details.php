@@ -288,7 +288,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-4">
-                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_BIRTH');?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_BIRTH');?></label>
                     </div>
                     <div class="col-sm-4 col-xs-8">
                         <label class="control-label"><?php echo System_helper::display_date($user_info['date_birth']);?></label>
@@ -296,7 +296,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-4">
-                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_GENDER');?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_GENDER');?></label>
                     </div>
                     <div class="col-sm-4 col-xs-8">
                         <label class="control-label"><?php echo $user_info['gender'];?></label>
@@ -304,7 +304,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-4">
-                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_MARITAL_STATUS');?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MARITAL_STATUS');?></label>
                     </div>
                     <div class="col-sm-4 col-xs-8">
                         <label class="control-label"><?php echo $user_info['status_marital'];?></label>
@@ -372,7 +372,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div id="collapse8" class="panel-collapse collapse">
                 <div class="row show-grid">
                     <div class="col-xs-4">
-                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_JOIN');?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_JOIN');?></label>
                     </div>
                     <div class="col-sm-4 col-xs-8">
                         <label class="control-label"><?php echo System_helper::display_date($user_info['date_join']);?></label>
@@ -406,7 +406,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div id="collapse9" class="panel-collapse collapse">
                 <div class="row show-grid">
                     <div class="col-xs-4">
-                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_BLOOD_GROUP');?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BLOOD_GROUP');?></label>
                     </div>
                     <div class="col-sm-4 col-xs-8">
                         <label class="control-label"><?php echo $user_info['blood_group'];?></label>

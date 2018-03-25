@@ -214,7 +214,7 @@ class Transfer_wo_receive extends Root_Controller
             {
                 $variety_ids[$row['variety_id']]=$row['variety_id'];
             }
-            $data['stocks']=Stock_helper::get_variety_stock($variety_ids);
+            $data['stocks']=Stock_helper::get_variety_stock($data['item']['outlet_id'],$variety_ids);
 
             $data['title']="HQ to Outlet Challan Receive :: ". Barcode_helper::get_barcode_transfer_warehouse_to_outlet($data['item']['id']);
             $ajax['status']=true;

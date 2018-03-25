@@ -226,6 +226,12 @@ $lang['LABEL_REMARKS_LC_OPEN']='LC Open Remarks';
 $lang['LABEL_REMARKS_LC_RELEASE']='Release Remarks';
 $lang['LABEL_REMARKS_LC_RECEIVE']='Receive Remarks';
 $lang['LABEL_REMARKS_LC_EXPENSE']='Expense Remarks';
+$lang['LABEL_REMARKS_REQUEST']='Remarks for Request';
+$lang['LABEL_REMARKS_APPROVE']='Remarks for Approve';
+$lang['LABEL_REMARKS_COURIER']='Remarks for Courier';
+$lang['LABEL_REMARKS_CHALLAN']='Remarks for Challan';
+$lang['LABEL_REMARKS_DELIVERY']='Remarks for Delivery';
+$lang['LABEL_REMARKS_RECEIVE']='Remarks for Receive';
 
 // Unit
 $lang['LABEL_PACK'] = 'Pkt';
@@ -333,6 +339,7 @@ $lang['LABEL_FORWARD']='Forwarded';
 $lang['LABEL_APPROVED']='Approved';
 $lang['LABEL_REJECTED']='Rejected';
 $lang['LABEL_DELIVERED']='Delivered';
+$lang['LABEL_RECEIVED']='Received';
 /* Stock out purpose */
 $lang['LABEL_STOCK_OUT_SHORT_INVENTORY']='Short Inventory';
 $lang['LABEL_STOCK_OUT_RND']='R&D Purpose';
