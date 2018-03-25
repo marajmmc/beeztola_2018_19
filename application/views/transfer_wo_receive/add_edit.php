@@ -152,7 +152,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         $stock_quantity_total_new_kg+=$stock_quantity_new_kg;
 
                         ?>
-                        <tr>
+                        <tr id="item_rows_<?php echo $index+1;?>">
                             <td>
                                 <label><?php echo $value['crop_name']; ?></label>
                             </td>
@@ -182,10 +182,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                                 </label>
                             </td>
                             <td class="text-right">
-                                <label class=" "><?php echo $quantity_approve; ?></label>
+                                <label class="quantity_approve " id="quantity_approve_<?php echo $index+1;?>"><?php echo $quantity_approve; ?></label>
                             </td>
                             <td class="text-right">
-                                <label class=" " id="quantity_approve_kg_<?php echo $index+1;?>"> <?php echo number_format($quantity_approve_kg,3,'.','');?> </label>
+                                <label class="quantity_approve_kg " id="quantity_approve_kg_<?php echo $index+1;?>"> <?php echo number_format($quantity_approve_kg,3,'.','');?> </label>
                             </td>
                             <td>
                                 <input type="text" value="<?php echo $quantity_receive; ?>" id="quantity_receive_<?php echo $index+1;?>" data-current-id="<?php echo $index+1;?>" name="items[<?php echo $index+1;?>][quantity_receive]" class="form-control float_type_positive quantity_receive" />
@@ -237,7 +237,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Challan No</label>
+                <label class="control-label pull-right">Challan No:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo $item['challan_no'];?></label>
@@ -245,7 +245,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CHALLAN');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CHALLAN');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo System_helper::display_date($item['date_challan']);?></label>
@@ -253,7 +253,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Courier Name</label>
+                <label class="control-label pull-right">Courier Name:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo $item['courier_name'];?></label>
@@ -261,7 +261,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Receive Branch (Place)</label>
+                <label class="control-label pull-right">Receive Branch (Place):</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo $item['place_destination'];?></label>
@@ -269,41 +269,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Remarks for Courier</label>
+                <label class="control-label pull-right">Remarks for Courier:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo $item['remarks_couriers'];?></label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table table-bordered table-responsive system_table_details_view">
-                    <tbody>
-                    <tr>
-                        <th colspan="21" class="text-center success">Courier Information</th>
-                    </tr>
-                    <tr>
-                        <th class="widget-header header_caption" style="width: 50%;"><label class="control-label pull-right">Challan No</label></th>
-                        <th class=""><label class="control-label"><?php echo $item['challan_no'];?></label></th>
-                    </tr>
-                    <tr>
-                        <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CHALLAN');?></label></th>
-                        <th class=" header_value"><label class="control-label"><?php echo System_helper::display_date($item['date_challan']);?></label></th>
-                    </tr>
-                    <tr>
-                        <th class="widget-header header_caption"><label class="control-label pull-right">Courier Name</label></th>
-                        <th class="header_value"><label class="control-label"><?php echo $item['courier_name'];?></label></th>
-                    </tr>
-                    <tr>
-                        <th class="widget-header header_caption" style="vertical-align: top"><label class="control-label pull-right">Receive Branch (Place)</label></th>
-                        <th class=" header_value" colspan="3"><label class="control-label"><?php echo nl2br($item['place_destination']);?></label></th>
-                    </tr>
-                    <tr>
-                        <th class="widget-header header_caption" style="vertical-align: top"><label class="control-label pull-right">Remarks for Courier</label></th>
-                        <th class=" header_value" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_couriers']);?></label></th>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
         <div class="widget-header">
@@ -317,7 +286,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_RECEIVED');?> <span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select id="status_delivery" class="form-control" name="item[status_delivery]">
+                <select id="status_receive" class="form-control" name="item[status_receive]">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <option value="<?php echo $this->config->item('system_status_received')?>"><?php echo $this->config->item('system_status_received')?></option>
                 </select>
@@ -333,6 +302,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
     </div>
 </form>
+<style>
+    .quantity_exist_warning
+    {
+        background-color: red !important;
+        color: #FFFFFF;
+    }
+</style>
 <script>
     $(document).ready(function()
     {
@@ -341,25 +317,49 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).on('input','#items_container .quantity_receive',function()
         {
             var current_id=$(this).attr('data-current-id');
-            var quantity_receive=parseFloat($(this).val());
             var quantity_receive_kg=0;
             var stock_quantity_new=0;
             var stock_quantity_new_kg=0;
-            var stock_current = parseFloat($('#stock_current_'+current_id).html().replace(/,/g,''));
-            var stock_current_kg = parseFloat($('#stock_current_kg_'+current_id).html().replace(/,/g,''));
-            var pack_size=parseFloat($("#pack_size_id_"+current_id).attr('data-pack-size-name'));
 
-            quantity_receive_kg=parseFloat((pack_size*quantity_receive)/1000);
+            var quantity_approve = parseFloat($('#quantity_approve_'+current_id).html().replace(/,/g,''));
+            if(isNaN(quantity_approve))
+            {
+                quantity_approve=0;
+            }
+            var quantity_receive=parseFloat($(this).val());
             if(isNaN(quantity_receive))
             {
                 quantity_receive=0;
             }
+            var stock_current = parseFloat($('#stock_current_'+current_id).html().replace(/,/g,''));
+            if(isNaN(stock_current))
+            {
+                stock_current=0;
+            }
+            var stock_current_kg = parseFloat($('#stock_current_kg_'+current_id).html().replace(/,/g,''));
+            if(isNaN(stock_current_kg))
+            {
+                stock_current_kg=0;
+            }
+            var pack_size=parseFloat($("#pack_size_id_"+current_id).attr('data-pack-size-name'));
+            quantity_receive_kg=parseFloat((pack_size*quantity_receive)/1000);
+            if(isNaN(quantity_receive_kg))
+            {
+                quantity_receive_kg=0;
+            }
+
             stock_quantity_new=(stock_current+quantity_receive);
             stock_quantity_new_kg=(stock_current_kg+quantity_receive_kg);
 
             $("#quantity_receive_kg_"+current_id).html(number_format(quantity_receive_kg,3,'.',''));
             $("#stock_quantity_new_"+current_id).html(stock_quantity_new);
             $("#stock_quantity_new_kg_"+current_id).html(number_format(stock_quantity_new_kg,3,'.',''));
+
+            $('#item_rows_'+current_id).removeClass('quantity_exist_warning');
+            if(quantity_approve!=quantity_receive)
+            {
+                $('#item_rows_'+current_id).addClass('quantity_exist_warning');
+            }
             calculate_total();
         });
 
