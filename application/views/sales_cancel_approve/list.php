@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $CI=& get_instance();
 $action_buttons=array();
 $action_buttons[]=array(
-    'label'=>'All Requests',
+    'label'=>'All List',
     'href'=>site_url($CI->controller_url.'/index/list_all')
 );
 if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
