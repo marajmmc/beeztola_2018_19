@@ -15,28 +15,6 @@ if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))
         'href'=>site_url($CI->controller_url.'/index/add')
     );
 }
-if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
-{
-    if(($item['status']==$CI->config->item('system_status_active')&&(!($item['invoice_old_id']>0))))
-    {
-        if(System_helper::display_date(time())==System_helper::display_date($item['date_sale']))
-        {
-            $action_buttons[]=array(
-                'label'=>'Sale Cancel',
-                'href'=>site_url($CI->controller_url.'/index/delete/'.$item['id'])
-            );
-        }
-        elseif($user->user_group==1)
-        {
-            $action_buttons[]=array(
-                'label'=>'Sale Cancel',
-                'href'=>site_url($CI->controller_url.'/index/delete/'.$item['id'])
-            );
-        }
-    }
-
-
-}
 $action_buttons[]=array(
     'type'=>'button',
     'label'=>$CI->lang->line("ACTION_PRINT"),
