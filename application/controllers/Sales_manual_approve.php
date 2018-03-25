@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Sales_cancel_approve extends Root_Controller
+class Sales_manual_approve extends Root_Controller
 {
     public $message;
     public $permissions;
@@ -11,8 +11,8 @@ class Sales_cancel_approve extends Root_Controller
     {
         parent::__construct();
         $this->message="";
-        $this->permissions=User_helper::get_permission('Sales_cancel_approve');
-        $this->controller_url='sales_cancel_approve';
+        $this->permissions=User_helper::get_permission('Sales_manual_approve');
+        $this->controller_url='sales_manual_approve';
         $this->user_outlet_ids=array();
         $this->user_outlets=User_helper::get_assigned_outlets();
         if(sizeof($this->user_outlets)>0)
@@ -82,7 +82,7 @@ class Sales_cancel_approve extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= $this->get_preference();
-            $data['title']="List of Sale Cancel Approval Pending";
+            $data['title']="List of Manual Sale Approval Pending";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -101,25 +101,25 @@ class Sales_cancel_approve extends Root_Controller
     }
     private function system_get_items()
     {
-        $this->db->from($this->config->item('table_pos_sale_cancel').' cancel');
-        $this->db->select('cancel.*');
 
-        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=cancel.sale_id','INNER');
-        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual');
+
+        $this->db->from($this->config->item('table_pos_sale_manual').' sale_manual');
+        $this->db->select('sale_manual.*');
         $this->db->select('cus.name outlet_name');
         $this->db->select('f.name customer_name');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
-        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
-        $this->db->where_in('sale.outlet_id',$this->user_outlet_ids);
-        $this->db->where('cancel.status_approve',$this->config->item('system_status_pending'));
-        $this->db->order_by('cancel.id DESC');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale_manual.outlet_id AND cus.revision=1','INNER');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale_manual.farmer_id','INNER');
+        $this->db->where_in('sale_manual.outlet_id',$this->user_outlet_ids);
+        $this->db->order_by('sale_manual.id DESC');
+        $this->db->where('sale_manual.status_approve',$this->config->item('system_status_pending'));
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
-            $item['invoice_no']=Barcode_helper::get_barcode_sales($item['sale_id']);
-            $item['date_sale']=System_helper::display_date($item['date_sale']);
-            $item['date_cancel']=System_helper::display_date($item['date_cancel']);
-            $item['amount_actual']=number_format($item['amount_actual'],2);
+            $item['date_sale']=System_helper::display_date_time($item['date_sale']);
+            $item['amount_discount']=number_format($item['amount_discount_variety']+$item['amount_discount_self'],2);
+            $item['amount_total']=number_format($item['amount_total'],2);
+            $item['amount_actual']=number_format($item['amount_payable_actual'],2);
+
         }
         $this->json_return($items);
     }
@@ -128,7 +128,7 @@ class Sales_cancel_approve extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= $this->get_preference_all();
-            $data['title']="List of All Sale Cancel Requests";
+            $data['title']="All Sale Cancel Requests";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list_all",$data,true));
             if($this->message)
@@ -161,25 +161,32 @@ class Sales_cancel_approve extends Root_Controller
         {
             $pagesize=$pagesize*2;
         }
-        $this->db->from($this->config->item('table_pos_sale_cancel').' cancel');
-        $this->db->select('cancel.*');
 
-        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=cancel.sale_id','INNER');
-        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual');
+        $this->db->from($this->config->item('table_pos_sale_manual').' sale_manual');
+        $this->db->select('sale_manual.*');
         $this->db->select('cus.name outlet_name');
         $this->db->select('f.name customer_name');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
-        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
-        $this->db->where_in('sale.outlet_id',$this->user_outlet_ids);
-        $this->db->order_by('cancel.id DESC');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale_manual.outlet_id AND cus.revision=1','INNER');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale_manual.farmer_id','INNER');
+        $this->db->where_in('sale_manual.outlet_id',$this->user_outlet_ids);
+        $this->db->order_by('sale_manual.id DESC');
         $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
-            $item['invoice_no']=Barcode_helper::get_barcode_sales($item['sale_id']);
-            $item['date_sale']=System_helper::display_date($item['date_sale']);
-            $item['date_cancel']=System_helper::display_date($item['date_cancel']);
-            $item['amount_actual']=number_format($item['amount_actual'],2);
+            $item['date_sale']=System_helper::display_date_time($item['date_sale']);
+            if($item['status_approve']==$this->config->item('system_status_approved'))
+            {
+                $item['invoice_no']=Barcode_helper::get_barcode_sales($item['sale_id']);
+            }
+            else
+            {
+                $item['invoice_no']='N/A';
+            }
+            $item['amount_discount']=number_format($item['amount_discount_variety']+$item['amount_discount_self'],2);
+            $item['amount_total']=number_format($item['amount_total'],2);
+            $item['amount_actual']=number_format($item['amount_payable_actual'],2);
+
         }
         $this->json_return($items);
     }
@@ -534,12 +541,13 @@ class Sales_cancel_approve extends Root_Controller
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
         $data['id']= 1;
-        $data['invoice_no']= 1;
-        $data['date_sale']= 1;
-        $data['date_cancel']= 1;
         $data['outlet_name']= 1;
+        $data['date_sale']= 1;
         $data['customer_name']= 1;
+        $data['amount_total']= 1;
+        $data['amount_discount']= 1;
         $data['amount_actual']= 1;
+
         if($result)
         {
             if($result['preferences']!=null)
@@ -583,11 +591,12 @@ class Sales_cancel_approve extends Root_Controller
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list_all"'),1);
         $data['id']= 1;
-        $data['invoice_no']= 1;
-        $data['date_sale']= 1;
-        $data['date_cancel']= 1;
         $data['outlet_name']= 1;
+        $data['date_sale']= 1;
+        $data['invoice_no']= 1;
         $data['customer_name']= 1;
+        $data['amount_total']= 1;
+        $data['amount_discount']= 1;
         $data['amount_actual']= 1;
         $data['status_approve']= 1;
         if($result)

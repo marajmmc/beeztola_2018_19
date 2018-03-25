@@ -80,7 +80,7 @@ class Sales_manual_request extends Root_Controller
         if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
         {
             $data['system_preference_items']= $this->get_preference();
-            $data['title']="List of Sales";
+            $data['title']="List of Manual Sales";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -148,7 +148,7 @@ class Sales_manual_request extends Root_Controller
     {
         if(isset($this->permissions['action1']) && ($this->permissions['action1']==1))
         {
-            $data['title']="New Sale";
+            $data['title']="New Manual Sale";
             $ajax['system_page_url']=site_url($this->controller_url."/index/add");
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
