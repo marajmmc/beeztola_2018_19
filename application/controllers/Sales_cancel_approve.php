@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Sales_cancel_request extends Root_Controller
+class Sales_cancel_approve extends Root_Controller
 {
     public $message;
     public $permissions;
@@ -11,8 +11,8 @@ class Sales_cancel_request extends Root_Controller
     {
         parent::__construct();
         $this->message="";
-        $this->permissions=User_helper::get_permission('Sales_cancel_request');
-        $this->controller_url='sales_cancel_request';
+        $this->permissions=User_helper::get_permission('Sales_cancel_approve');
+        $this->controller_url='sales_cancel_approve';
         $this->user_outlet_ids=array();
         $this->user_outlets=User_helper::get_assigned_outlets();
         if(sizeof($this->user_outlets)>0)
@@ -39,13 +39,18 @@ class Sales_cancel_request extends Root_Controller
         {
             $this->system_get_items();
         }
-        elseif($action=="search")
+        elseif($action=="list_all")
         {
-            $this->system_search();
+            $this->system_list_all();
         }
-        elseif($action=="add")
+        elseif($action=="get_items_all")
         {
-            $this->system_add();
+            $this->system_get_items_all();
+        }
+
+        elseif($action=="edit")
+        {
+            $this->system_edit($id);
         }
         elseif($action=="save")
         {
@@ -55,10 +60,13 @@ class Sales_cancel_request extends Root_Controller
         {
             $this->system_details($id);
         }
-
         elseif($action=="set_preference")
         {
             $this->system_set_preference();
+        }
+        elseif($action=="set_preference_all")
+        {
+            $this->system_set_preference_all();
         }
         elseif($action=="save_preference")
         {
@@ -74,7 +82,7 @@ class Sales_cancel_request extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= $this->get_preference();
-            $data['title']="All Sale Cancel Requests";
+            $data['title']="All Sale Cancel Pending Approvals";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -92,6 +100,52 @@ class Sales_cancel_request extends Root_Controller
         }
     }
     private function system_get_items()
+    {
+        $this->db->from($this->config->item('table_pos_sale_cancel').' cancel');
+        $this->db->select('cancel.*');
+
+        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=cancel.sale_id','INNER');
+        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual');
+        $this->db->select('cus.name outlet_name');
+        $this->db->select('f.name customer_name');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
+        $this->db->where_in('sale.outlet_id',$this->user_outlet_ids);
+        $this->db->where('cancel.status_approve',$this->config->item('system_status_pending'));
+        $this->db->order_by('cancel.id DESC');
+        $items=$this->db->get()->result_array();
+        foreach($items as &$item)
+        {
+            $item['invoice_no']=Barcode_helper::get_barcode_sales($item['sale_id']);
+            $item['date_sale']=System_helper::display_date($item['date_sale']);
+            $item['date_cancel']=System_helper::display_date($item['date_cancel']);
+            $item['amount_actual']=number_format($item['amount_actual'],2);
+        }
+        $this->json_return($items);
+    }
+    private function system_list_all()
+    {
+        if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
+        {
+            $data['system_preference_items']= $this->get_preference_all();
+            $data['title']="All Sale Cancel Requests";
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list_all",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url."/index/list_all");
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_get_items_all()
     {
         $current_records = $this->input->post('total_records');
         if(!$current_records)
@@ -129,45 +183,35 @@ class Sales_cancel_request extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function system_search()
+    private function system_edit($id)
     {
-        if(isset($this->permissions['action1'])&&($this->permissions['action1']==1))
+        if(isset($this->permissions['action2'])&&($this->permissions['action2']==1))
         {
-            $data['title']="Sale Cancel Request";
-            $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
-            if($this->message)
+            if($id>0)
             {
-                $ajax['system_message']=$this->message;
+                $cancel_id=$id;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/search');
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
-    private function system_add()
-    {
-        if(isset($this->permissions['action1'])&&($this->permissions['action1']==1))
-        {
-            $item=$this->input->post('item');
-            if(!$item['barcode'])
+            else
+            {
+                $cancel_id=$this->input->post('id');
+            }
+
+            $cancel_request_info=Query_helper::get_info($this->config->item('table_pos_sale_cancel'),'*',array('id ='.$cancel_id),1);
+            if(!($cancel_request_info))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Invoice No field is required.';
+                $ajax['system_message']='Invalid Cancel Request';
                 $this->json_return($ajax);
             }
-            $sale_id=Barcode_helper::get_id_sales($item['barcode']);
-            if(!($sale_id>0))
+            if($cancel_request_info['status_approve']!=$this->config->item('system_status_pending'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Invoice Not Found.';
+                $ajax['system_message']='Cancel Request already Approve/Rejected';
                 $this->json_return($ajax);
             }
+            $data['cancel_info']=$cancel_request_info;
+            $sale_id=$cancel_request_info['sale_id'];
+
             $this->db->from($this->config->item('table_pos_sale').' sale');
             $this->db->select('sale.*');
             $this->db->select('cus.name outlet_name,cus.name_short outlet_short_name');
@@ -178,7 +222,14 @@ class Sales_cancel_request extends Root_Controller
             $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
             $this->db->where('sale.id',$sale_id);
             $data['item']=$this->db->get()->row_array();
-
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('edit',$cancel_id,'Trying to access Invalid Sale id');
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+                die();
+            }
             if($data['item']['status']!=$this->config->item('system_status_active'))
             {
                 $ajax['status']=false;
@@ -194,16 +245,6 @@ class Sales_cancel_request extends Root_Controller
                 $this->json_return($ajax);
                 die();
             }
-            //check if it is already in requested
-            $result=Query_helper::get_info($this->config->item('table_pos_sale_cancel'),'*',array('sale_id ='.$sale_id,'status_approve ="'.$this->config->item('system_status_pending').'"'),1);
-            if($result)
-            {
-                $ajax['status']=false;
-                $ajax['system_message']='Invoice already Requested for Cancel';
-                $this->json_return($ajax);
-            }
-
-
             $this->db->from($this->config->item('table_pos_sale_details').' sd');
             $this->db->select('sd.*');
 
@@ -232,16 +273,18 @@ class Sales_cancel_request extends Root_Controller
             {
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
+            $user_ids[$data['cancel_info']['remarks_cancel_requested']]=$data['cancel_info']['remarks_cancel_requested'];
 
             $data['users']=System_helper::get_users_info($user_ids);
             $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($sale_id).')';
 
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/add",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit/'.$cancel_id);
             $this->json_return($ajax);
         }
         else
@@ -254,15 +297,29 @@ class Sales_cancel_request extends Root_Controller
     private function system_save()
     {
         $item=$this->input->post('item');
-        $sale_id=$item['id'];
+        $cancel_id=$item['cancel_id'];
         $user = User_helper::get_user();
         $time=time();
-        if(!(isset($this->permissions['action1']) && ($this->permissions['action1']==1)))
+        if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
+        $cancel_request_info=Query_helper::get_info($this->config->item('table_pos_sale_cancel'),'*',array('id ='.$cancel_id),1);
+        if(!($cancel_request_info))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Cancel Request';
+            $this->json_return($ajax);
+        }
+        if($cancel_request_info['status_approve']!=$this->config->item('system_status_pending'))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Cancel Request already Approve/Rejected';
+            $this->json_return($ajax);
+        }
+        $sale_id=$cancel_request_info['sale_id'];
         $sale_info=Query_helper::get_info($this->config->item('table_pos_sale'),'*',array('id ='.$sale_id),1);
         if(!$sale_info)
         {
@@ -272,21 +329,19 @@ class Sales_cancel_request extends Root_Controller
             $this->json_return($ajax);
             die();
         }
+        if($sale_info['status']!=$this->config->item('system_status_active'))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Invoice already Canceled';
+            $this->json_return($ajax);
+        }
         if(!in_array($sale_info['outlet_id'],$this->user_outlet_ids))
         {
-            System_helper::invalid_try('save',$item['id'],'Trying to access other Outlets data');
+            System_helper::invalid_try('save',$cancel_id,'Trying to access other Outlets data');
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
             die();
-        }
-        //check if it is already in requested
-        $result=Query_helper::get_info($this->config->item('table_pos_sale_cancel'),'*',array('sale_id ='.$sale_id,'status_approve ="'.$this->config->item('system_status_pending').'"'),1);
-        if($result)
-        {
-            $ajax['status']=false;
-            $ajax['system_message']='Invoice already Requested for Cancel';
-            $this->json_return($ajax);
         }
 
         if(!$this->check_validation())
@@ -297,18 +352,35 @@ class Sales_cancel_request extends Root_Controller
         }
         $this->db->trans_start();  //DB Transaction Handle START
         {
-            $data['sale_id']=$sale_id;
-            $data['date_cancel']=System_helper::get_time($item['date_cancel']);
-            if(System_helper::get_time(System_helper::display_date($sale_info['date_sale']))>$data['date_cancel'])
+            $data=array();
+            $data['date_cancel_approved']=$time;
+            $data['user_cancel_approved']=$user->user_id;
+            $data['remarks_cancel_approved']=$item['remarks_cancel_approved'];
+            $data['status_approve']=$item['status_approve'];
+            Query_helper::update($this->config->item('table_pos_sale_cancel'),$data,array('id='.$cancel_id));
+            if($item['status_approve']==$this->config->item('system_status_approved'))
             {
-                $ajax['status']=false;
-                $ajax['system_message']='Cancel Date Can not be less than Sale date';
-                $this->json_return($ajax);
+                $stocks=Stock_helper::get_variety_stock($sale_info['outlet_id']);
+                $item_head_details=Query_helper::get_info($this->config->item('table_pos_sale_details'),'*',array('id ='.$sale_id));
+                $item_head=array();
+                $item_head['date_cancel']=$cancel_request_info['date_cancel'];
+                $item_head['date_cancel_approved']=$time;
+                $item_head['user_cancel_approved']=$user->user_id;
+                $item_head['remarks_cancel_approved']=$item['remarks_cancel_approved'];
+                $item_head['status']=$this->config->item('system_status_inactive');
+                Query_helper::update($this->config->item('table_pos_sale'),$item_head,array('id='.$sale_id));
+                //update stock
+                foreach($item_head_details as $data_details)
+                {
+                    $data_stock=array();
+                    $data_stock['out_sale']=($stocks[$data_details['variety_id']][$data_details['pack_size_id']]['out_sale']-$data_details['quantity']);
+                    $data_stock['current_stock']=($stocks[$data_details['variety_id']][$data_details['pack_size_id']]['current_stock']+$data_details['quantity']);
+                    $data_stock['date_updated'] = $time;
+                    $data_stock['user_updated'] = $user->user_id;
+                    Query_helper::update($this->config->item('table_pos_stock_summary_variety'),$data_stock,array('id='.$stocks[$data_details['variety_id']][$data_details['pack_size_id']]['id']));
+
+                }
             }
-            $data['date_cancel_requested']=$time;
-            $data['remarks_cancel_requested']=$item['remarks_cancel_requested'];
-            $data['user_cancel_requested']=$user->user_id;
-            Query_helper::add($this->config->item('table_pos_sale_cancel'),$data, true);
         }
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
@@ -326,8 +398,8 @@ class Sales_cancel_request extends Root_Controller
     private function check_validation()
     {
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('item[date_cancel]',$this->lang->line('LABEL_DATE_CANCEL'),'required');
-        $this->form_validation->set_rules('item[remarks_cancel_requested]','Cancel Reason','required');
+        $this->form_validation->set_rules('item[status_approve]',"Approve/Reject",'required');
+        $this->form_validation->set_rules('item[remarks_cancel_approved]','Remarks','required');
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();
@@ -381,6 +453,55 @@ class Sales_cancel_request extends Root_Controller
     {
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
+        $data['id']= 1;
+        $data['invoice_no']= 1;
+        $data['date_sale']= 1;
+        $data['date_cancel']= 1;
+        $data['outlet_name']= 1;
+        $data['customer_name']= 1;
+        $data['amount_actual']= 1;
+        if($result)
+        {
+            if($result['preferences']!=null)
+            {
+                $preferences=json_decode($result['preferences'],true);
+                foreach($data as $key=>$value)
+                {
+                    if(isset($preferences[$key]))
+                    {
+                        $data[$key]=$value;
+                    }
+                    else
+                    {
+                        $data[$key]=0;
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+    private function system_set_preference_all()
+    {
+        if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
+        {
+            $data['system_preference_items']=$this->get_preference_all();
+            $data['preference_method_name']='list_all';
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference');
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function get_preference_all()
+    {
+        $user = User_helper::get_user();
+        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list_all"'),1);
         $data['id']= 1;
         $data['invoice_no']= 1;
         $data['date_sale']= 1;

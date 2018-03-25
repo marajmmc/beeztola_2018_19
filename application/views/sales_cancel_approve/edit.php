@@ -1,7 +1,11 @@
-<?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-$CI=& get_instance();
-
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+$CI = & get_instance();
+$action_buttons=array();
+$action_buttons[]=array(
+    'label'=>$CI->lang->line("ACTION_BACK"),
+    'href'=>site_url($CI->controller_url)
+);
+$CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
 <div class="row widget hidden-print">
     <div class="widget-header">
@@ -64,6 +68,16 @@ $CI=& get_instance();
             <?php
             }
             ?>
+            <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Cancel Requested Time</label></td>
+                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($cancel_info['date_cancel_requested']);?></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Cancel Requested Approved By</label></td>
+                <td class=""><label class="control-label"><?php echo $users[$cancel_info['user_cancel_requested']]['name'];?></label></td>
+            </tr>
+            <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Cancel Request Remarks</label></td>
+                <td class="" colspan="3"><label class="control-label"><?php echo nl2br($cancel_info['remarks_cancel_requested']);?></td>
+            </tr>
         </tbody>
     </table>
     <div class="widget-header">
@@ -158,31 +172,43 @@ $CI=& get_instance();
     </div>
 </div>
 <form id="sale_form" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
-    <input type="hidden" name="item[id]" id="sale_id" value="<?php echo $item['id']; ?>" />
+    <input type="hidden" name="item[cancel_id]" id="cancel_id" value="<?php echo $cancel_info['id']; ?>" />
     <div class="row widget">
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CANCEL');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[date_cancel]" class="form-control datepicker" value="" readonly/>
+                <label class="control-label"><?php echo System_helper::display_date($cancel_info['date_cancel']);?>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Cancel Reason<span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Approve/Reject<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <textarea name="item[remarks_cancel_requested]" class="form-control"></textarea>
+                <select class="form-control" name="item[status_approve]">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <option value="<?php echo $CI->config->item('system_status_approved');?>">Approve</option>
+                    <option value="<?php echo $CI->config->item('system_status_rejected');?>">Reject</option>
+                </select>
             </div>
         </div>
-        <div class="row show-grid" style="padding-bottom: 100px;">
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right">Remarks<span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <textarea name="item[remarks_cancel_approved]" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="row show-grid">
             <div class="col-xs-4">
 
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button">
-                    <button id="button_action_save" type="button" class="btn" data-form="#sale_form" data-message-confirm="Are you sure to Request Cancel?">Request Cancel</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#sale_form" data-message-confirm="Are you sure to Approve Cancel?">Approve/Reject</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">
@@ -191,9 +217,3 @@ $CI=& get_instance();
         </div>
     </div>
 </form>
-<script type="text/javascript">
-    jQuery(document).ready(function()
-    {
-        $(".datepicker").datepicker({dateFormat : display_date_format});
-    });
-</script>
