@@ -218,6 +218,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 ?>
                 <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Cancel Date</label></td>
+                    <td class="" colspan="3"><label class="control-label"><?php echo System_helper::display_date($item['date_cancel']);?></td>
+                </tr>
+                <tr>
                     <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Cancel Approve Time</label></td>
                     <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_cancel_approved']);?></td>
                     <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Cancel Approved By</label></td>
