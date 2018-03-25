@@ -295,16 +295,16 @@ class Sales_cancel_request extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
+        if(System_helper::get_time(System_helper::display_date($sale_info['date_sale']))>System_helper::get_time($item['date_cancel']))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Cancel Date Can not be less than Sale date';
+            $this->json_return($ajax);
+        }
         $this->db->trans_start();  //DB Transaction Handle START
         {
             $data['sale_id']=$sale_id;
             $data['date_cancel']=System_helper::get_time($item['date_cancel']);
-            if(System_helper::get_time(System_helper::display_date($sale_info['date_sale']))>$data['date_cancel'])
-            {
-                $ajax['status']=false;
-                $ajax['system_message']='Cancel Date Can not be less than Sale date';
-                $this->json_return($ajax);
-            }
             $data['date_cancel_requested']=$time;
             $data['remarks_cancel_requested']=$item['remarks_cancel_requested'];
             $data['user_cancel_requested']=$user->user_id;

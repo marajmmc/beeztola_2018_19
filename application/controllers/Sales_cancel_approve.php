@@ -361,7 +361,7 @@ class Sales_cancel_approve extends Root_Controller
             if($item['status_approve']==$this->config->item('system_status_approved'))
             {
                 $stocks=Stock_helper::get_variety_stock($sale_info['outlet_id']);
-                $item_head_details=Query_helper::get_info($this->config->item('table_pos_sale_details'),'*',array('id ='.$sale_id));
+                $item_head_details=Query_helper::get_info($this->config->item('table_pos_sale_details'),'*',array('sale_id ='.$sale_id));
                 $item_head=array();
                 $item_head['date_cancel']=$cancel_request_info['date_cancel'];
                 $item_head['date_cancel_approved']=$time;
