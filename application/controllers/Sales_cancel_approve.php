@@ -316,7 +316,7 @@ class Sales_cancel_approve extends Root_Controller
         if($cancel_request_info['status_approve']!=$this->config->item('system_status_pending'))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Cancel Request already Approve/Rejected';
+            $ajax['system_message']='Cancel Request already Approved/Rejected';
             $this->json_return($ajax);
         }
         $sale_id=$cancel_request_info['sale_id'];

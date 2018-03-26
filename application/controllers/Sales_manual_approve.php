@@ -196,63 +196,44 @@ class Sales_manual_approve extends Root_Controller
         {
             if($id>0)
             {
-                $cancel_id=$id;
+                $manual_sale_id=$id;
             }
             else
             {
-                $cancel_id=$this->input->post('id');
+                $manual_sale_id=$this->input->post('id');
             }
 
-            $cancel_request_info=Query_helper::get_info($this->config->item('table_pos_sale_cancel'),'*',array('id ='.$cancel_id),1);
-            if(!($cancel_request_info))
-            {
-                $ajax['status']=false;
-                $ajax['system_message']='Invalid Cancel Request';
-                $this->json_return($ajax);
-            }
-            if($cancel_request_info['status_approve']!=$this->config->item('system_status_pending'))
-            {
-                $ajax['status']=false;
-                $ajax['system_message']='Cancel Request already Approve/Rejected';
-                $this->json_return($ajax);
-            }
-            $data['cancel_info']=$cancel_request_info;
-            $sale_id=$cancel_request_info['sale_id'];
-
-            $this->db->from($this->config->item('table_pos_sale').' sale');
-            $this->db->select('sale.*');
-            $this->db->select('cus.name outlet_name,cus.name_short outlet_short_name');
-            $this->db->select('f.name farmer_name,f.mobile_no,f.nid,f.address');
-            $this->db->select('ft.name type_name');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
-            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
-            $this->db->where('sale.id',$sale_id);
+            $this->db->from($this->config->item('table_pos_sale_manual').' sale_manual');
+            $this->db->select('sale_manual.*');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale_manual.outlet_id AND cus.revision=1','INNER');
+            $this->db->select('cus.name outlet_name');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale_manual.farmer_id','INNER');
+            $this->db->select('f.name farmer_name,f.mobile_no');
+            $this->db->where('sale_manual.id',$manual_sale_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('edit',$cancel_id,'Trying to access Invalid Sale id');
+                System_helper::invalid_try('edit',$manual_sale_id,'Trying to access Invalid Manual Sale id');
                 $ajax['status']=false;
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
                 die();
             }
-            if($data['item']['status']!=$this->config->item('system_status_active'))
-            {
-                $ajax['status']=false;
-                $ajax['system_message']='Invoice already Canceled';
-                $this->json_return($ajax);
-            }
-
             if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
             {
-                System_helper::invalid_try('edit',0,'outlet id '.$data['item']['outlet_id'].' not assigned');
+                System_helper::invalid_try('edit',$manual_sale_id,'Trying to access other Outlets data');
                 $ajax['status']=false;
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
                 die();
             }
-            $this->db->from($this->config->item('table_pos_sale_details').' sd');
+            if($data['item']['status_approve']!=$this->config->item('system_status_pending'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='This Sale already Approved/Rejected';
+                $this->json_return($ajax);
+            }
+            $this->db->from($this->config->item('table_pos_sale_manual_details').' sd');
             $this->db->select('sd.*');
 
             $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = sd.variety_id','INNER');
@@ -261,37 +242,26 @@ class Sales_manual_approve extends Root_Controller
             $this->db->select('type.name crop_type_name,type.id crop_type_id');
             $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
             $this->db->select('crop.name crop_name,crop.id crop_id');
-            $this->db->where('sd.sale_id',$sale_id);
-
+            $this->db->where('sd.manual_sale_id',$manual_sale_id);
             $data['items']=$this->db->get()->result_array();
-            $data['has_variety_discount']=false;
-            foreach($data['items'] as $row)
-            {
-                if($row['amount_discount_variety']>0)
-                {
-                    $data['has_variety_discount']=true;
-                    break;
-                }
-            }
 
             $user_ids=array();
-            $user_ids[$data['item']['user_created']]=$data['item']['user_created'];
+
+            $user_ids[$data['item']['user_manual_requested']]=$data['item']['user_manual_requested'];
             if($data['item']['user_manual_approved']>0)
             {
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
-            $user_ids[$data['cancel_info']['remarks_cancel_requested']]=$data['cancel_info']['remarks_cancel_requested'];
-
             $data['users']=System_helper::get_users_info($user_ids);
-            $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($sale_id).')';
-
+            $data['stocks']=Stock_helper::get_variety_stock($data['item']['outlet_id']);
+            $data['title']='Approve/reject of Request Id('.$manual_sale_id.')';
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit/'.$cancel_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit/'.$manual_sale_id);
             $this->json_return($ajax);
         }
         else
@@ -303,8 +273,9 @@ class Sales_manual_approve extends Root_Controller
     }
     private function system_save()
     {
+
         $item=$this->input->post('item');
-        $cancel_id=$item['cancel_id'];
+        $manual_sale_id=$item['manual_sale_id'];
         $user = User_helper::get_user();
         $time=time();
         if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
@@ -313,87 +284,120 @@ class Sales_manual_approve extends Root_Controller
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
-        $cancel_request_info=Query_helper::get_info($this->config->item('table_pos_sale_cancel'),'*',array('id ='.$cancel_id),1);
-        if(!($cancel_request_info))
+        $manual_sale_info=Query_helper::get_info($this->config->item('table_pos_sale_manual'),'*',array('id ='.$manual_sale_id),1);
+        if(!($manual_sale_info))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Invalid Cancel Request';
+            $ajax['system_message']='Invalid Sales Approval';
             $this->json_return($ajax);
         }
-        if($cancel_request_info['status_approve']!=$this->config->item('system_status_pending'))
+        if($manual_sale_info['status_approve']!=$this->config->item('system_status_pending'))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Cancel Request already Approve/Rejected';
+            $ajax['system_message']='This Request already Approved/Rejected';
             $this->json_return($ajax);
         }
-        $sale_id=$cancel_request_info['sale_id'];
-        $sale_info=Query_helper::get_info($this->config->item('table_pos_sale'),'*',array('id ='.$sale_id),1);
-        if(!$sale_info)
+        if(!in_array($manual_sale_info['outlet_id'],$this->user_outlet_ids))
         {
-            System_helper::invalid_try('save',$item['id'],'Trying to access Invalid Sale id');
+            System_helper::invalid_try('save',$manual_sale_id,'Trying to access other Outlets data');
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
             die();
         }
-        if($sale_info['status']!=$this->config->item('system_status_active'))
-        {
-            $ajax['status']=false;
-            $ajax['system_message']='Invoice already Canceled';
-            $this->json_return($ajax);
-        }
-        if(!in_array($sale_info['outlet_id'],$this->user_outlet_ids))
-        {
-            System_helper::invalid_try('save',$cancel_id,'Trying to access other Outlets data');
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-            die();
-        }
-
         if(!$this->check_validation())
         {
             $ajax['status']=false;
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
+        $stocks=Stock_helper::get_variety_stock($manual_sale_info['outlet_id']);
+        $manual_sale_info_details=Query_helper::get_info($this->config->item('table_pos_sale_manual_details'),'*',array('manual_sale_id ='.$manual_sale_id));
+        if($item['status_approve']==$this->config->item('system_status_approved'))
+        {
+
+            foreach($manual_sale_info_details as $row)
+            {
+                if($row['quantity']>$stocks[$row['variety_id']][$row['pack_size_id']]['current_stock'])
+                {
+                    $ajax['status']=false;
+                    $message='Not Enough Stock('.$row['variety_id'].'-'.$row['pack_size_id'].')';
+                    $message.='<br>Current Stock('.$stocks[$row['variety_id']][$row['pack_size_id']]['current_stock'].')';
+                    $ajax['system_message']=$message;
+                    $this->json_return($ajax);
+                    die();
+                }
+            }
+            //check stock validation
+        }
+
         $this->db->trans_start();  //DB Transaction Handle START
         {
-            $data=array();
-            $data['date_cancel_approved']=$time;
-            $data['user_cancel_approved']=$user->user_id;
-            $data['remarks_cancel_approved']=$item['remarks_cancel_approved'];
-            $data['status_approve']=$item['status_approve'];
-            Query_helper::update($this->config->item('table_pos_sale_cancel'),$data,array('id='.$cancel_id));
-            if($item['status_approve']==$this->config->item('system_status_approved'))
+            if($item['status_approve']==$this->config->item('system_status_rejected'))
             {
-                $stocks=Stock_helper::get_variety_stock($sale_info['outlet_id']);
-                $item_head_details=Query_helper::get_info($this->config->item('table_pos_sale_details'),'*',array('sale_id ='.$sale_id));
+                $data=array();
+                $data['status_approve']=$item['status_approve'];
+                $data['date_manual_approved']=$time;
+                $data['user_manual_approved']=$user->user_id;
+                $data['remarks_manual_approved']=$item['remarks_manual_approved'];
+                Query_helper::update($this->config->item('table_pos_sale_manual'),$data,array('id='.$manual_sale_id));
+            }
+            else if($item['status_approve']==$this->config->item('system_status_approved'))
+            {
                 $item_head=array();
-                $item_head['date_cancel']=$cancel_request_info['date_cancel'];
-                $item_head['date_cancel_approved']=$time;
-                $item_head['user_cancel_approved']=$user->user_id;
-                $item_head['remarks_cancel_approved']=$item['remarks_cancel_approved'];
-                $item_head['status']=$this->config->item('system_status_inactive');
-                Query_helper::update($this->config->item('table_pos_sale'),$item_head,array('id='.$sale_id));
-                //update stock
-                foreach($item_head_details as $data_details)
+                $item_head['outlet_id']=$manual_sale_info['outlet_id'];
+                $item_head['farmer_id']=$manual_sale_info['farmer_id'];
+                $item_head['discount_self_percentage']=$manual_sale_info['discount_self_percentage'];
+                $item_head['amount_total']=$manual_sale_info['amount_total'];
+                $item_head['amount_discount_variety']=$manual_sale_info['amount_discount_variety'];
+                $item_head['amount_discount_self']=$manual_sale_info['amount_discount_self'];
+                $item_head['amount_payable']=$manual_sale_info['amount_payable'];
+                $item_head['amount_payable_actual']=$manual_sale_info['amount_payable_actual'];
+                $item_head['amount_cash']=$manual_sale_info['amount_cash'];
+                $item_head['date_sale']=$manual_sale_info['date_sale'];
+                $item_head['remarks']=$manual_sale_info['remarks_manual_requested'];
+                $item_head['status_manual_sale']=$this->config->item('system_status_yes');
+                $item_head['status']=$this->config->item('system_status_active');
+                $item_head['date_manual_approved']=$time;
+                $item_head['user_manual_approved']=$user->user_id;
+                $item_head['remarks_manual_approved']=$item['remarks_manual_approved'];
+                $item_head['date_created']=$manual_sale_info['date_manual_requested'];
+                $item_head['user_created']=$manual_sale_info['user_manual_requested'];
+                $sale_id=Query_helper::add($this->config->item('table_pos_sale'),$item_head);
+                if(!($sale_id>0))
                 {
+                    $ajax['status']=false;
+                    $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+                    $this->json_return($ajax);
+                }
+                foreach($manual_sale_info_details as $data_details)
+                {
+                    unset($data_details['id']);
+                    unset($data_details['manual_sale_id']);
+                    $data_details['sale_id']=$sale_id;
+                    Query_helper::add($this->config->item('table_pos_sale_details'),$data_details);
+
                     $data_stock=array();
-                    $data_stock['out_sale']=($stocks[$data_details['variety_id']][$data_details['pack_size_id']]['out_sale']-$data_details['quantity']);
-                    $data_stock['current_stock']=($stocks[$data_details['variety_id']][$data_details['pack_size_id']]['current_stock']+$data_details['quantity']);
+                    $data_stock['out_sale']=($stocks[$data_details['variety_id']][$data_details['pack_size_id']]['out_sale']+$data_details['quantity']);
+                    $data_stock['current_stock']=($stocks[$data_details['variety_id']][$data_details['pack_size_id']]['current_stock']-$data_details['quantity']);
                     $data_stock['date_updated'] = $time;
                     $data_stock['user_updated'] = $user->user_id;
                     Query_helper::update($this->config->item('table_pos_stock_summary_variety'),$data_stock,array('id='.$stocks[$data_details['variety_id']][$data_details['pack_size_id']]['id']));
-
                 }
+                $data=array();
+                $data['status_approve']=$item['status_approve'];
+                $data['date_manual_approved']=$time;
+                $data['user_manual_approved']=$user->user_id;
+                $data['remarks_manual_approved']=$item['remarks_manual_approved'];
+                $data['sale_id']=$sale_id;
+                Query_helper::update($this->config->item('table_pos_sale_manual'),$data,array('id='.$manual_sale_id));
             }
         }
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
-            $this->system_list();
+            $this->system_list_all();
         }
         else
         {
@@ -406,7 +410,7 @@ class Sales_manual_approve extends Root_Controller
     {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('item[status_approve]',"Approve/Reject",'required');
-        $this->form_validation->set_rules('item[remarks_cancel_approved]','Remarks','required');
+        $this->form_validation->set_rules('item[remarks_manual_approved]','Remarks','required');
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();

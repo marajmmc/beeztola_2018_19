@@ -104,8 +104,38 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_SALE');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-2">
                 <input type="text" name="item[date_sale]" class="form-control datepicker" value="" readonly/>
+            </div>
+            <div class="col-xs-1">
+                Hour:
+            </div>
+            <div class="col-xs-2">
+                <select class="form-control" name="item[date_sale_hour]">
+                    <?php
+                    for($i=0;$i<24;$i++)
+                    {
+                        ?>
+                        <option value="<?php echo $i;?>"><?php echo $i;?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                Minute:
+            </div>
+            <div class="col-xs-2">
+                <select class="form-control" name="item[date_sale_min]">
+                    <?php
+                    for($i=0;$i<60;$i++)
+                    {
+                        ?>
+                        <option value="<?php echo $i;?>"><?php echo $i;?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
             </div>
         </div>
         <div class="row show-grid">

@@ -5,7 +5,7 @@ class Test extends CI_Controller
 {
     public function index()
     {
-        echo System_helper::display_date_time(1520806402);
+        echo System_helper::display_date_time(System_helper::get_time('26-Mar-2018 1:9:00'));
 
         //$a=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type_outlet_discount'),array('*'),array('outlet_id =-1'),1);
 

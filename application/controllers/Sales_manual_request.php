@@ -524,7 +524,7 @@ class Sales_manual_request extends Root_Controller
         }
 
 
-        $item_head['date_sale']=System_helper::get_time($item['date_sale']);
+        $item_head['date_sale']=System_helper::get_time($item['date_sale'].' '.$item['date_sale_hour'].':'.$item['date_sale_min'].':'.'00');
         $item_head['status_approve']=$this->config->item('system_status_pending');
         $item_head['date_manual_requested']=$time;
         $item_head['user_manual_requested']=$user->user_id;

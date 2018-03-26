@@ -174,6 +174,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 <form id="sale_form" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
     <input type="hidden" name="item[cancel_id]" id="cancel_id" value="<?php echo $cancel_info['id']; ?>" />
     <div class="row widget">
+        <div class="widget-header">
+            <div class="title">
+                Approve/Reject
+            </div>
+            <div class="clearfix"></div>
+        </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CANCEL');?><span style="color:#FF0000">*</span></label>
@@ -208,7 +214,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button">
-                    <button id="button_action_save" type="button" class="btn" data-form="#sale_form" data-message-confirm="Are you sure to Approve Cancel?">Approve/Reject</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#sale_form" data-message-confirm="Are you sure to Approve/Reject the Sale Cancel?">Approve/Reject</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">
