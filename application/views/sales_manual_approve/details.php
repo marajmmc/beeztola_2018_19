@@ -27,80 +27,55 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td class=""><label class="control-label"><?php echo $item['farmer_name'];?></label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_INVOICE_NO');?></label></td>
-                <td class=""><label class="control-label"><?php echo Barcode_helper::get_barcode_sales($item['id']);?></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Id</label></td>
+                <td class=""><label class="control-label"><?php echo ($item['id']);?></td>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MOBILE_NO');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['mobile_no'];?></label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE');?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_SALE');?></label></td>
                 <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_sale']);?></td>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['discount_self_percentage'];?>%</label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Created Time</label></td>
-                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_created']);?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Created By</label></td>
-                <td class=""><label class="control-label"><?php echo $users[$item['user_created']]['name'];?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Approval Status</label></td>
+                <td class=""><label class="control-label"><?php echo $item['status_approve'];?></td>
+            </tr>
+            <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Requested Time</label></td>
+                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_manual_requested']);?></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Requested By</label></td>
+                <td class=""><label class="control-label"><?php echo $users[$item['user_manual_requested']]['name'];?></label></td>
+            </tr>
+            <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Request Remarks</label></td>
+                <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_manual_requested']);?></td>
             </tr>
             <?php
-            if(strlen($item['remarks'])>0)
+            if($item['status_approve']!=$CI->config->item('system_status_pending'))
             {
                 ?>
                 <tr>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Remarks</label></td>
-                    <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks']);?></td>
-                </tr>
-            <?php
-            }
-            ?>
-            <?php
-            if($item['status_manual_sale']==$CI->config->item('system_status_yes'))
-            {
-                ?>
-                <tr>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Special Sale Approved Time</label></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Sale Approved/Rejected Time</label></td>
                     <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_manual_approved']);?></td>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Special Sale Approved By</label></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Approved/Rejected By</label></td>
                     <td class=""><label class="control-label"><?php echo $users[$item['user_manual_approved']]['name'];?></label></td>
                 </tr>
                 <tr>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Special Approval Remarks</label></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Approval/Reject Remarks</label></td>
                     <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_manual_approved']);?></td>
                 </tr>
             <?php
             }
             ?>
-            <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Cancel Requested Time</label></td>
-                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($cancel_info['date_cancel_requested']);?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Cancel Requested Approved By</label></td>
-                <td class=""><label class="control-label"><?php echo $users[$cancel_info['user_cancel_requested']]['name'];?></label></td>
-            </tr>
-            <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Cancel Request Remarks</label></td>
-                <td class="" colspan="3"><label class="control-label"><?php echo nl2br($cancel_info['remarks_cancel_requested']);?></td>
-            </tr>
-            <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Cancel Requested Approval Status</label></td>
-                <td class=""><label class="control-label"><?php echo $cancel_info['status_approve'];?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Cancel Date</label></td>
-                <td class=""><label class="control-label"><label class="control-label"><?php echo System_helper::display_date($cancel_info['date_cancel']);?></td>
-            </tr>
             <?php
-            if($cancel_info['status_approve']!=$CI->config->item('system_status_pending'))
+            if($item['status_approve']==$CI->config->item('system_status_approved'))
             {
                 ?>
                 <tr>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Cancel Request Approved/Rejected Time</label></td>
-                    <td class=""><label class="control-label"><?php echo System_helper::display_date_time($cancel_info['date_cancel_approved']);?></td>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Approved/Rejected By</label></td>
-                    <td class=""><label class="control-label"><?php echo $users[$cancel_info['user_cancel_approved']]['name'];?></label></td>
-                </tr>
-                <tr>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Approval/Reject Remarks</label></td>
-                    <td class="" colspan="3"><label class="control-label"><?php echo nl2br($cancel_info['remarks_cancel_approved']);?></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Invoice No:</label></td>
+                    <td class="" colspan="3"><label class="control-label"><?php echo Barcode_helper::get_barcode_sales($item['sale_id']);?></td>
                 </tr>
             <?php
             }

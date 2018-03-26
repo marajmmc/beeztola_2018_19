@@ -104,7 +104,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </tbody>
             <tfoot>
             <tr>
-                <td colspan="4">&nbsp;</td>
+                <td colspan="5">&nbsp;</td>
                 <td><label><?php echo $CI->lang->line('LABEL_TOTAL'); ?></label></td>
                 <td class="text-right"><label><?php echo $total_quantity; ?></label></td>
                 <td class="text-right"><label><?php echo number_format($total_weight_kg/1000,3,'.','');?></label></td>
@@ -114,27 +114,27 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td class="text-right"><label><?php echo number_format($item['amount_total']-$item['amount_discount_variety'],2); ?></label></td>
             </tr>
             <tr>
-                <td colspan="9">&nbsp;</td>
+                <td colspan="10">&nbsp;</td>
                 <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_discount_self'],2); ?></label></td>
             </tr>
             <tr>
-                <td colspan="9">&nbsp;</td>
+                <td colspan="10">&nbsp;</td>
                 <td><label>Payable</label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_payable'],2); ?></label></td>
             </tr>
             <tr>
-                <td colspan="9">&nbsp;</td>
+                <td colspan="10">&nbsp;</td>
                 <td><label>Payable(rounded)</label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_payable_actual'],2); ?></label></td>
             </tr>
             <tr>
-                <td colspan="9">&nbsp;</td>
+                <td colspan="10">&nbsp;</td>
                 <td><label>Paid</label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_cash'],2); ?></label></td>
             </tr>
             <tr>
-                <td colspan="9">&nbsp;</td>
+                <td colspan="10">&nbsp;</td>
                 <td><label>Change</label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_cash']-$item['amount_payable_actual'],2); ?></label></td>
             </tr>
