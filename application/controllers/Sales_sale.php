@@ -516,6 +516,7 @@ class Sales_sale extends Root_Controller
         $item_head_details=array();
         $item_head=array();
         $item_head['outlet_id']=$item['outlet_id'];
+        $item_head['outlet_id_commission']=$item['outlet_id'];
         $item_head['farmer_id']=$item['farmer_id'];
         $item_head['discount_self_percentage']=$item['discount_self_percentage'];
         $item_head['amount_total']=0;

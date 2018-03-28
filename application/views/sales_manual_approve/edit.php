@@ -165,6 +165,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
+                <label class="control-label pull-right">Outlet For Commission<span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select class="form-control" name="item[outlet_id_commission]">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <?php
+                    foreach($outlets as $outlet)
+                    {
+                        ?>
+                        <option value="<?php echo $outlet['outlet_id'];?>"><?php echo $outlet['outlet_name'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
                 <label class="control-label pull-right">Remarks<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">

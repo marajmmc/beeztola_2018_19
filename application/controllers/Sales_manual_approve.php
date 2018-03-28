@@ -254,6 +254,17 @@ class Sales_manual_approve extends Root_Controller
             }
             $data['users']=System_helper::get_users_info($user_ids);
             $data['stocks']=Stock_helper::get_variety_stock($data['item']['outlet_id']);
+
+            $this->db->from($this->config->item('table_login_csetup_customer').' customer');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id=customer.id','INNER');
+            $this->db->select('customer_info.customer_id outlet_id, CONCAT_WS(" - ",customer_info.customer_code, customer_info.name) outlet_name');
+            $this->db->where('customer.status',$this->config->item('system_status_active'));
+            $this->db->where('customer_info.type',$this->config->item('system_customer_type_outlet_id'));
+            $this->db->where(' customer_info.revision',1);
+            $this->db->order_by('customer.id');
+            $data['outlets']=$this->db->get()->result_array();
+
+
             $data['title']='Approve/reject of Request Id('.$manual_sale_id.')';
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit",$data,true));
@@ -346,6 +357,7 @@ class Sales_manual_approve extends Root_Controller
             {
                 $item_head=array();
                 $item_head['outlet_id']=$manual_sale_info['outlet_id'];
+                $item_head['outlet_id_commission']=$item['outlet_id_commission'];
                 $item_head['farmer_id']=$manual_sale_info['farmer_id'];
                 $item_head['discount_self_percentage']=$manual_sale_info['discount_self_percentage'];
                 $item_head['amount_total']=$manual_sale_info['amount_total'];
@@ -385,6 +397,7 @@ class Sales_manual_approve extends Root_Controller
                     Query_helper::update($this->config->item('table_pos_stock_summary_variety'),$data_stock,array('id='.$stocks[$data_details['variety_id']][$data_details['pack_size_id']]['id']));
                 }
                 $data=array();
+                $data['outlet_id_commission']=$item['outlet_id_commission'];
                 $data['status_approve']=$item['status_approve'];
                 $data['date_manual_approved']=$time;
                 $data['user_manual_approved']=$user->user_id;
@@ -408,9 +421,14 @@ class Sales_manual_approve extends Root_Controller
     }
     private function check_validation()
     {
+        $item=$this->input->post('item');
         $this->load->library('form_validation');
         $this->form_validation->set_rules('item[status_approve]',"Approve/Reject",'required');
         $this->form_validation->set_rules('item[remarks_manual_approved]','Remarks','required');
+        if($item['status_approve']==$this->config->item('system_status_approved'))
+        {
+            $this->form_validation->set_rules('item[outlet_id_commission]','Outlet For Commission','required');
+        }
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();
@@ -475,6 +493,11 @@ class Sales_manual_approve extends Root_Controller
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
             $data['users']=System_helper::get_users_info($user_ids);
+            if($data['item']['outlet_id_commission']>0)
+            {
+                $result=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('name outlet_name'),array('customer_id ='.$data['item']['outlet_id_commission']),1);
+                $data['item']['outlet_name_commission']=$result['outlet_name'];
+            }
             $data['title']='Details of Request Id('.$manual_sale_id.')';
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));

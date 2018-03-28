@@ -627,6 +627,11 @@ class Sales_manual_request extends Root_Controller
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
             $data['users']=System_helper::get_users_info($user_ids);
+            if($data['item']['outlet_id_commission']>0)
+            {
+                $result=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('name outlet_name'),array('customer_id ='.$data['item']['outlet_id_commission']),1);
+                $data['item']['outlet_name_commission']=$result['outlet_name'];
+            }
             $data['title']='Details of Request Id('.$manual_sale_id.')';
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));

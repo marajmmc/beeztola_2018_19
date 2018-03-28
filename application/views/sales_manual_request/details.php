@@ -74,7 +74,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
                 <tr>
                     <td class="widget-header header_caption"><label class="control-label pull-right">Invoice No:</label></td>
-                    <td class="" colspan="3"><label class="control-label"><?php echo Barcode_helper::get_barcode_sales($item['sale_id']);?></td>
+                    <td class=""><label class="control-label"><?php echo Barcode_helper::get_barcode_sales($item['sale_id']);?></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Outlet For Commission</label></td>
+                    <td class=""><label class="control-label"><?php echo $item['outlet_name_commission'];?></td>
                 </tr>
             <?php
             }
