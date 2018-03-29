@@ -686,43 +686,43 @@ class Payment_deposit extends Root_Controller
             }
             $this->db->from($this->config->item('table_pos_payment').' payment');
             $this->db->select('payment.*');
-            $this->db->select('outlet_info.name outlet');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('outlet_info.name outlet_name');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1','INNER');
             $this->db->select('payment_way.name payment_way');
             $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
-            $this->db->select('bank_source.name bank_name');
+            $this->db->select('bank_source.name bank_payment_source');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
             $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
             $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
             $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
-            $this->db->select('user_info.name payment_by');
-            $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user_info.user_id = payment.user_updated','LEFT');
-            $this->db->select('user_info_forwarded.name payment_forwarded_by');
-            $this->db->join($this->config->item('table_login_setup_user_info').' user_info_forwarded','user_info_forwarded.user_id = payment.user_updated_forward','LEFT');
-            $this->db->where('payment.id',$item_id);
             $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('payment.id',$item_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('Payment_forward Non Exists',$item_id);
+                System_helper::invalid_try('Forward',$item_id,'Id Not Exists');
                 $ajax['status']=false;
-                $ajax['system_message']='Invalid Payment Forward.';
+                $ajax['system_message']='Invalid Payment.';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_payment_forward']==$this->config->item('system_status_forwarded'))
+            if($data['item']['status_deposit_forward']==$this->config->item('system_status_forwarded'))
             {
-                System_helper::invalid_try('Payment_forward already forwarded',$item_id);
                 $ajax['status']=false;
                 $ajax['system_message']='Payment already forwarded.';
                 $this->json_return($ajax);
             }
-            //Checking Valid Outlet
-            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Payment_forward Outlet Non Assigned',$message='You are trying to forward payment from an outlet which is not assigned to you.'))
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
             {
+                System_helper::invalid_try('Forward',$item_id,'outlet id '.$data['item']['outlet_id'].' not assigned');
                 $ajax['status']=false;
-                $ajax['system_message']=$this->message;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
+                die();
             }
+            $user_ids=array();
+            $user_ids[$data['item']['user_deposit_updated']]=$data['item']['user_deposit_updated'];
+            $data['users']=System_helper::get_users_info($user_ids);
+
             $data['title']="Payment Forward :: ".Barcode_helper::get_barcode_payment($item_id);
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/forward",$data,true));
@@ -752,36 +752,40 @@ class Payment_deposit extends Root_Controller
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
-        if($item['status_payment_forward']!=$this->config->item('system_status_forwarded'))
+        if($item['status_deposit_forward']!=$this->config->item('system_status_forwarded'))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Forward Payment is required.';
+            $ajax['system_message']='Select Forward Option.';
             $this->json_return($ajax);
         }
         $result=Query_helper::get_info($this->config->item('table_pos_payment'),'*',array('id ='.$id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
         if(!$result)
         {
-            System_helper::invalid_try('Save_payment_forward Non Exists',$id);
+            System_helper::invalid_try('Save Forward',$id,'Id Not Exists');
             $ajax['status']=false;
             $ajax['system_message']='Invalid Payment Forward.';
             $this->json_return($ajax);
         }
-        if($result['status_payment_forward']==$this->config->item('system_status_forwarded'))
+        if($result['status_deposit_forward']==$this->config->item('system_status_forwarded'))
         {
             $ajax['status']=false;
             $ajax['system_message']='Already Payment Forwarded.';
             $this->json_return($ajax);
         }
         //Checking Valid Outlet
-        if(!$this->check_valid_outlet($result['outlet_id'],$invalid_try='Save_payment_forward Outlet Non Assigned',$message='You are trying to forward payment from an outlet which is not assigned to you.'))
+        if(!in_array($result['outlet_id'],$this->user_outlet_ids))
         {
+            System_helper::invalid_try('Save Forward',$id,'outlet id '.$result['outlet_id'].' not assigned');
             $ajax['status']=false;
-            $ajax['system_message']=$this->message;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
+            die();
         }
         $this->db->trans_start();  //DB Transaction Handle START
-        $item['date_updated_forward']=$time;
-        $item['user_updated_forward']=$user->user_id;
+        $item['date_deposit_forwarded']=$time;
+        $item['user_deposit_forwarded']=$user->user_id;
+        //$item['status_deposit_forward']=$this->config->item('system_status_forwarded');
+        //status coming from input
         Query_helper::update($this->config->item('table_pos_payment'),$item,array('id='.$id));
 
         $this->db->trans_complete();   //DB Transaction Handle END
