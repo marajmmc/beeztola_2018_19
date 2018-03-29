@@ -57,16 +57,30 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select name="item[outlet_id]" class="form-control">
-                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
-                    <?php
-                    foreach($assigned_outlet as $outlet)
-                    {?>
-                        <option value="<?php echo $outlet['outlet_id']?>" <?php if($outlet['outlet_id']==$item['outlet_id']){ echo "selected";}?>><?php echo $outlet['outlet_name'];?></option>
-                    <?php
-                    }
+                <?php
+                if(sizeof($CI->user_outlets)==1)
+                {
                     ?>
-                </select>
+                    <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $CI->user_outlets[0]['customer_id'] ?>" />
+                    <label class="control-label"><?php echo $CI->user_outlets[0]['name'] ?></label>
+                <?php
+                }
+                else
+                {
+                    ?>
+                    <select name="item[outlet_id]" id="outlet_id" class="form-control">
+                        <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                        <?php
+                        foreach($CI->user_outlets as $row)
+                        {?>
+                            <option value="<?php echo $row['customer_id']?>"><?php echo $row['name'];?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                <?php
+                }
+                ?>
             </div>
         </div>
         <div class="row show-grid">
@@ -88,7 +102,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[reference_no]" class="form-control" value="<?php echo $item['reference_no'];?>"/>
@@ -121,7 +135,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_BRANCH_SOURCE');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[bank_branch_source]" class="form-control" value="<?php echo $item['bank_branch_source'];?>"/>
@@ -135,7 +149,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <select name="item[bank_account_id_destination]" class="form-control">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
-                    foreach($bank_account_number_destination as $account_destination)
+                    foreach($bank_accounts_destination as $account_destination)
                     {?>
                         <option value="<?php echo $account_destination['value']?>" <?php if($account_destination['value']==$item['bank_account_id_destination']){ echo "selected";}?>><?php echo $account_destination['text'];?></option>
                     <?php
@@ -164,7 +178,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <textarea name="item[remarks_payment]" class="form-control"><?php echo $item['remarks_payment'] ?></textarea>
+                <textarea name="item[remarks_deposit]" class="form-control"><?php echo $item['remarks_deposit'] ?></textarea>
             </div>
         </div>
     </div>
