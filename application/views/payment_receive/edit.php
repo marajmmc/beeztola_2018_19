@@ -7,16 +7,6 @@ $action_buttons[]=array
     'label'=>$CI->lang->line("ACTION_BACK"),
     'href'=>site_url($CI->controller_url)
 );
-if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)) || (isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_SAVE"),
-        'id'=>'button_action_save',
-        'data-form'=>'#save_form'
-    );
-}
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 ?>
@@ -29,6 +19,32 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php echo $title; ?>
             </div>
             <div class="clearfix"></div>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-responsive system_table_details_view">
+                <tbody>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Payment Entry By</label></td>
+                    <td class="header_value"><label class="control-label"><?php echo $users[$item['user_deposit_updated']]['name'];?></label></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Payment Entry Time</label></td>
+                    <td class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_deposit_updated']);?></label></td>
+                </tr>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Payment Forwarded By</label></td>
+                    <td class="header_value"><label class="control-label"><?php echo $users[$item['user_deposit_forwarded']]['name'];?></label></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Payment Forwarded Time</label></td>
+                    <td class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_deposit_forwarded']);?></label></td>
+                </tr>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Attachment(Document)</label></td>
+                    <td colspan="3" class=" header_value"><img style="max-widtd: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></td>
+                </tr>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label></td>
+                    <td colspan="3" class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_deposit']);?></label></td>
+                </tr>
+                </tbody>
+            </table>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
@@ -51,15 +67,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_RECEIVE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[date_receive]" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date_receive']);?>" readonly/>
+                <input type="text" name="item[date_receive]" class="form-control datepicker" value="" readonly/>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <?php echo $item['outlet'];?>
+                <?php echo $item['outlet_name'];?>
             </div>
         </div>
         <div class="row show-grid">
@@ -83,12 +99,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <?php echo $item['bank_name_source'];?>
+                <?php echo $item['bank_payment_source'];?>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_BRANCH_SOURCE');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo $item['bank_branch_source'];?>
@@ -96,39 +112,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Entry Time:</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <?php echo System_helper::display_date_time($item['date_updated']);?>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Entry By:</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <?php echo $item['payment_by'];?>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Forward Time:</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <?php echo System_helper::display_date_time($item['date_updated_forward']);?>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right">Payment Forwarded By:</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <?php echo $item['payment_forwarded_by'];?>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label id="amount_payment" data-amount-payment-id="<?php echo $item['amount_payment'];?>" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?>:</label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?>:</label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php echo number_format($item['amount_payment'],2);?>
@@ -160,31 +144,25 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Attachment:</label>
-            </div>
-            <div class="col-xs-4" id="image_payment">
-                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
-            </div>
-        </div>
-        <?php if($item['remarks_payment']){?>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS').'(Payment)';?>:</label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <?php echo nl2br($item['remarks_payment']); ?>
-            </div>
-        </div>
-        <?php } ?>
-        <div class="row show-grid">
-            <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <textarea name="item[remarks_receive]" class="form-control"><?php echo $item['remarks_receive'] ?></textarea>
             </div>
         </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
 
+            </div>
+            <div class="col-sm-4 col-xs-4">
+                <div class="action_button">
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are you sure to Receive?">Receive</button>
+                </div>
+            </div>
+            <div class="col-sm-4 col-xs-4">
+
+            </div>
+        </div>
     </div>
     <div class="clearfix"></div>
 </form>
@@ -197,7 +175,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).off('input','#amount_bank_charge');
         $(document).on('input', '#amount_bank_charge', function()
         {
-            var amount_payment=$('#amount_payment').attr('data-amount-payment-id');
+            var amount_payment=<?php echo $item['amount_payment'];?>;
             var amount_bank_charge=$('#amount_bank_charge').val();
             var amount_receive=number_format((amount_payment-amount_bank_charge),2);
             $('#amount_receive').html(amount_receive);
