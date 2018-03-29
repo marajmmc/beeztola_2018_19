@@ -84,6 +84,9 @@ foreach($results as $result)
             var system_crops=JSON.parse('<?php echo json_encode($system_crops);?>');
             var system_types=JSON.parse('<?php echo json_encode($system_types);?>');
             var system_varieties=JSON.parse('<?php echo json_encode($system_varieties);?>');
+            var system_report_color_grand='#AEC2DD';
+            var system_report_color_crop='#0CA2C5';
+            var system_report_color_type='#6CAB44';
         </script>
         <header class="hidden-print">
 

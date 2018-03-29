@@ -20,7 +20,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div class="col-xs-8">
                 <div class="row show-grid">
                     <div class="col-xs-6">
-                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
                     </div>
                     <div class="col-xs-6">
                         <select name="report[outlet_id]" class="form-control">
@@ -72,7 +72,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <div class="col-xs-6">
                         <select id="pack_size_id" name="report[pack_size_id]" class="form-control">
                             <option value="-1"><?php echo $CI->lang->line('SELECT');?></option>
-                            <option value="0">Bulk</option>
                             <?php
                             foreach($pack_sizes as $pack_size)
                             {?>

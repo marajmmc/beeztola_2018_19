@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Report_stock_outlet_summary extends Root_Controller
+class Report_stock_variety_summary extends Root_Controller
 {
     public $message;
     public $permissions;
@@ -11,8 +11,8 @@ class Report_stock_outlet_summary extends Root_Controller
     {
         parent::__construct();
         $this->message="";
-        $this->permissions=User_helper::get_permission('Report_stock_outlet_summary');
-        $this->controller_url='report_stock_outlet_summary';
+        $this->permissions=User_helper::get_permission('Report_stock_variety_summary');
+        $this->controller_url='report_stock_variety_summary';
         $this->user_outlet_ids=array();
         $this->user_outlets=User_helper::get_assigned_outlets();
         if(sizeof($this->user_outlets)>0)
@@ -117,23 +117,23 @@ class Report_stock_outlet_summary extends Root_Controller
         $variety_id=$this->input->post('variety_id');
         $pack_size_id=$this->input->post('pack_size_id');
         $items=array();
-        $this->db->from($this->config->item('table_pos_stock_summary_variety').' stock_summary_outlet');
-        $this->db->select('stock_summary_outlet.*');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=stock_summary_outlet.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->from($this->config->item('table_pos_stock_summary_variety').' stock_summary_variety');
+        $this->db->select('stock_summary_variety.*');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=stock_summary_variety.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
-        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id=stock_summary_outlet.variety_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id=stock_summary_variety.variety_id','INNER');
         $this->db->select('v.name variety_name');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' croptype','croptype.id=v.crop_type_id','INNER');
         $this->db->select('croptype.id crop_type_id, croptype.name crop_type_name');
         $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=croptype.crop_id','INNER');
         $this->db->select('crop.id crop_id, crop.name crop_name');
-        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id=stock_summary_outlet.pack_size_id','LEFT');
+        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id=stock_summary_variety.pack_size_id','LEFT');
         $this->db->select('pack.name pack_size');
         $this->db->order_by('crop.id, croptype.id, v.id, pack.id');
-        $this->db->where('stock_summary_outlet.outlet_id',$outlet_id);
+        $this->db->where('stock_summary_variety.outlet_id',$outlet_id);
         if($variety_id>0 && is_numeric($variety_id))
         {
-            $this->db->where('stock_summary_outlet.variety_id',$variety_id);
+            $this->db->where('stock_summary_variety.variety_id',$variety_id);
         }
         if($crop_type_id>0 && is_numeric($crop_type_id))
         {
@@ -146,7 +146,7 @@ class Report_stock_outlet_summary extends Root_Controller
         }
         if($pack_size_id>=0 && is_numeric($pack_size_id))
         {
-            $this->db->where('stock_summary_outlet.pack_size_id',$pack_size_id);
+            $this->db->where('stock_summary_variety.pack_size_id',$pack_size_id);
         }
         $results=$this->db->get()->result_array();
         $varieties=array();
@@ -155,18 +155,9 @@ class Report_stock_outlet_summary extends Root_Controller
             $varieties[$result['variety_id']][$result['pack_size_id']]['crop_name']=$result['crop_name'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['crop_type_name']=$result['crop_type_name'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['variety_name']=$result['variety_name'];
-            if($result['pack_size_id']==0)
-            {
-                $varieties[$result['variety_id']][$result['pack_size_id']]['pack_size']='Bulk';
-                $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt']='';
-                $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg']=$result['current_stock'];
-            }
-            else
-            {
-                $varieties[$result['variety_id']][$result['pack_size_id']]['pack_size']=$result['pack_size'];
-                $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt']=$result['current_stock'];
-                $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg']=($result['current_stock']*$result['pack_size'])/1000;
-            }
+            $varieties[$result['variety_id']][$result['pack_size_id']]['pack_size']=$result['pack_size'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt']=$result['current_stock'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg']=($result['current_stock']*$result['pack_size'])/1000;
         }
         $type_total=array();
         $crop_total=array();
@@ -186,9 +177,9 @@ class Report_stock_outlet_summary extends Root_Controller
         $prev_crop_name='';
         $prev_type_name='';
         $first_row=true;
-        foreach($varieties as $variety_id=>$variety)
+        foreach($varieties as $variety)
         {
-            foreach($variety as $pack_size_id=>$pack)
+            foreach($variety as $pack)
             {
                 if(!$first_row)
                 {
@@ -196,8 +187,13 @@ class Report_stock_outlet_summary extends Root_Controller
                     {
                         $items[]=$this->get_row($type_total);
                         $items[]=$this->get_row($crop_total);
+
                         $prev_crop_name=$pack['crop_name'];
                         $prev_type_name=$pack['crop_type_name'];
+                        $type_total['current_stock_kg']=0;
+                        $type_total['current_stock_pkt']=0;
+                        $crop_total['current_stock_kg']=0;
+                        $crop_total['current_stock_pkt']=0;
                     }
                     elseif($prev_type_name!=$pack['crop_type_name'])
                     {
@@ -217,6 +213,12 @@ class Report_stock_outlet_summary extends Root_Controller
                     $prev_type_name=$pack['crop_type_name'];
                     $first_row=false;
                 }
+                $type_total['current_stock_kg']+=$pack['current_stock_kg'];
+                $type_total['current_stock_pkt']+=$pack['current_stock_pkt'];
+                $crop_total['current_stock_kg']+=$pack['current_stock_kg'];
+                $crop_total['current_stock_pkt']+=$pack['current_stock_pkt'];
+                $grand_total['current_stock_kg']+=$pack['current_stock_kg'];
+                $grand_total['current_stock_pkt']+=$pack['current_stock_pkt'];
                 $items[]=$this->get_row($pack);
             }
         }
@@ -233,8 +235,6 @@ class Report_stock_outlet_summary extends Root_Controller
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
-        $row['current_stock_pkt']=0;
-        $row['current_stock_kg']=0;
         $row['current_stock_kg']=number_format($info['current_stock_kg'],3,'.','');
         $row['current_stock_pkt']=$info['current_stock_pkt'];
         return $row;
