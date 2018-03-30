@@ -426,46 +426,41 @@ class Payment_edit_approve extends Root_Controller
         }
 
         $this->db->trans_start();  //DB Transaction Handle START
+        //update edit data
         $item['date_manual_edit_approved']=$time;
         $item['user_manual_edit_approved']=$user->user_id;
         Query_helper::update($this->config->item('table_pos_payment_edit'),$item,array('id='.$edit_id));
         if($item['status_approve']==$this->config->item('system_status_approved'))
         {
-            //get old value
-            //insert into history table
+            //inserting into history table
+            $data=$item_current;
+            unset($data['id']);
+            $data['payment_id']=$item_new['payment_id'];
+            Query_helper::add($this->config->item('table_pos_payment_edit_history'),$data, false);
             //update new value
-        }
-
-        //This item from pos_payment table and temporary data for inserting edit history table
-        /*$temp_payment_edit_history=Query_helper::get_info($this->config->item('table_pos_payment'),'*',array('id ='.$result['payment_id']),1);
-
-        $result_history=Query_helper::get_info($this->config->item('table_pos_payment_edit_history'),'*',array('payment_id ='.$result['payment_id'],'revision =1'),1);
-        if($result_history)
-        {
             $data=array();
-            $data['user_updated']=$result_history['user_updated'];
-            $this->db->set('revision', 'revision+1', FALSE);
-            Query_helper::update($this->config->item('table_pos_payment_edit_history'),$data,array('id='.$result['payment_id']),false);
-        }
-        $item_payment_edit_history=$temp_payment_edit_history;
-        $item_payment_edit_history['payment_id']=$result['payment_id'];
-        $item_payment_edit_history['revision']=1;
-        Query_helper::add($this->config->item('table_pos_payment_edit_history'),$item_payment_edit_history, false);
+            $data['date_payment']=$item_new['date_payment'];
+            $data['date_sale']=$item_new['date_sale'];
+            $data['outlet_id']=$item_new['outlet_id'];
+            $data['payment_way_id']=$item_new['payment_way_id'];
+            $data['reference_no']=$item_new['reference_no'];
+            $data['amount_payment']=$item_new['amount_payment'];
+            $data['bank_id_source']=$item_new['bank_id_source'];
+            $data['bank_branch_source']=$item_new['bank_branch_source'];
+            $data['bank_account_id_destination']=$item_new['bank_account_id_destination'];
+            $data['image_name']=$item_new['image_name'];
+            $data['image_location']=$item_new['image_location'];
+            $data['date_receive']=$item_new['date_receive'];
+            $data['amount_bank_charge']=$item_new['amount_bank_charge'];
+            $data['amount_receive']=$item_new['amount_receive'];
+            $data['id_last_edit_approve']=$edit_id;
+            $data['date_manual_edit_approved']=$time;
+            $data['user_manual_edit_approved']=$user->user_id;
+            $data['remarks_manual_edit_approved']=$item['remarks_manual_edit_approved'];
+            $this->db->set('revision_count_edit_approve', 'revision_count_edit_approve+1', FALSE);
+            Query_helper::update($this->config->item('table_pos_payment'),$data,array('id='.$item_new['payment_id']),false);
 
-        //This item from pos_payment_edit table and will update into pos_payment table
-        $item_payment=$result;
-        unset($item_payment['payment_id']);
-        unset($item_payment['revision_count']);
-        unset($item_payment['status_forward']);
-        unset($item_payment['date_updated']);
-        unset($item_payment['user_updated']);
-        unset($item_payment['status_approve']);
-        unset($item_payment['status']);
-        $item_pos_payment['revision_count_payment']=$temp_payment_edit_history['revision_count_payment']+1;
-        $item_pos_payment['revision_count_receive']=$temp_payment_edit_history['revision_count_receive']+1;
-        $item_pos_payment['date_updated_approve_edit']=$item['date_updated_approve_edit'];
-        $item_pos_payment['user_updated_approve_edit']=$user->user_id;
-        Query_helper::update($this->config->item('table_pos_payment'),$item_payment,array('id='.$result['payment_id']));*/
+        }
         $this->db->trans_complete();   //DB Transaction Handle END
         if($this->db->trans_status() === TRUE)
         {
