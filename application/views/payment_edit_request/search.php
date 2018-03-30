@@ -1,5 +1,13 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-$CI = & get_instance();
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+$CI=& get_instance();
+$action_buttons=array();
+$action_buttons[]=array
+(
+    'label'=>$CI->lang->line("ACTION_BACK"),
+    'href'=>site_url($CI->controller_url)
+);
+$CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 ?>
 <div class="row widget">
@@ -26,7 +34,7 @@ $CI = & get_instance();
             </div>
             <div class="col-xs-4">
                 <div class="action_button pull-right">
-                    <button id="button_action_report" type="button" class="btn" data-form="#search_form">Load Payment</button>
+                    <button id="button_action_report" type="button" class="btn" data-form="#search_form">Search Payment</button>
                 </div>
 
             </div>

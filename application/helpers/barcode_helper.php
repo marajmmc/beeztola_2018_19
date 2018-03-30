@@ -13,7 +13,7 @@ class Barcode_helper
         //if((substr($code,0,2)=='F-'))
         if(Barcode_helper::get_farmer_code_type($code)=='barcode')
         {
-            $result=Query_helper::get_info($CI->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.intval(substr($code,2))),1);
+            $result=Query_helper::get_info($CI->config->item('table_pos_setup_farmer_farmer'),array('id'),array('id ='.intval(substr($code,2))),1);
             if($result)
             {
                 return $result['id'];
@@ -40,7 +40,7 @@ class Barcode_helper
         }
         else
         {
-            $result=Query_helper::get_info($CI->config->item('table_pos_setup_farmer_farmer'),'*',array('mobile_no ="'.($code).'"'),1);
+            $result=Query_helper::get_info($CI->config->item('table_pos_setup_farmer_farmer'),array('id'),array('mobile_no ="'.($code).'"'),1);
             if($result)
             {
                 return $result['id'];
@@ -70,6 +70,26 @@ class Barcode_helper
     public static function get_barcode_payment($id)
     {
         return 'P-'.str_pad($id,6,0,STR_PAD_LEFT);
+    }
+    public static function get_id_payment($barcode)
+    {
+        $CI =& get_instance();
+        if((substr($barcode,0,2)=='P-'))
+        {
+            $result=Query_helper::get_info($CI->config->item('table_pos_payment'),array('id'),array('id ='.intval(substr($barcode,2))),1);
+            if($result)
+            {
+                return $result['id'];
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            return 0;
+        }
     }
     public static function get_barcode_variety($crop_id,$variety_id,$pack_id)
     {

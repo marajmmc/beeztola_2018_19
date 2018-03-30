@@ -5,12 +5,29 @@ class Payment_edit_request extends Root_Controller
     public $message;
     public $permissions;
     public $controller_url;
+    public $user_outlets;
+    public $user_outlet_ids;
     public function __construct()
     {
         parent::__construct();
         $this->message="";
         $this->permissions=User_helper::get_permission('Payment_edit_request');
         $this->controller_url='payment_edit_request';
+        $this->user_outlet_ids=array();
+        $this->user_outlets=User_helper::get_assigned_outlets();
+        if(sizeof($this->user_outlets)>0)
+        {
+            foreach($this->user_outlets as $row)
+            {
+                $this->user_outlet_ids[]=$row['customer_id'];
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
+            $this->json_return($ajax);
+        }
     }
     public function index($action="list",$id=0)
     {
@@ -88,7 +105,7 @@ class Payment_edit_request extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= $this->get_preference();
-            $data['title']="Pending Edit Payment Request List";
+            $data['title']="Pending Edit List";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -107,25 +124,10 @@ class Payment_edit_request extends Root_Controller
     }
     private function system_get_items()
     {
-        //Getting Assigned Outlet
-        $user = User_helper::get_user();
-        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-        $this->db->select('user_outlet.customer_id outlet_id');
-        $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-        $this->db->where('user_outlet.revision',1);
-        $this->db->where('user_outlet.user_id',$user->user_id);
-        $this->db->order_by('user_outlet.customer_id','ASC');
-        $result_outlet=$this->db->get()->result_array();
-        $assigned_outlet=array();
-        foreach($result_outlet as $outlet)
-        {
-            $assigned_outlet[]=$outlet['outlet_id'];
-        }
         $this->db->from($this->config->item('table_pos_payment_edit').' payment_edit');
         $this->db->select('payment_edit.*');
-        $this->db->select('outlet_info.name outlet');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment_edit.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('outlet_info.name outlet_name');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment_edit.outlet_id AND outlet_info.revision=1','INNER');
         $this->db->select('payment_way.name payment_way');
         $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment_edit.payment_way_id','INNER');
         $this->db->select('bank_source.name bank_payment_source');
@@ -134,26 +136,61 @@ class Payment_edit_request extends Root_Controller
         $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
         $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
         $this->db->where('payment_edit.status !=',$this->config->item('system_status_delete'));
-        $this->db->where('payment_edit.status_forward =',$this->config->item('system_status_pending'));
-        $this->db->where_in('payment_edit.outlet_id',$assigned_outlet);
+        $this->db->where('payment_edit.status_request_forward',$this->config->item('system_status_pending'));
+        $this->db->where_in('payment_edit.outlet_id',$this->user_outlet_ids);
         $this->db->order_by('payment_edit.id','DESC');
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
-            $item['barcode']=Barcode_helper::get_barcode_payment($item['payment_id']);
+            $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
             $item['date_receive']=System_helper::display_date($item['date_receive']);
             $item['amount_payment']=number_format($item['amount_payment'],2);
-            $item['amount_receive']=number_format($item['amount_receive'],2);
             $item['amount_bank_charge']=number_format($item['amount_bank_charge'],2);
-            $item['bank_payment_branch_source']=$item['bank_branch_source'];
-            if($item['bank_account_id_destination'])
-            {
-                $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
-            }
+            $item['amount_receive']=number_format($item['amount_receive'],2);
+            $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
         }
         $this->json_return($items);
+
+    }
+    private function get_preference()
+    {
+        $user = User_helper::get_user();
+        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
+        $data['id']= 1;
+        $data['barcode']= 1;
+        $data['date_payment']= 1;
+        $data['date_sale']= 1;
+        $data['date_receive']= 1;
+        $data['outlet_name']= 1;
+        $data['payment_way']= 1;
+        $data['reference_no']= 1;
+        $data['amount_payment']= 1;
+        $data['amount_bank_charge']= 1;
+        $data['amount_receive']= 1;
+        $data['bank_payment_source']= 1;
+        $data['bank_branch_source']= 1;
+        $data['bank_account_number_destination']= 1;
+        if($result)
+        {
+            if($result['preferences']!=null)
+            {
+                $preferences=json_decode($result['preferences'],true);
+                foreach($data as $key=>$value)
+                {
+                    if(isset($preferences[$key]))
+                    {
+                        $data[$key]=$value;
+                    }
+                    else
+                    {
+                        $data[$key]=0;
+                    }
+                }
+            }
+        }
+        return $data;
     }
     private function system_list_all()
     {
@@ -245,7 +282,7 @@ class Payment_edit_request extends Root_Controller
     {
         if(isset($this->permissions['action1'])&&($this->permissions['action1']==1))
         {
-            $data['title']="New Payment Edit Request";
+            $data['title']="Search Payment For edit";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
             if($this->message)
@@ -266,76 +303,62 @@ class Payment_edit_request extends Root_Controller
     {
         if(isset($this->permissions['action1'])&&($this->permissions['action1']==1))
         {
-            if($this->input->post('item'))
-            {
-                $item=$this->input->post('item');
+            $item=$this->input->post('item');
 
-                if(!$item['barcode'])
-                {
-                    $ajax['status']=false;
-                    $ajax['system_message']='This Barcode field is required.';
-                    $this->json_return($ajax);
-                }
-            }
-            else
+            if(!$item['barcode'])
             {
-                $this->system_search();
+                $ajax['status']=false;
+                $ajax['system_message']='This Barcode field is required.';
+                $this->json_return($ajax);
             }
-            $item_id=intval(substr($item['barcode'],2));
-            $data['title']="New Payment Edit Request";
+
+            $item_id=Barcode_helper::get_id_payment($item['barcode']);
+            if(!($item_id>0))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Payment Barcode.';
+                $this->json_return($ajax);
+            }
             $data['item']=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$item_id),1);
             if(!$data['item'])
             {
-                System_helper::invalid_try('Add Non Exists',$item_id);
                 $ajax['status']=false;
-                $ajax['system_message']='Invalid Edit Payment Request.';
+                $ajax['system_message']='Invalid Payment Barcode.';
                 $this->json_return($ajax);
             }
             if($data['item']['status']==$this->config->item('system_status_delete'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Payment is deleted. You can not request to edit it';
+                $ajax['system_message']='Invalid Payment Barcode.';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_receive']!==$this->config->item('system_status_complete'))
+            if($data['item']['status_payment_receive']!==$this->config->item('system_status_received'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Payment is not received yet. You can not request to edit it';
+                $ajax['system_message']='Payment is not received yet.';
                 $this->json_return($ajax);
             }
-            $data['payment_id']=$data['item']['id'];
-            $data['item_payment_edit']=Query_helper::get_info($this->config->item('table_pos_payment_edit'),array('*'),array('payment_id ='.$item_id),1);
-            if($data['item_payment_edit']['status_approve']==$this->config->item('system_status_pending'))
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('add',$item_id,'outlet id '.$data['item']['outlet_id'].' not assigned');
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+                die();
+            }
+
+            $data['item']['payment_id']=$data['item']['id'];
+
+            //check already requested for another edit
+
+            $result=Query_helper::get_info($this->config->item('table_pos_payment_edit'),array('*'),array('payment_id ='.$item_id,'status_approve="'.$this->config->item('system_status_pending').'"'),1);
+            if($result)
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Your previous edit request for this barcode is waiting for approval';
+                $ajax['system_message']='Your previous edit request for this Payment is waiting for approval';
                 $this->json_return($ajax);
             }
-            if($data['item_payment_edit']['id'])
-            {
-                $data['id']=$data['item_payment_edit']['id'];
-            }
-            else
-            {
-                $data['id']=0;
-            }
-            $user = User_helper::get_user();
-            // Checking Valid Outlet
-            if(!$this->check_valid_outlet($data['item']['outlet_id'],$invalid_try='Edit Outlet Non Assigned',$message='You are trying to send edit payment request from an outlet which is not assigned to you.'))
-            {
-                $ajax['status']=false;
-                $ajax['system_message']=$this->message;
-                $this->json_return($ajax);
-            }
-            //Getting Assigned Outlet
-            $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-            $this->db->select('user_outlet.customer_id outlet_id, outlet_info.name outlet_name');
-            $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-            $this->db->where('user_outlet.revision',1);
-            $this->db->where('user_outlet.user_id',$user->user_id);
-            $this->db->order_by('user_outlet.customer_id','ASC');
-            $data['assigned_outlet']=$this->db->get()->result_array();
+
             $data['payment_way']=Query_helper::get_info($this->config->item('table_login_setup_payment_way'),array('id value, name text'),array('status ="'.$this->config->item('system_status_active').'"'));
             $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering'));
             //getting bank account
@@ -343,19 +366,20 @@ class Payment_edit_request extends Root_Controller
             $this->db->select('ba.id value');
             $this->db->select("CONCAT_WS(' ( ',ba.account_number,  CONCAT_WS('', bank.name,' - ',ba.branch_name,')')) text");
             $this->db->join($this->config->item('table_login_setup_bank').' bank','bank.id=ba.bank_id','INNER');
-            $this->db->join($this->config->item('table_login_setup_bank_account_purpose').' bap','bap.bank_account_id=ba.id AND bap.revision=1 AND bap.purpose ="sale_receive"','INNER');
+            $this->db->join($this->config->item('table_login_setup_bank_account_purpose').' bap','bap.bank_account_id=ba.id AND bap.revision=1 AND bap.purpose ="'.$this->config->item('system_bank_account_purpose_sale_receive').'"','INNER');
             $this->db->where('ba.status !=',$this->config->item('system_status_delete'));
-            $this->db->where('ba.account_type_receive = 1');
+            $this->db->where('ba.account_type_receive',1);
             $this->db->where('bank.status !=',$this->config->item('system_status_delete'));
             $this->db->order_by('bank.ordering','ASC');
-            $data['bank_account_number_destination']=$this->db->get()->result_array();
+            $data['bank_accounts_destination']=$this->db->get()->result_array();
+
+            $data['title']="New Edit Request for Payment(".Barcode_helper::get_barcode_payment($data['item']['id'].')');
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/add",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/add');
             $this->json_return($ajax);
         }
         else
@@ -446,15 +470,16 @@ class Payment_edit_request extends Root_Controller
     }
     private function system_save()
     {
-        $id = $this->input->post("id"); //Payment edit id
-        $payment_id = $this->input->post("payment_id");
+        $edit_id = $this->input->post("id"); //Payment edit id
         $user = User_helper::get_user();
         $time=time();
         $item=$this->input->post('item');
-        $result_payment_edit='';
-        if($id>0)
+        $item_old=array();
+        if($edit_id>0)
         {
-            if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+            //edit pending
+            //check lots of validaion like already forward??or deleted
+            /*if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
             {
                 $ajax['status']=false;
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
@@ -479,7 +504,7 @@ class Payment_edit_request extends Root_Controller
                 $ajax['status']=false;
                 $ajax['system_message']='Edit Payment Request already forwarded. You can not Save it';
                 $this->json_return($ajax);
-            }
+            }*/
         }
         else
         {
@@ -490,28 +515,40 @@ class Payment_edit_request extends Root_Controller
                 $this->json_return($ajax);
             }
         }
-
-        //Payment Item Checking(by $payment_id)
-        $result=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$payment_id),1);
+        $result=Query_helper::get_info($this->config->item('table_pos_payment'),array('*'),array('id ='.$item['payment_id']),1);
         if(!$result)
         {
-            System_helper::invalid_try('Update Non Exists',$id);
+            System_helper::invalid_try('Save',$edit_id,'Payment id('.$item['payment_id'].') not exits');
             $ajax['status']=false;
-            $ajax['system_message']='Invalid Payment Edit Request.';
+            $ajax['system_message']='Invalid Payment.';
             $this->json_return($ajax);
         }
         if($result['status']==$this->config->item('system_status_delete'))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Your requested payment is deleted. You can not save it';
+            $ajax['system_message']='Invalid Payment.';
             $this->json_return($ajax);
         }
-        if($result['status_receive']!==$this->config->item('system_status_complete'))
+        if($result['status_payment_receive']!==$this->config->item('system_status_received'))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Payment is not received yet. You can not save it';
+            $ajax['system_message']='Payment is not received yet.';
             $this->json_return($ajax);
         }
+        if(!in_array($result['outlet_id'],$this->user_outlet_ids))
+        {
+            System_helper::invalid_try('Save',$edit_id,'outlet id '.$result['outlet_id'].' not assigned');
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+            die();
+        }
+        if($edit_id==0)
+        {
+            $item['image_name']=$result['image_name'];
+            $item['image_location']=$result['image_location'];
+        }
+
 
         if(!$this->check_validation())
         {
@@ -520,15 +557,9 @@ class Payment_edit_request extends Root_Controller
             $this->json_return($ajax);
         }
 
-        // Checking Valid Outlet
-        if(!$this->check_valid_outlet($item['outlet_id'],$invalid_try='Save Outlet Non Assigned',$message='You are trying to save payment edit request from an outlet which is not assigned to you.'))
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->message;
-            $this->json_return($ajax);
-        }
+
         //Uploading attachment
-        $date_payment=str_replace('-','_',$item['date_payment']);
+        $date_payment=str_replace('-','_',strtolower($item['date_payment']));
         $path='images/payment/'.$date_payment;
         $dir=(FCPATH).$path;
         if(!is_dir($dir))
@@ -550,56 +581,34 @@ class Payment_edit_request extends Root_Controller
                 $this->json_return($ajax);
             }
         }
-        if(!(isset($item['image_name'])))
-        {
-            if($id>0)
-            {
-                $item['image_name']=$result_payment_edit['image_name'];
-                $item['image_location']=$result_payment_edit['image_location'];
-            }
-            else
-            {
-                $item['image_name']=$result['image_name'];
-                $item['image_location']=$result['image_location'];
-            }
-        }
         $this->db->trans_start();  //DB Transaction Handle START
-        if($id>0)
+        if($edit_id>0)
         {
-            $item['payment_id']=$payment_id;
-            $item['date_payment']=System_helper::get_time($item['date_payment']);
+
+            /*$item['date_payment']=System_helper::get_time($item['date_payment']);
             $item['date_sale']=System_helper::get_time($item['date_sale']);
             $item['date_receive']=System_helper::get_time($item['date_receive']);
             $item['amount_receive']=$item['amount_payment']-$item['amount_bank_charge'];
             $item['date_updated']=$time;
             $item['user_updated']=$user->user_id;
             $this->db->set('revision_count', 'revision_count+1', FALSE);
-            Query_helper::update($this->config->item('table_pos_payment_edit'),$item,array('id='.$id), true);
+            Query_helper::update($this->config->item('table_pos_payment_edit'),$item,array('id='.$id), true);*/
+
         }
         else
         {
-            $item['payment_id']=$payment_id;
             $item['date_payment']=System_helper::get_time($item['date_payment']);
             $item['date_sale']=System_helper::get_time($item['date_sale']);
             $item['date_receive']=System_helper::get_time($item['date_receive']);
             $item['amount_receive']=$item['amount_payment']-$item['amount_bank_charge'];
-            $item['date_updated']=$time;
-            $item['user_updated']=$user->user_id;
+            $item['date_request_updated']=$time;
+            $item['user_request_updated']=$user->user_id;
             Query_helper::add($this->config->item('table_pos_payment_edit'),$item, true);
         }
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
-            $save_and_new=$this->input->post('system_save_new_status');
-            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
-            if($save_and_new==1)
-            {
-                $this->system_add();
-            }
-            else
-            {
-                $this->system_list();
-            }
+            $this->system_list();
         }
         else
         {
@@ -621,11 +630,25 @@ class Payment_edit_request extends Root_Controller
         $this->form_validation->set_rules('item[amount_bank_charge]',$this->lang->line('LABEL_AMOUNT_BANK_CHARGE'),'required');
         $this->form_validation->set_rules('item[bank_id_source]',$this->lang->line('LABEL_BANK_NAME'),'required');
         $this->form_validation->set_rules('item[bank_account_id_destination]',$this->lang->line('LABEL_BANK_ACCOUNT_NUMBER'),'required');
+        $this->form_validation->set_rules('item[remarks_request]','Edit Reason','required');
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();
             return false;
         }
+        $item=$this->input->post('item');
+        if((System_helper::get_time($item['date_sale']))>(System_helper::get_time($item['date_payment'])))
+        {
+            $this->message='Sale Date Must be less than Payment Date';
+            return false;
+        }
+        if((System_helper::get_time($item['date_payment']))>(System_helper::get_time($item['date_receive'])))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Receive Date Must be same or greater than Payment Date';
+            $this->json_return($ajax);
+        }
+
         return true;
     }
     private function system_details($id)
@@ -954,33 +977,6 @@ class Payment_edit_request extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function check_valid_outlet($outlet_id,$invalid_try,$message)
-    {
-        $user = User_helper::get_user();
-        $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-        $this->db->select('user_outlet.customer_id outlet_id');
-        $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id AND outlet.status="'.$this->config->item('system_status_active').'"','INNER');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-        $this->db->where('user_outlet.revision',1);
-        $this->db->where('user_outlet.user_id',$user->user_id);
-        $this->db->order_by('user_outlet.customer_id','ASC');
-        $result_outlet=$this->db->get()->result_array();
-        $assigned_outlet=array();
-        foreach($result_outlet as $outlet)
-        {
-            $assigned_outlet[]=$outlet['outlet_id'];
-        }
-        if(!(in_array($outlet_id,$assigned_outlet)))
-        {
-            System_helper::invalid_try($invalid_try,$outlet_id);
-            $this->message=$message;
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
     private function system_set_preference()
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
@@ -999,43 +995,7 @@ class Payment_edit_request extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function get_preference()
-    {
-        $user = User_helper::get_user();
-        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
-        $data['barcode']= 1;
-        $data['date_payment']= 1;
-        $data['date_sale']= 1;
-        $data['date_receive']= 1;
-        $data['outlet']= 1;
-        $data['payment_way']= 1;
-        $data['reference_no']= 1;
-        $data['amount_payment']= 1;
-        $data['amount_bank_charge']= 1;
-        $data['amount_receive']= 1;
-        $data['bank_payment_source']= 1;
-        $data['bank_payment_branch_source']= 1;
-        $data['bank_account_number_destination']= 1;
-        if($result)
-        {
-            if($result['preferences']!=null)
-            {
-                $preferences=json_decode($result['preferences'],true);
-                foreach($data as $key=>$value)
-                {
-                    if(isset($preferences[$key]))
-                    {
-                        $data[$key]=$value;
-                    }
-                    else
-                    {
-                        $data[$key]=0;
-                    }
-                }
-            }
-        }
-        return $data;
-    }
+
     private function system_set_preference_all_payment_edit_request()
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))

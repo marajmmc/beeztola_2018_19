@@ -5,7 +5,7 @@ $action_buttons=array();
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
     $action_buttons[]=array(
-        'label'=>'All Edit Payment Request',
+        'label'=>'All List',
         'href'=>site_url($CI->controller_url.'/index/list_all')
     );
 }
@@ -13,7 +13,7 @@ if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))
 {
     $action_buttons[]=array(
         'label'=>$CI->lang->line("ACTION_NEW"),
-        'href'=>site_url($CI->controller_url.'/index/search')
+        'href'=>site_url($CI->controller_url.'/index/add')
     );
 }
 if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
@@ -42,7 +42,7 @@ if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
     (
         'type'=>'button',
         'label'=>$CI->lang->line('ACTION_DELETE'),
-        'data-message-confirm'=>'Are you sure to delete this data?',
+        'data-message-confirm'=>'Are you sure to delete this Payment?',
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/delete')
     );
@@ -123,17 +123,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'date_payment', type: 'string'},
                 { name: 'date_sale', type: 'string'},
                 { name: 'date_receive', type: 'string'},
-                { name: 'outlet', type: 'string'},
+                { name: 'outlet_name', type: 'string'},
                 { name: 'payment_way', type: 'string'},
                 { name: 'reference_no', type: 'string'},
                 { name: 'amount_payment', type: 'string'},
                 { name: 'amount_bank_charge', type: 'string'},
                 { name: 'amount_receive', type: 'string'},
                 { name: 'bank_payment_source', type: 'string'},
-                { name: 'bank_payment_branch_source', type: 'string'},
+                { name: 'bank_branch_source', type: 'string'},
                 { name: 'bank_account_number_destination', type: 'string'}
             ],
             id: 'id',
+            type: 'POST',
             url: url
         };
         var dataAdapter = new $.jqx.dataAdapter(source);
@@ -155,19 +156,20 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsreorder: true,
                 columns:
                     [
-                        { text: '<?php echo $CI->lang->line('LABEL_BARCODE'); ?>', dataField: 'barcode',pinned:true,width:'80',hidden: <?php echo $system_preference_items['barcode']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_DATE_PAYMENT'); ?>', dataField: 'date_payment',pinned:true,width:'100',hidden: <?php echo $system_preference_items['date_payment']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_DATE_SALE'); ?>', dataField: 'date_sale',pinned:true,width:'100',hidden: <?php echo $system_preference_items['date_sale']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_DATE_RECEIVE'); ?>', dataField: 'date_receive',pinned:true,width:'100',hidden: <?php echo $system_preference_items['date_receive']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>',dataField: 'outlet',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['outlet']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id',width:'80',cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BARCODE'); ?>', dataField: 'barcode',width:'80',hidden: <?php echo $system_preference_items['barcode']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_DATE_PAYMENT'); ?>', dataField: 'date_payment',width:'100',hidden: <?php echo $system_preference_items['date_payment']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_DATE_SALE'); ?>', dataField: 'date_sale',width:'100',hidden: <?php echo $system_preference_items['date_sale']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_DATE_RECEIVE'); ?>', dataField: 'date_receive',width:'100',hidden: <?php echo $system_preference_items['date_receive']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>',dataField: 'outlet_name',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_PAYMENT_WAY'); ?>',dataField: 'payment_way',width:'100',filterType:'list',hidden: <?php echo $system_preference_items['payment_way']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_REFERENCE_NO'); ?>',dataField: 'reference_no',width:'100',hidden: <?php echo $system_preference_items['reference_no']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT'); ?>',dataField: 'amount_payment',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_payment']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE'); ?>',dataField: 'amount_bank_charge',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_bank_charge']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE'); ?>',dataField: 'amount_receive',width:'150',cellsAlign:'right', hidden: <?php echo $system_preference_items['amount_receive']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE'); ?>',dataField: 'bank_payment_source',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_source']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_BRANCH_SOURCE'); ?>',dataField: 'bank_payment_branch_source',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_payment_branch_source']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'); ?>',dataField: 'bank_account_number_destination',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_account_number_destination']?0:1;?>}
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE'); ?>',dataField: 'bank_payment_source',filterType:'list',width:'150',hidden: <?php echo $system_preference_items['bank_payment_source']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_BRANCH_SOURCE'); ?>',dataField: 'bank_branch_source',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_branch_source']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'); ?>',dataField: 'bank_account_number_destination',filterType:'list',hidden: <?php echo $system_preference_items['bank_account_number_destination']?0:1;?>}
                     ]
             });
     });

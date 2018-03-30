@@ -73,7 +73,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <?php
                         foreach($CI->user_outlets as $row)
                         {?>
-                            <option value="<?php echo $row['customer_id']?>"><?php echo $row['name'];?></option>
+                            <option value="<?php echo $row['customer_id']?>" <?php if($row['customer_id']==$item['outlet_id']){ echo "selected";}?>><?php echo $row['name'];?></option>
                         <?php
                         }
                         ?>
