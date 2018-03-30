@@ -785,7 +785,7 @@ class Payment_deposit extends Root_Controller
         $item['date_deposit_forwarded']=$time;
         $item['user_deposit_forwarded']=$user->user_id;
         //$item['status_deposit_forward']=$this->config->item('system_status_forwarded');
-        //status coming from input
+
         Query_helper::update($this->config->item('table_pos_payment'),$item,array('id='.$id));
 
         $this->db->trans_complete();   //DB Transaction Handle END
