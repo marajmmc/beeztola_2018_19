@@ -435,6 +435,7 @@ class Payment_edit_approve extends Root_Controller
             //inserting into history table
             $data=$item_current;
             unset($data['id']);
+            $data['edit_id']=$edit_id;
             $data['payment_id']=$item_new['payment_id'];
             Query_helper::add($this->config->item('table_pos_payment_edit_history'),$data, false);
             //update new value
