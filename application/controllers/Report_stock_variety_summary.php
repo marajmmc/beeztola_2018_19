@@ -144,7 +144,7 @@ class Report_stock_variety_summary extends Root_Controller
         {
             $this->db->where('croptype.crop_id',$crop_id);
         }
-        if($pack_size_id>=0 && is_numeric($pack_size_id))
+        if($pack_size_id>0 && is_numeric($pack_size_id))
         {
             $this->db->where('stock_summary_variety.pack_size_id',$pack_size_id);
         }
@@ -222,9 +222,12 @@ class Report_stock_variety_summary extends Root_Controller
                 $items[]=$this->get_row($pack);
             }
         }
-        $items[]=$this->get_row($type_total);
-        $items[]=$this->get_row($crop_total);
-        $items[]=$this->get_row($grand_total);
+        if($results)
+        {
+            $items[]=$this->get_row($type_total);
+            $items[]=$this->get_row($crop_total);
+            $items[]=$this->get_row($grand_total);
+        }
         $this->json_return($items);
         die();
     }
