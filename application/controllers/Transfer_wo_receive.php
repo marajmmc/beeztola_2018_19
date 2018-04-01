@@ -387,8 +387,10 @@ class Transfer_wo_receive extends Root_Controller
             $data['status_receive_approve']=$this->config->item('system_status_pending');
             $data['status_system_delivery_receive']=$this->config->item('system_status_no');
             $data['remarks_receive_forward']=$item_head['remarks_receive_forward'];
-            $data['date_updated_delivery_forward']=$time;
-            $data['user_updated_delivery_forward']=$user->user_id;
+            /*$data['date_updated_delivery_forward']=$time;
+            $data['user_updated_delivery_forward']=$user->user_id;*/
+            $data['date_updated_receive_forward']=$time;
+            $data['user_updated_receive_forward']=$user->user_id;
             $this->db->set('revision_count_delivery', 'revision_count_delivery+1', FALSE);
             Query_helper::update($this->config->item('table_sms_transfer_wo'),$data, array('id='.$id), false);
             foreach($items as $item)

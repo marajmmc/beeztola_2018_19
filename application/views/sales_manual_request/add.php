@@ -401,6 +401,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
                 //val works but not set as value
                 $(content_id+' .price_unit_pack').attr('value',sale_varieties_info[variety_barcode]['price_unit_pack']);
+                //$(content_id+' .price_unit_pack').val(sale_varieties_info[variety_barcode]['price_unit_pack']);
                 $(content_id+' .price_unit_pack').attr('id','price_unit_pack_'+variety_barcode);
                 $(content_id+' .price_unit_pack').attr('name','items['+sale_varieties_info[variety_barcode]['variety_id']+']['+sale_varieties_info[variety_barcode]['pack_size_id']+'][price_unit_pack]');
 

@@ -152,7 +152,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         $stock_quantity_total_new_kg+=$stock_quantity_new_kg;
 
                         ?>
-                        <tr id="item_rows_<?php echo $index+1;?>">
+                        <tr id="item_rows_<?php echo $index+1;?>" class='<?php if($quantity_approve!=$quantity_receive){echo 'quantity_exist_warning';}?>'>
                             <td>
                                 <label><?php echo $value['crop_name']; ?></label>
                             </td>
