@@ -132,6 +132,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 {
                     $('#crop_type_id').html(get_dropdown_with_select(system_types[crop_id]));
                 }
+                else
+                {
+                    $('#crop_type_id_container').hide();
+                }
             }
         });
         $(document).on("change","#crop_type_id",function()
@@ -146,6 +150,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 if(system_varieties[crop_type_id]!==undefined)
                 {
                     $('#variety_id').html(get_dropdown_with_select(system_varieties[crop_type_id]));
+                }
+                else
+                {
+                    $('#variety_id_container').hide();
                 }
             }
         });
