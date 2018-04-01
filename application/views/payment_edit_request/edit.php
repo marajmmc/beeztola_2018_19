@@ -23,33 +23,54 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_PAYMENT');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Label</label>
             </div>
             <div class="col-sm-4 col-xs-8">
+                <label class="control-label">New Value</label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label class="control-label">Current Value</label>
+            </div>
+        </div>
+
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_PAYMENT');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-xs-4">
                 <input type="text" name="item[date_payment]" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date_payment']);?>" readonly/>
+            </div>
+            <div class="col-xs-4">
+                <label class="control-label"><?php echo System_helper::display_date($item_current['date_payment']);?></label>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_SALE');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <input type="text" name="item[date_sale]" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date_sale']);?>" readonly/>
+            </div>
+            <div class="col-xs-4">
+                <label class="control-label"><?php echo System_helper::display_date($item_current['date_sale']);?></label>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_RECEIVE');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class=" col-xs-4">
                 <input type="text" name="item[date_receive]" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date_receive']);?>" readonly/>
+            </div>
+            <div class="col-xs-4">
+                <label class="control-label"><?php echo System_helper::display_date($item_current['date_receive']);?></label>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <?php
                 if(sizeof($CI->user_outlets)==1)
                 {
@@ -75,12 +96,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 ?>
             </div>
+            <div class="col-xs-4">
+                <label class="control-label"><?php echo ($item_current['outlet_name']);?></label>
+            </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PAYMENT_WAY');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <select name="item[payment_way_id]" class="form-control">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
@@ -92,44 +116,51 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ?>
                 </select>
             </div>
+            <div class="col-xs-4">
+                <label class="control-label"><?php echo ($item_current['payment_way']);?></label>
+            </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <input type="text" name="item[reference_no]" class="form-control" value="<?php echo $item['reference_no'];?>"/>
             </div>
+            <label class="control-label"><?php echo ($item_current['reference_no']);?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <input type="text" id="amount_payment" name="item[amount_payment]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_payment'];?>"/>
             </div>
+            <label class="control-label"><?php echo number_format($item_current['amount_payment'],2);?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <input type="text" id="amount_bank_charge" name="item[amount_bank_charge]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_bank_charge'];?>"/>
             </div>
+            <label class="control-label"><?php echo number_format($item_current['amount_bank_charge'],2);?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?>:</label>
             </div>
-            <div class="col-sm-4 col-xs-8">
-                <label id="amount_receive"><?php echo number_format(($item['amount_payment']-$item['amount_bank_charge']),2);?></label>
+            <div class="col-xs-4">
+                <label id="amount_receive"><?php echo number_format(($item['amount_receive']),2);?></label>
             </div>
+            <label class="control-label"><?php echo number_format($item_current['amount_receive'],2);?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <select name="item[bank_id_source]" class="form-control">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
@@ -141,20 +172,22 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ?>
                 </select>
             </div>
+            <label class="control-label"><?php echo ($item_current['bank_payment_source']);?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_BRANCH_SOURCE');?></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <input type="text" name="item[bank_branch_source]" class="form-control" value="<?php echo $item['bank_branch_source'];?>"/>
             </div>
+            <label class="control-label"><?php echo ($item_current['bank_branch_source']);?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER').' (Receive)';?><span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <select name="item[bank_account_id_destination]" class="form-control">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
@@ -166,6 +199,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ?>
                 </select>
             </div>
+            <label class="control-label"><?php echo $item_current['account_number'];?></label>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
@@ -181,12 +215,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div class="col-xs-4" id="image_payment">
                 <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
             </div>
+            <div class="col-xs-4">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item_current['image_location']; ?>" alt="<?php echo $item_current['image_name']; ?>">
+            </div>
+
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right">Edit Reason<span style="color:#FF0000">*</span></label>
             </div>
-            <div class="col-sm-4 col-xs-8">
+            <div class="col-xs-4">
                 <textarea name="item[remarks_request]" class="form-control"><?php echo $item['remarks_request'] ?></textarea>
             </div>
         </div>

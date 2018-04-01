@@ -20,7 +20,7 @@ $config['table_pos_setup_farmer_type_outlet_discount_histories'] = 'arm_beeztola
 
 $config['table_pos_payment'] = 'arm_beeztola_2018_19.pos_payment';
 $config['table_pos_payment_edit'] = 'arm_beeztola_2018_19.pos_payment_edit';
-
+$config['table_pos_payment_edit_history'] = 'arm_beeztola_2018_19.pos_payment_edit_history';
 //sale
 $config['table_pos_sale'] = 'arm_beeztola_2018_19.pos_sale';
 $config['table_pos_sale_details'] = 'arm_beeztola_2018_19.pos_sale_details';
@@ -31,7 +31,7 @@ $config['table_pos_sale_manual_details'] = 'arm_beeztola_2018_19.pos_sale_manual
 
 
 
-$config['table_pos_payment_edit_history'] = 'arm_beeztola_2018_19.pos_payment_edit_history';
+
 
 
 
