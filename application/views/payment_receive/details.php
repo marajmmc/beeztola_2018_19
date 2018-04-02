@@ -142,6 +142,25 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td class="header_value"><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></td>
                 <td colspan="2">&nbsp;</td>
             </tr>
+            <?php
+            if($item['status_payment_receive']==$CI->config->item('system_status_received'))
+            {
+                ?>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?></label></td>
+                    <td class=""><label class="control-label"><?php echo number_format($item['amount_bank_charge'],2);?></label></td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?></label></td>
+                    <td class=""><label class="control-label"><?php echo number_format(($item['amount_receive']),2);?></label></td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            <?php
+            }
+            ?>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?></label></td>
                 <td class=" header_value"><label class="control-label"><?php echo $item['bank_payment_source'];?></label></td>
