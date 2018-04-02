@@ -273,7 +273,7 @@ class Sales_cancel_approve extends Root_Controller
             {
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
-            $user_ids[$data['cancel_info']['remarks_cancel_requested']]=$data['cancel_info']['remarks_cancel_requested'];
+            $user_ids[$data['cancel_info']['user_cancel_requested']]=$data['cancel_info']['user_cancel_requested'];
 
             $data['users']=System_helper::get_users_info($user_ids);
             $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($sale_id).')';
@@ -485,7 +485,7 @@ class Sales_cancel_approve extends Root_Controller
             {
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
-            $user_ids[$data['cancel_info']['remarks_cancel_requested']]=$data['cancel_info']['remarks_cancel_requested'];
+            $user_ids[$data['cancel_info']['user_cancel_requested']]=$data['cancel_info']['user_cancel_requested'];
             if($data['cancel_info']['user_cancel_approved']>0)
             {
                 $user_ids[$data['cancel_info']['user_cancel_approved']]=$data['cancel_info']['user_cancel_approved'];
