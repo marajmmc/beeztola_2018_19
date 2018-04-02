@@ -144,6 +144,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
+                <label class="control-label pull-right">Receive/Back<span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select class="form-control" name="item[status_payment_receive]">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <option value="<?php echo $this->config->item('system_status_received')?>">Receive</option>
+                    <option value="<?php echo $this->config->item('system_status_rejected')?>">Back To deposit</option>
+                </select>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
@@ -156,7 +168,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button">
-                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are you sure to Receive?">Receive</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are you sure to Receive?">Receive/Back</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">

@@ -339,6 +339,7 @@ class Payment_receive extends Root_Controller
     }
     private function system_save()
     {
+
         $item_id = $this->input->post("id");
         $user = User_helper::get_user();
         $time=time();
@@ -386,20 +387,38 @@ class Payment_receive extends Root_Controller
             $this->json_return($ajax);
         }
         // Checking Valid Outlet
-        if($date_payment>(System_helper::get_time($item['date_receive'])))
+        if($item['status_payment_receive']==$this->config->item('system_status_received'))
         {
-            $ajax['status']=false;
-            $ajax['system_message']='Receive Date Must be same or greater than Payment Date';
-            $this->json_return($ajax);
+            if($date_payment>(System_helper::get_time($item['date_receive'])))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Receive Date Must be same or greater than Payment Date';
+                $this->json_return($ajax);
+            }
         }
 
+
         $this->db->trans_start();  //DB Transaction Handle START
-        $item['date_receive']=System_helper::get_time($item['date_receive']);
-        $item['amount_receive']=$result['amount_payment']-$item['amount_bank_charge'];
-        $item['status_payment_receive']=$this->config->item('system_status_received');
-        $item['date_payment_received']=$time;
-        $item['user_payment_received']=$user->user_id;
-        Query_helper::update($this->config->item('table_pos_payment'),$item,array('id='.$item_id), true);
+        if($item['status_payment_receive']==$this->config->item('system_status_received'))
+        {
+            $item['date_receive']=System_helper::get_time($item['date_receive']);
+            $item['amount_receive']=$result['amount_payment']-$item['amount_bank_charge'];
+            $item['date_payment_received']=$time;
+            $item['user_payment_received']=$user->user_id;
+            Query_helper::update($this->config->item('table_pos_payment'),$item,array('id='.$item_id), true);
+
+        }
+        else if($item['status_payment_receive']==$this->config->item('system_status_rejected'))
+        {
+            $data=array();
+            $data['status_deposit_forward']=$this->config->item('system_status_pending');
+            $this->db->set('revision_count_receive_reject', 'revision_count_receive_reject+1', FALSE);
+            $data['date_receive_rejected']=$time;
+            $data['user_receive_rejected']=$user->user_id;
+            $data['remarks_receive_rejected']=$item['remarks_receive'];
+            Query_helper::update($this->config->item('table_pos_payment'),$data,array('id='.$item_id), true);
+        }
+
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
@@ -415,14 +434,25 @@ class Payment_receive extends Root_Controller
     }
     private function check_validation()
     {
+        $item=$this->input->post('item');
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('item[date_receive]',$this->lang->line('LABEL_DATE_RECEIVE'),'required');
-        $this->form_validation->set_rules('item[amount_bank_charge]',$this->lang->line('LABEL_AMOUNT_BANK_CHARGE'),'required');
+
+        $this->form_validation->set_rules('item[status_payment_receive]',$this->lang->line('LABEL_STATUS_RECEIVE'),'required');
+        if($item['status_payment_receive']==$this->config->item('system_status_rejected'))
+        {
+            $this->form_validation->set_rules('item[remarks_receive]',$this->lang->line('LABEL_REMARKS'),'required');
+        }
+        elseif($item['status_payment_receive']==$this->config->item('system_status_received'))
+        {
+            $this->form_validation->set_rules('item[date_receive]',$this->lang->line('LABEL_DATE_RECEIVE'),'required');
+            $this->form_validation->set_rules('item[amount_bank_charge]',$this->lang->line('LABEL_AMOUNT_BANK_CHARGE'),'required');
+        }
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();
             return false;
         }
+
         return true;
     }
     private function system_details($id)

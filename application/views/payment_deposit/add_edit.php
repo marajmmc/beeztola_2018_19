@@ -36,6 +36,38 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="clearfix"></div>
         </div>
+        <?php
+        if($item['revision_count_receive_reject']>0)
+        {
+            ?>
+            <div class="row show-grid">
+                <div class="col-xs-4">
+                    <label class="control-label pull-right">Payment Back By</label>
+                </div>
+                <div class="col-sm-4 col-xs-8">
+                    <label class="control-label"><?php echo $users[$item['user_receive_rejected']]['name'];?></label>
+                </div>
+            </div>
+            <div class="row show-grid">
+                <div class="col-xs-4">
+                    <label class="control-label pull-right">Payment Back Time</label>
+                </div>
+                <div class="col-sm-4 col-xs-8">
+                    <label class="control-label"><?php echo System_helper::display_date_time($item['date_receive_rejected']);?></label>
+
+                </div>
+            </div>
+            <div class="row show-grid">
+                <div class="col-xs-4">
+                    <label class="control-label pull-right">Payment Back Reason</label>
+                </div>
+                <div class="col-sm-4 col-xs-8">
+                    <label class="control-label"><?php echo $item['remarks_receive_rejected'];?></label>
+                </div>
+            </div>
+            <?php
+        }
+        ?>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_PAYMENT');?><span style="color:#FF0000">*</span></label>

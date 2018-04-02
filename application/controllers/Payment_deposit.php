@@ -299,7 +299,8 @@ class Payment_deposit extends Root_Controller
                 'bank_account_id_destination'=>'',
                 'image_location'=>'',
                 'image_name'=>'',
-                'remarks_deposit'=>''
+                'remarks_deposit'=>'',
+                'revision_count_receive_reject'=>0
             );
             $data['payment_way']=Query_helper::get_info($this->config->item('table_login_setup_payment_way'),array('id value, name text'),array('status ="'.$this->config->item('system_status_active').'"'));
             $data['bank_source']=Query_helper::get_info($this->config->item('table_login_setup_bank'),array('id bank_id_source, name bank_name_source'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering'));
@@ -382,6 +383,14 @@ class Payment_deposit extends Root_Controller
             $this->db->where('bank.status !=',$this->config->item('system_status_delete'));
             $this->db->order_by('bank.ordering','ASC');
             $data['bank_accounts_destination']=$this->db->get()->result_array();
+
+            $user_ids=array();
+            $user_ids[$data['item']['user_deposit_updated']]=$data['item']['user_deposit_updated'];
+            if($data['item']['user_receive_rejected']>0)
+            {
+                $user_ids[$data['item']['user_receive_rejected']]=$data['item']['user_receive_rejected'];
+            }
+            $data['users']=System_helper::get_users_info($user_ids);
 
             $data['title']="Edit Payment:: ". Barcode_helper::get_barcode_payment($data['item']['id']);
             $ajax['status']=true;
