@@ -900,6 +900,21 @@ class Payment_edit_request extends Root_Controller
                 $this->json_return($ajax);
                 die();
             }
+            $this->db->from($this->config->item('table_pos_payment').' payment');
+            $this->db->select('payment.*');
+            $this->db->select('outlet_info.name outlet_name');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=payment.outlet_id AND outlet_info.revision=1','INNER');
+            $this->db->select('payment_way.name payment_way');
+            $this->db->join($this->config->item('table_login_setup_payment_way').' payment_way','payment_way.id=payment.payment_way_id','INNER');
+            $this->db->select('bank_source.name bank_payment_source');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_source','bank_source.id=payment.bank_id_source','INNER');
+            $this->db->join($this->config->item('table_login_setup_bank_account').' ba','ba.id=payment.bank_account_id_destination','LEFT');
+            $this->db->select('bank_destination.name bank_destination, ba.account_number, ba.branch_name');
+            $this->db->join($this->config->item('table_login_setup_bank').' bank_destination','bank_destination.id=ba.bank_id','LEFT');
+            $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('payment.id',$data['item']['payment_id']);
+            $data['item_current']=$this->db->get()->row_array();
+
             $user_ids=array();
             $user_ids[$data['item']['user_request_updated']]=$data['item']['user_request_updated'];
             $data['users']=System_helper::get_users_info($user_ids);

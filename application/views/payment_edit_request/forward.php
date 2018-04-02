@@ -33,69 +33,85 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td class="header_value"><label class="control-label"><?php echo System_helper::display_date_time($item['date_request_updated']);?></label></td>
             </tr>
             <tr>
+                <td class="widget-header header_caption text-center" colspan="2"><label class="control-label">New Value</label></td>
+                <td class="widget-header header_caption text-center" colspan="2"><label class="control-label">Current Value</label></td>
+            </tr>
+            <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_PAYMENT');?></label></td>
                 <td class=""><label class="control-label"><?php echo System_helper::display_date($item['date_payment']);?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo System_helper::display_date($item_current['date_payment']);?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_SALE');?></label></td>
                 <td class=""><label class="control-label"><?php echo System_helper::display_date($item['date_sale']);?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo System_helper::display_date($item_current['date_sale']);?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_RECEIVE');?></label></td>
                 <td class=""><label class="control-label"><?php echo System_helper::display_date($item['date_receive']);?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo System_helper::display_date($item_current['date_receive']);?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['outlet_name'];?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo $item_current['outlet_name'];?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PAYMENT_WAY');?></label></td>
                 <td class="header_value"><label class="control-label"><?php echo $item['payment_way'];?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class="header_value"><label class="control-label"><?php echo $item_current['payment_way'];?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?></label></td>
                 <td class=" header_value"><label class="control-label"><?php echo $item['reference_no'];?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=" header_value"><label class="control-label"><?php echo $item_current['reference_no'];?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?></label></td>
                 <td class=""><label class="control-label"><?php echo number_format($item['amount_payment'],2);?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo number_format($item_current['amount_payment'],2);?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?></label></td>
                 <td class=""><label class="control-label"><?php echo number_format($item['amount_bank_charge'],2);?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo number_format($item_current['amount_bank_charge'],2);?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_RECEIVE');?></label></td>
                 <td class=""><label class="control-label"><?php echo number_format(($item['amount_receive']),2);?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=""><label class="control-label"><?php echo number_format(($item_current['amount_receive']),2);?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?></label></td>
                 <td class="header_value"><label class="control-label"><?php echo $item['bank_payment_source'];?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class="header_value"><label class="control-label"><?php echo $item_current['bank_payment_source'];?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_BRANCH_SOURCE');?></label></td>
                 <td class="header_value"><label class="control-label"><?php echo $item['bank_branch_source'];?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class="header_value"><label class="control-label"><?php echo $item_current['bank_branch_source'];?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION');?></label></td>
                 <td class=" header_value"><label class="control-label"><?php echo $item['account_number'].' ('.$item['bank_destination'].' -'.$item['branch_name'].')';?></label></td>
-                <td colspan="2">&nbsp;</td>
+                <td class=" header_value"><label class="control-label"><?php echo $item_current['account_number'].' ('.$item_current['bank_destination'].' -'.$item_current['branch_name'].')';?></label></td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right">Attachment (Document)</label></td>
-                <td colspan="3" class=" header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></td>
-
+                <td class="header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></td>
+                <td class="header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item_current['image_location']; ?>" alt="<?php echo $item_current['image_name']; ?>"></td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right">Edit Reason</label></td>

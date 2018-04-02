@@ -249,10 +249,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
-        $(document).off('input','#amount_bank_charge');
         $(document).on('input', '#amount_bank_charge', function()
         {
-            var amount_payment=<?php echo $item['amount_payment'];?>;
+            var amount_payment=$('#amount_payment').val();
+            var amount_bank_charge=$('#amount_bank_charge').val();
+            var amount_receive=number_format((amount_payment-amount_bank_charge),2);
+            $('#amount_receive').html(amount_receive);
+        });
+        $(document).off('input','#amount_payment');
+        $(document).on('input', '#amount_payment', function()
+        {
+            var amount_payment=$('#amount_payment').val();
             var amount_bank_charge=$('#amount_bank_charge').val();
             var amount_receive=number_format((amount_payment-amount_bank_charge),2);
             $('#amount_receive').html(amount_receive);
