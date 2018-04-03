@@ -4,7 +4,8 @@ class Transfer extends CI_Controller
 {
     public function index()
     {
-        $this->users();
+        //$this->users();
+        //$this->payment();
     }
     private function users()
     {
@@ -67,12 +68,121 @@ class Transfer extends CI_Controller
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
-            echo 'Success';
+            echo 'Success Transfer users';
         }
         else
         {
-            echo 'Failed';
+            echo 'Failed Transfer users';
         }
+    }
+    private function payment()
+    {
+        $source_tables=array(
+            'user_pos_new'=>$this->config->item('table_pos_setup_user'),
+            'user_login_old'=>'arm_login.setup_user',
+            'outlets'=>'arm_ems.ems_csetup_customers',
+            'payment_way'=>$this->config->item('table_login_setup_payment_way'),
+            'payment'=>'arm_ems.ems_payment_payment'
+        );
+        $destination_tables=array(
+            'payment'=>$this->config->item('table_pos_payment')
+        );
+
+        $results=Query_helper::get_info($source_tables['user_login_old'],array('id,user_name'),array());
+        $payment_users_old=array();
+        foreach($results as $result)
+        {
+            $payment_users_old[$result['id']]=$result['user_name'];
+        }
+
+        $results=Query_helper::get_info($source_tables['user_pos_new'],array('id,user_name'),array());
+        $payment_users_new=array();
+        foreach($results as $result)
+        {
+            $payment_users_new[$result['user_name']]=$result['id'];
+        }
+        $results=Query_helper::get_info($source_tables['payment_way'],array('id,name'),array());
+        $payment_ways=array();
+        foreach($results as $result)
+        {
+            $payment_ways[$result['name']]=$result['id'];
+        }
+        $results=Query_helper::get_info($source_tables['outlets'],array('id,name,customer_code'),array('type ="Outlet"'));
+        $outlet_ids=array();
+        foreach($results as $result)
+        {
+            $outlet_ids[$result['id']]=$result['id'];
+        }
+        $this->db->from($source_tables['payment']);
+        $this->db->where_in('customer_id',$outlet_ids);
+        $this->db->where('status','Active');//ignored deleted
+        $this->db->order_by('id','ASC');
+        $results=$this->db->get()->result_array();
+        $this->db->trans_start();  //DB Transaction Handle START
+        foreach($results as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['date_payment']=$result['date_payment_customer'];
+            $data['date_sale']=$result['date_payment_customer']-3600*24;
+            $data['outlet_id']=$result['customer_id'];
+            /*if(!(isset($payment_ways[$result['payment_way']])))
+            {
+                die('Payment way not found');
+            }*/
+            $data['payment_way_id']=$payment_ways[$result['payment_way']];
+            $data['reference_no']=$result['cheque_no'];
+            $data['amount_payment']=$result['amount_customer'];
+            /*if(!($result['amount_customer']>0))
+            {
+                die('Payment amount is 0');
+            }*/
+            $data['bank_id_source']=$result['bank_id'];
+            $data['bank_branch_source']=$result['bank_branch'];
+            //$data['image_name']='no_image.jpg';
+            //$data['image_location']='images/no_image.jpg';
+            //$data['remarks_deposit']='';
+            //$data['revision_count_deposit']=1;
+
+            $data['date_deposit_updated']=$result['date_created'];
+            $data['user_deposit_updated']=$payment_users_new[$payment_users_old[$result['user_created']]];
+            if(!($result['arm_bank_id']>0))
+            {
+                $data['bank_account_id_destination']=0;
+                //$data['status_deposit_forward']=$this->config->item('system_status_pending');
+
+            }
+            else
+            {
+                $data['bank_account_id_destination']=$result['arm_bank_id'];
+                $data['status_deposit_forward']=$this->config->item('system_status_forwarded');
+                $data['date_deposit_forwarded']=$result['date_created'];
+                $data['user_deposit_forwarded']=$payment_users_new[$payment_users_old[$result['user_created']]];
+                $data['date_receive']=$result['date_payment_receive'];
+                $data['amount_bank_charge']=$result['amount']-$result['amount_customer'];
+                $data['amount_receive']=$result['amount'];
+                //$data['remarks_receive']='';
+                $data['status_payment_receive']=$this->config->item('system_status_received');
+                $data['date_payment_received']=$result['date_receive'];
+                $data['user_payment_received']=$payment_users_new[$payment_users_old[$result['user_receive']]];
+            }
+            //$data['status']=$result['status'];
+//            echo '<pre>';
+//            print_r($data);
+//            echo '</pre>';
+            Query_helper::add($destination_tables['payment'],$data,false);
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            echo 'Success transfer payment';
+        }
+        else
+        {
+            echo 'Failed transfer payment';
+        }
+
+
     }
 
 }
