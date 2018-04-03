@@ -353,6 +353,7 @@ class Transfer_wo_receive extends Root_Controller
 
         $current_stocks=Stock_helper::get_variety_stock($result['item']['outlet_id'],$variety_ids);
         $status_quantity_deference=false;
+        $quantity_total_receive_kg=0;
         foreach($items as $item)
         {
             if(!isset($old_items[$item['variety_id']][$item['pack_size_id']]))
@@ -365,6 +366,8 @@ class Transfer_wo_receive extends Root_Controller
             {
                 $status_quantity_deference=true;
             }
+
+            $quantity_total_receive_kg+=(($item['quantity_receive']*$old_items[$item['variety_id']][$item['pack_size_id']]['pack_size'])/1000);
         }
 
         $this->db->trans_start();
@@ -382,6 +385,7 @@ class Transfer_wo_receive extends Root_Controller
 
             $data=array();
             $data['date_receive']=$time;
+            $data['quantity_total_receive_kg']=$quantity_total_receive_kg;
             $data['status_receive']=$this->config->item('system_status_pending');
             $data['status_receive_forward']=$this->config->item('system_status_forwarded');
             $data['status_receive_approve']=$this->config->item('system_status_pending');
@@ -417,6 +421,7 @@ class Transfer_wo_receive extends Root_Controller
         {
             $data=array();
             $data['date_receive']=$time;
+            $data['quantity_total_receive_kg']=$quantity_total_receive_kg;
             $data['status_receive']=$item_head['status_receive'];
             $data['status_receive_forward']=$this->config->item('system_status_forwarded');
             $data['status_receive_approve']=$this->config->item('system_status_approved');
