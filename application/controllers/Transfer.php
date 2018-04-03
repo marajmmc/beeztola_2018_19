@@ -227,14 +227,70 @@ class Transfer extends CI_Controller
     private function sale()
     {
         $source_tables=array(
-            'sale'=>'arm_pos.pos_sale',
-            'sale_details'=>'arm_pos.pos_sale_details'
+            'sale'=>'arm_pos.pos_sale'
         );
         $destination_tables=array(
             'sale'=>$this->config->item('table_pos_sale'),
-            'sale_details'=>$this->config->item('table_pos_sale_details'),
             'sale_cancel'=>$this->config->item('table_pos_sale_cancel')
         );
+        $results=Query_helper::get_info($source_tables['sale'],'*',array());
+        $this->db->trans_start();  //DB Transaction Handle START
+        foreach($results as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['outlet_id']=$result['customer_id'];
+            $data['outlet_id_commission']=$result['customer_id'];
+            $data['farmer_id']=$result['farmer_id'];
+            $data['discount_self_percentage']=$result['discount_percentage'];
+            $data['amount_total']=$result['amount_total'];
+            $data['amount_discount_variety']=0;
+            $data['amount_discount_self']=$result['amount_total']-$result['amount_payable'];
+            $data['amount_payable']=$result['amount_payable'];
+            $data['amount_payable_actual']=$result['amount_payable'];
+            $data['amount_cash']=$result['amount_cash']+$result['amount_previous_paid'];
+            $data['date_sale']=$result['date_sale'];
+            $data['remarks']=$result['remarks'];
+            $data['status']=$result['status'];
+            if($result['status']==$this->config->item('system_status_inactive'))
+            {
+                $cancel_data=array();
+                $cancel_data['sale_id']=$result['id'];
+                $cancel_data['date_cancel']=$result['date_canceled'];
+
+
+                $cancel_data['date_cancel_requested']=$result['date_canceled'];
+                $cancel_data['user_cancel_requested']=$result['user_canceled'];
+                $cancel_data['remarks_cancel_requested']=$result['remarks'].'<br>--System Request';
+
+                $cancel_data['date_cancel_approved']=$result['date_canceled'];
+                $cancel_data['user_cancel_approved']=$result['user_canceled'];
+                $cancel_data['remarks_cancel_approved']=$result['remarks'].'<br>--System Approve';
+
+                $cancel_data['status_approve']=$this->config->item('system_status_approved');
+
+                Query_helper::add($destination_tables['sale_cancel'],$cancel_data,false);
+
+                $data['date_cancel']=$result['date_canceled'];
+                $data['date_cancel_approved']=$result['date_canceled'];
+                $data['user_cancel_approved']=$result['user_canceled'];
+                $data['remarks_cancel_approved']=$result['remarks'].'<br>--System Approve';
+            }
+            $data['date_created']=$result['date_created'];
+            $data['user_created']=$result['user_created'];
+            Query_helper::add($destination_tables['sale'],$data,false);
+
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            echo 'Success transfer Sale';
+        }
+        else
+        {
+            echo 'Failed transfer Sale';
+        }
+
     }
 
 }
