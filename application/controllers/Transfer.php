@@ -6,6 +6,8 @@ class Transfer extends CI_Controller
     {
         //$this->users();
         //$this->payment();
+        //$this->sale_details();
+        //$this->sale();
     }
     private function users()
     {
@@ -183,6 +185,56 @@ class Transfer extends CI_Controller
         }
 
 
+    }
+    private function sale_details()
+    {
+        $source_tables=array(
+            'sale_details'=>'arm_pos.pos_sale_details'
+        );
+        $destination_tables=array(
+            'sale_details'=>$this->config->item('table_pos_sale_details'),
+        );
+        $results=Query_helper::get_info($source_tables['sale_details'],'*',array());
+        $this->db->trans_start();  //DB Transaction Handle START
+        foreach($results as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['sale_id']=$result['sale_id'];
+            $data['variety_id']=$result['variety_id'];
+            $data['pack_size_id']=$result['pack_size_id'];
+            $data['pack_size']=$result['pack_size'];
+            $data['price_unit_pack']=$result['price_unit'];
+            $data['quantity']=$result['quantity_sale'];
+            $data['amount_total']=$result['quantity_sale']*$result['price_unit'];
+            $data['discount_percentage_variety']=0;
+            $data['amount_discount_variety']=0;
+            $data['amount_payable_actual']=$data['amount_total'];
+            Query_helper::add($destination_tables['sale_details'],$data,false);
+
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            echo 'Success transfer Sale Details';
+        }
+        else
+        {
+            echo 'Failed transfer Sale Details';
+        }
+
+    }
+    private function sale()
+    {
+        $source_tables=array(
+            'sale'=>'arm_pos.pos_sale',
+            'sale_details'=>'arm_pos.pos_sale_details'
+        );
+        $destination_tables=array(
+            'sale'=>$this->config->item('table_pos_sale'),
+            'sale_details'=>$this->config->item('table_pos_sale_details'),
+            'sale_cancel'=>$this->config->item('table_pos_sale_cancel')
+        );
     }
 
 }
