@@ -8,6 +8,7 @@ class Transfer extends CI_Controller
         //$this->payment();
         //$this->sale_details();
         //$this->sale();
+        $this->stock();
     }
     private function users()
     {
@@ -292,5 +293,92 @@ class Transfer extends CI_Controller
         }
 
     }
+    private function stock()
+    {
+        //stock transfer after sale transfer complted
+        $source_tables=array(
+            'outlets'=>'arm_ems.ems_csetup_customers',
+            'po_receives'=>'arm_ems.ems_sales_po_receives',
+            'po_details'=>'arm_ems.ems_sales_po_details',
+            'po'=>'arm_ems.ems_sales_po',
+            'sale'=>$this->config->item('table_pos_sale'),
+            'sale_details'=>$this->config->item('table_pos_sale_details')
+        );
+        $destination_tables=array(
+            'stock'=>$this->config->item('table_pos_stock_summary_variety')
 
+        );
+        //sale quantity
+        $this->db->from($source_tables['sale_details'].' details');
+        $this->db->select('SUM(details.quantity) out_sale');
+        $this->db->select('details.variety_id,details.pack_size_id,details.pack_size');
+        $this->db->join($source_tables['sale'].' sale','sale.id = details.sale_id','INNER');
+        $this->db->select('sale.outlet_id');
+        $this->db->where('sale.status','Active');//ignored deleted
+        $this->db->group_by('sale.outlet_id');
+        $this->db->group_by('details.variety_id');
+        $this->db->group_by('details.pack_size_id');
+        $this->db->order_by('sale.outlet_id','ASC');
+        $results=$this->db->get()->result_array();
+        $sales=array();
+        foreach($results as $result)
+        {
+            $sales[$result['outlet_id']][$result['variety_id']][$result['pack_size_id']]=$result;
+        }
+
+
+        $results=Query_helper::get_info($source_tables['outlets'],array('id,name,customer_code'),array('type ="Outlet"'));
+        $outlet_ids=array();
+        foreach($results as $result)
+        {
+            $outlet_ids[$result['id']]=$result['id'];
+        }
+
+        $this->db->from($source_tables['po_receives'].' por');
+        $this->db->select('SUM(por.quantity_receive-pod.quantity_return) in_wo');
+        //$this->db->select('por.quantity_receive');//sum
+        $this->db->join($source_tables['po_details'].' pod','pod.id =por.sales_po_detail_id','INNER');
+        $this->db->select('pod.variety_id,pod.pack_size_id,pod.pack_size');
+        //$this->db->select('pod.quantity_return');//sum
+        $this->db->join($source_tables['po'].' po','po.id =pod.sales_po_id','INNER');
+        $this->db->select('po.customer_id outlet_id');
+        $this->db->where('po.status_received',$this->config->item('system_status_received'));
+        $this->db->where_in('po.customer_id',$outlet_ids);
+        $this->db->where('por.revision',1);
+        $this->db->where('pod.revision',1);
+        $this->db->group_by('po.customer_id');
+        $this->db->group_by('pod.variety_id');
+        $this->db->group_by('pod.pack_size_id');
+        $this->db->order_by('po.customer_id','ASC');
+        $results=$this->db->get()->result_array();
+        $time=time();
+        $this->db->trans_start();  //DB Transaction Handle START
+        foreach($results as $result)
+        {
+            $data=array();
+            $data['outlet_id']=$result['outlet_id'];
+            $data['variety_id']=$result['variety_id'];
+            $data['pack_size_id']=$result['pack_size_id'];
+            $data['in_wo']=$result['in_wo'];
+            $data['out_sale']=0;
+            if(isset($sales[$result['outlet_id']][$result['variety_id']][$result['pack_size_id']]))
+            {
+                $data['out_sale']=$sales[$result['outlet_id']][$result['variety_id']][$result['pack_size_id']]['out_sale'];
+            }
+            $data['current_stock']=$data['in_wo']-$data['out_sale'];
+            $data['date_updated']=$time;
+            $data['user_updated']=1;
+            Query_helper::add($destination_tables['stock'],$data,false);
+
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            echo 'Success transfer Stock';
+        }
+        else
+        {
+            echo 'Failed transfer Stock';
+        }
+    }
 }
