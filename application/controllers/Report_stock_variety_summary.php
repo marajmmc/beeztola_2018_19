@@ -222,12 +222,9 @@ class Report_stock_variety_summary extends Root_Controller
                 $items[]=$this->get_row($pack);
             }
         }
-        if($results)
-        {
-            $items[]=$this->get_row($type_total);
-            $items[]=$this->get_row($crop_total);
-            $items[]=$this->get_row($grand_total);
-        }
+        $items[]=$this->get_row($type_total);
+        $items[]=$this->get_row($crop_total);
+        $items[]=$this->get_row($grand_total);
         $this->json_return($items);
         die();
     }
