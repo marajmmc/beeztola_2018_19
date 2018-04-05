@@ -37,23 +37,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-6">
-                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_START').' (Sale)';?></label>
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
                     </div>
-                    <div class="col-xs-6">
-                        <input type="text" id="date_start_sale" name="report[date_start_sale]" class="form-control date_large" value="<?php echo $date_start_sale; ?>">
-                    </div>
-                </div>
-                <div class="row show-grid">
-                    <div class="col-xs-6">
-                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_END').' (Sale)';?></label>
-                    </div>
-                    <div class="col-xs-6">
-                        <input type="text" id="date_end_sale" name="report[date_end_sale]" class="form-control date_large" value="<?php echo $date_end_sale; ?>">
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-6">
-                <div class="row show-grid">
                     <div class="col-xs-6">
                         <select id="fiscal_year_id" name="report[fiscal_year_id]" class="form-control">
                             <option value=""><?php echo $CI->lang->line('SELECT');?></option>
@@ -65,12 +50,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             }
                             ?>
                         </select>
-
-                    </div>
-                    <div class="col-xs-6">
-                        <label class="control-label"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
                     </div>
                 </div>
+            </div>
+            <div class="col-xs-6">
+
                 <div class="row show-grid">
                     <div class="col-xs-6">
                         <input type="text" id="date_start_payment" name="report[date_start_payment]" class="form-control date_large" value="<?php echo $date_start_payment; ?>">
@@ -85,6 +69,22 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     </div>
                     <div class="col-xs-6">
                         <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_END').' (Payment)';?></label>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-6">
+                        <input type="text" id="date_start_sale" name="report[date_start_sale]" class="form-control date_large" value="<?php echo $date_start_sale; ?>">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_START').' (Sale)';?></label>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-6">
+                        <input type="text" id="date_end_sale" name="report[date_end_sale]" class="form-control date_large" value="<?php echo $date_end_sale; ?>">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_END').' (Sale)';?></label>
                     </div>
                 </div>
             </div>
