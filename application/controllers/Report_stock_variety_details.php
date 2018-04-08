@@ -163,6 +163,7 @@ class Report_stock_variety_details extends Root_Controller
         $crop_type_id=$this->input->post('crop_type_id');
         $variety_id=$this->input->post('variety_id');
         $pack_size_id=$this->input->post('pack_size_id');
+        //remember pack_size_id replaced in final foreach loop
         $date_end=$this->input->post('date_end');
         $date_start=$this->input->post('date_start');
         //get variety ids form input
@@ -203,9 +204,9 @@ class Report_stock_variety_details extends Root_Controller
         {
             $pack_sizes[$result['value']]=$result['text'];
         }
-
+        //to wo
         $this->db->from($this->config->item('table_sms_transfer_wo_details').' details');
-        $this->db->select('details.variety_id,details.pack_size_id,details.warehouse_id');
+        $this->db->select('details.variety_id,details.pack_size_id');
 
         $this->db->select('SUM(CASE WHEN wo.date_receive<'.$date_start.' then details.quantity_receive ELSE 0 END) in_wo_opening',false);
 
@@ -234,6 +235,34 @@ class Report_stock_variety_details extends Root_Controller
         }
         //write oo code
         //if not in $stock_in array initialize in_wo as 0
+
+        //sales
+        $this->db->from($this->config->item('table_pos_sale_details').' details');
+        $this->db->select('details.variety_id,details.pack_size_id');
+
+        $this->db->select('SUM(CASE WHEN sale.date_sale<'.$date_start.' then details.quantity ELSE 0 END) sale_opening',false);
+        $this->db->select('SUM(CASE WHEN sale.date_sale<'.$date_start.' and sale.status="'.$this->config->item('system_status_inactive').'" then details.quantity ELSE 0 END) sale_cancel_opening',false);
+
+        $this->db->select('SUM(CASE WHEN sale.date_sale>='.$date_start.' and sale.date_sale<='.$date_end.' then details.quantity ELSE 0 END) sale',false);
+        $this->db->select('SUM(CASE WHEN sale.date_sale>='.$date_start.' and sale.date_sale<='.$date_end.' and sale.status="'.$this->config->item('system_status_inactive').'" then details.quantity ELSE 0 END) sale_cancel',false);
+
+
+        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=details.sale_id','INNER');
+        $this->db->where('sale.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('sale.outlet_id',$outlet_id);
+        if($pack_size_id>0)
+        {
+            $this->db->where('details.pack_size_id',$pack_size_id);
+        }
+        $this->db->group_by('details.variety_id');
+        $this->db->group_by('details.pack_size_id');
+        $results=$this->db->get()->result_array();
+        $sales=array();
+        foreach($results as $result)
+        {
+            $sales[$result['variety_id']][$result['pack_size_id']]['out_sale_opening']=($result['sale_opening']-$result['sale_cancel_opening']);
+            $sales[$result['variety_id']][$result['pack_size_id']]['out_sale']=($result['sale']-$result['sale_cancel']);
+        }
 
         $type_total=$this->initialize_row('','','Total Type','');
         $crop_total=$this->initialize_row('','','Total Crop','');
@@ -285,26 +314,38 @@ class Report_stock_variety_details extends Root_Controller
                         $first_row=false;
                     }
                     $info['opening_stock_pkt']=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo_opening'];
-                    $info['opening_stock_kg']=$info['opening_stock_pkt']*$pack_sizes[$pack_size_id]/1000;
-
-                    $type_total['opening_stock_pkt']+=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo_opening'];
-                    $type_total['opening_stock_kg']+=$info['opening_stock_pkt']*$pack_sizes[$pack_size_id]/1000;
-                    $crop_total['opening_stock_pkt']+=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo_opening'];
-                    $crop_total['opening_stock_kg']+=$info['opening_stock_pkt']*$pack_sizes[$pack_size_id]/1000;
-                    $grand_total['opening_stock_pkt']+=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo_opening'];
-                    $grand_total['opening_stock_kg']+=$info['opening_stock_pkt']*$pack_sizes[$pack_size_id]/1000;
-
                     $info['in_wo_pkt']=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo'];
+                    $info['out_sale_pkt']=0;
+
+                    if(isset($sales[$variety['variety_id']][$pack_size_id]))
+                    {
+                        $info['opening_stock_pkt']-=($sales[$variety['variety_id']][$pack_size_id]['out_sale_opening']);
+                        $info['out_sale_pkt']=($sales[$variety['variety_id']][$pack_size_id]['out_sale']);
+                    }
+
+                    $info['opening_stock_kg']=$info['opening_stock_pkt']*$pack_sizes[$pack_size_id]/1000;
+                    $type_total['opening_stock_pkt']+=$info['opening_stock_pkt'];
+                    $type_total['opening_stock_kg']+=$info['opening_stock_kg'];
+                    $crop_total['opening_stock_pkt']+=$info['opening_stock_pkt'];
+                    $crop_total['opening_stock_kg']+=$info['opening_stock_kg'];
+                    $grand_total['opening_stock_pkt']+=$info['opening_stock_pkt'];
+                    $grand_total['opening_stock_kg']+=$info['opening_stock_kg'];
+
                     $info['in_wo_kg']=$info['in_wo_pkt']*$pack_sizes[$pack_size_id]/1000;
+                    $type_total['in_wo_pkt']+=$info['in_wo_pkt'];
+                    $type_total['in_wo_kg']+=$info['in_wo_kg'];
+                    $crop_total['in_wo_pkt']+=$info['in_wo_pkt'];
+                    $crop_total['in_wo_kg']+=$info['in_wo_kg'];
+                    $grand_total['in_wo_pkt']+=$info['in_wo_pkt'];
+                    $grand_total['in_wo_kg']+=$info['in_wo_kg'];
 
-                    $type_total['in_wo_pkt']+=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo'];
-                    $type_total['in_wo_kg']+=$info['in_wo_pkt']*$pack_sizes[$pack_size_id]/1000;
-                    $crop_total['in_wo_pkt']+=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo'];
-                    $crop_total['in_wo_kg']+=$info['in_wo_pkt']*$pack_sizes[$pack_size_id]/1000;
-                    $grand_total['in_wo_pkt']+=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo'];
-                    $grand_total['in_wo_kg']+=$info['in_wo_pkt']*$pack_sizes[$pack_size_id]/1000;
-
-                    //+in_oo_opening
+                    $info['out_sale_kg']=$info['out_sale_pkt']*$pack_sizes[$pack_size_id]/1000;
+                    $type_total['out_sale_pkt']+=$info['out_sale_pkt'];
+                    $type_total['out_sale_kg']+=$info['out_sale_kg'];
+                    $crop_total['out_sale_pkt']+=$info['out_sale_pkt'];
+                    $crop_total['out_sale_kg']+=$info['out_sale_kg'];
+                    $grand_total['out_sale_pkt']+=$info['out_sale_pkt'];
+                    $grand_total['out_sale_kg']+=$info['out_sale_kg'];
 
                     $items[]=$this->get_row($info);
                 }
@@ -330,8 +371,8 @@ class Report_stock_variety_details extends Root_Controller
         $row['in_wo_kg']=0;
         $row['out_sale_pkt']=0;
         $row['out_sale_kg']=0;
-        $row['current_stock_pkt']=0;
-        $row['current_stock_kg']=0;
+        //$row['current_stock_pkt']=0;
+        //$row['current_stock_kg']=0;
         return $row;
     }
     private function reset_row($row)
@@ -342,8 +383,8 @@ class Report_stock_variety_details extends Root_Controller
         $row['in_wo_kg']=0;
         $row['out_sale_pkt']=0;
         $row['out_sale_kg']=0;
-        $row['current_stock_pkt']=0;
-        $row['current_stock_kg']=0;
+        //$row['current_stock_pkt']=0;
+        //$row['current_stock_kg']=0;
         return $row;
     }
     private function get_row($info)
@@ -353,7 +394,8 @@ class Report_stock_variety_details extends Root_Controller
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
-
+        $row['current_stock_pkt']=$info['opening_stock_pkt']+$info['in_wo_pkt']-$info['out_sale_pkt'];
+        $row['current_stock_kg']=$info['opening_stock_kg']+$info['in_wo_kg']-$info['out_sale_kg'];
         if($info['opening_stock_pkt']==0)
         {
             $row['opening_stock_pkt']='';
@@ -387,13 +429,34 @@ class Report_stock_variety_details extends Root_Controller
         {
             $row['in_wo_kg']=number_format($info['in_wo_kg'],3,'.','');
         }
-        $row['out_sale_pkt']=$info['out_sale_pkt'];
-        $row['out_sale_kg']=number_format($info['out_sale_kg'],3,'.','');
-        $row['current_stock_pkt']=$info['current_stock_pkt'];
-        $row['current_stock_kg']=number_format($info['current_stock_kg'],3,'.','');
-
-        //$row['current_stock_kg']=number_format($info['current_stock_kg'],3,'.','');
-        //$row['current_stock_pkt']=$info['current_stock_pkt'];
+        if($info['out_sale_pkt']==0)
+        {
+            $row['out_sale_pkt']='';
+        }
+        else
+        {
+            $row['out_sale_pkt']=$info['out_sale_pkt'];
+        }
+        if($info['out_sale_kg']==0)
+        {
+            $row['out_sale_kg']='';
+        }
+        else
+        {
+            $row['out_sale_kg']=number_format($info['out_sale_kg'],3,'.','');
+        }
+        if($row['current_stock_pkt']==0)
+        {
+            $row['current_stock_pkt']='';
+        }
+        if($row['current_stock_kg']==0)
+        {
+            $row['current_stock_kg']='';
+        }
+        else
+        {
+            $row['current_stock_kg']=number_format($row['current_stock_kg'],3,'.','');
+        }
         return $row;
     }
     private function system_set_preference()
