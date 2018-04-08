@@ -200,6 +200,8 @@ class Report_stock_variety_summary extends Root_Controller
                         $items[]=$this->get_row($type_total);
                         $pack['crop_name']='';
                         $prev_type_name=$pack['crop_type_name'];
+                        $type_total['current_stock_kg']=0;
+                        $type_total['current_stock_pkt']=0;
                     }
                     else
                     {
