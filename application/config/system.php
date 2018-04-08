@@ -29,3 +29,7 @@ $config['system_customer_type_customer_id']=2;
 /*Bank & Account Config*/
 // purpose
 $config['system_bank_account_purpose_sale_receive']='sale_receive';
+
+//System Configuration
+$config['system_purpose_pos_menu_odd_color']='pos_menu_odd_color';
+$config['system_purpose_pos_menu_even_color']='pos_menu_even_color';
