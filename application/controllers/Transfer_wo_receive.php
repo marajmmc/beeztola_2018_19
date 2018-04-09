@@ -50,6 +50,10 @@ class Transfer_wo_receive extends Root_Controller
         {
             $this->system_set_preference();
         }
+        elseif($action=="set_preference_all")
+        {
+            $this->system_set_preference_all();
+        }
         elseif($action=="save_preference")
         {
             System_helper::save_preference();
@@ -175,9 +179,8 @@ class Transfer_wo_receive extends Root_Controller
         $this->db->select('divisions.name division_name');
         $this->db->where('outlet_info.revision',1);
         $this->db->where('transfer_wo.status !=',$this->config->item('system_status_delete'));
-        $this->db->where('transfer_wo.status !=',$this->config->item('system_status_delete'));
         $this->db->where('transfer_wo.status_delivery',$this->config->item('system_status_delivered'));
-        $this->db->where('transfer_wo.status_receive',$this->config->item('system_status_pending'));
+        //$this->db->where('transfer_wo.status_receive',$this->config->item('system_status_pending'));
         $this->db->where('transfer_wo.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
         $this->db->order_by('transfer_wo.id','DESC');
         $results=$this->db->get()->result_array();
@@ -583,6 +586,7 @@ class Transfer_wo_receive extends Root_Controller
     }
     private function system_details($id)
     {
+        $user=User_helper::get_user();
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             if($id>0)
@@ -623,36 +627,14 @@ class Transfer_wo_receive extends Root_Controller
             $this->db->where('transfer_wo.status !=',$this->config->item('system_status_delete'));
             $this->db->where('transfer_wo.id',$item_id);
             $this->db->where('outlet_info.revision',1);
+            $this->db->where('transfer_wo.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
             $this->db->order_by('transfer_wo.id','DESC');
-            /*if($this->locations['division_id']>0)
-            {
-                $this->db->where('divisions.id',$this->locations['division_id']);
-                if($this->locations['zone_id']>0)
-                {
-                    $this->db->where('zones.id',$this->locations['zone_id']);
-                    if($this->locations['territory_id']>0)
-                    {
-                        $this->db->where('territories.id',$this->locations['territory_id']);
-                        if($this->locations['district_id']>0)
-                        {
-                            $this->db->where('districts.id',$this->locations['district_id']);
-                        }
-                    }
-                }
-            }*/
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
                 System_helper::invalid_try('details',$item_id,'View Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
-                $this->json_return($ajax);
-            }
-            if(!$this->check_my_editable($data['item']))
-            {
-                System_helper::invalid_try('details',$item_id,'User location Not Assign.');
-                $ajax['status']=false;
-                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
 
