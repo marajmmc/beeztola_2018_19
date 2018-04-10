@@ -37,11 +37,45 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-6">
-                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
+                        <label class="control-label pull-right">Payment Forward Status</label>
                     </div>
                     <div class="col-xs-6">
+                        <select id="status_deposit_forward" name="report[status_deposit_forward]" class="form-control">
+                            <option value="<?php echo $this->config->item('system_status_forwarded')?>">Forwarded</option>
+                            <option value="<?php echo $this->config->item('system_status_pending')?>">Pending</option>
+
+                        </select>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-6">
+                        <label class="control-label pull-right">Payment Receive Status</label>
+                    </div>
+                    <div class="col-xs-6">
+                        <select id="status_payment_receive" name="report[status_payment_receive]" class="form-control">
+                            <option value="<?php echo $this->config->item('system_status_received')?>">Received</option>
+                            <option value="<?php echo $this->config->item('system_status_pending')?>">Pending</option>
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="row show-grid">
+                    <div class="col-xs-6">
+                        <select id="search_by" name="report[search_by]" class="form-control">
+                            <option value="search_by_sale_date">Sale Date</option>
+                            <option value="search_by_payment_date">Payment Date</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="control-label">Search By</label>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-6">
                         <select id="fiscal_year_id" name="report[fiscal_year_id]" class="form-control">
-                            <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                            <option value=""><?php echo $this->lang->line('SELECT');?></option>
                             <?php
                             foreach($fiscal_years as $year)
                             {?>
@@ -51,40 +85,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             ?>
                         </select>
                     </div>
-                </div>
-            </div>
-            <div class="col-xs-6">
-
-                <div class="row show-grid">
                     <div class="col-xs-6">
-                        <input type="text" id="date_start_payment" name="report[date_start_payment]" class="form-control date_large" value="<?php echo $date_start_payment; ?>">
-                    </div>
-                    <div class="col-xs-6">
-                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_START').' (Payment)';?></label>
+                        <label class="control-label"><?php echo $this->lang->line('LABEL_FISCAL_YEAR');?></label>
                     </div>
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-6">
-                        <input type="text" id="date_end_payment" name="report[date_end_payment]" class="form-control date_large" value="<?php echo $date_end_payment; ?>">
+                        <input type="text" id="date_start" name="report[date_start]" class="form-control date_large" value="<?php echo System_helper::display_date(time()); ?>">
                     </div>
                     <div class="col-xs-6">
-                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_END').' (Payment)';?></label>
-                    </div>
-                </div>
-                <div class="row show-grid">
-                    <div class="col-xs-6">
-                        <input type="text" id="date_start_sale" name="report[date_start_sale]" class="form-control date_large" value="<?php echo $date_start_sale; ?>">
-                    </div>
-                    <div class="col-xs-6">
-                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_START').' (Sale)';?></label>
+                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_START');?></label>
                     </div>
                 </div>
                 <div class="row show-grid">
                     <div class="col-xs-6">
-                        <input type="text" id="date_end_sale" name="report[date_end_sale]" class="form-control date_large" value="<?php echo $date_end_sale; ?>">
+                        <input type="text" id="date_end" name="report[date_end]" class="form-control date_large" value="<?php echo System_helper::display_date(time()); ?>">
                     </div>
                     <div class="col-xs-6">
-                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_END').' (Sale)';?></label>
+                        <label class="control-label"><?php echo $CI->lang->line('LABEL_DATE_END');?></label>
                     </div>
                 </div>
             </div>
