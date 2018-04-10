@@ -24,7 +24,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     </div>
                     <div class="col-xs-6">
                         <select name="report[outlet_id]" class="form-control">
-                            <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                             <?php
                             foreach($assigned_outlet as $outlet)
                             {?>

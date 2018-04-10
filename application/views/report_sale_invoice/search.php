@@ -34,60 +34,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         </select>
                     </div>
                 </div>
-                <div class="row show-grid">
-                    <div class="col-xs-6">
-                        <label class="control-label pull-right">Payment Forward Status</label>
-                    </div>
-                    <div class="col-xs-6">
-                        <select id="status_deposit_forward" name="report[status_deposit_forward]" class="form-control">
-                            <option value="<?php echo $this->config->item('system_status_forwarded')?>">Forwarded</option>
-                            <option value="<?php echo $this->config->item('system_status_pending')?>">Pending</option>
-
-                        </select>
-                    </div>
-                </div>
-                <div class="row show-grid">
-                    <div class="col-xs-6">
-                        <label class="control-label pull-right">Payment Receive Status</label>
-                    </div>
-                    <div class="col-xs-6">
-                        <select id="status_payment_receive" name="report[status_payment_receive]" class="form-control">
-                            <option value="<?php echo $this->config->item('system_status_received')?>">Received</option>
-                            <option value="<?php echo $this->config->item('system_status_pending')?>">Pending</option>
-
-                        </select>
-                    </div>
-                </div>
             </div>
             <div class="col-xs-6">
-                <div class="row show-grid">
-                    <div class="col-xs-6">
-                        <select id="search_by" name="report[search_by]" class="form-control">
-                            <option value="search_by_sale_date">Sale Date</option>
-                            <option value="search_by_payment_date">Payment Date</option>
-                        </select>
-                    </div>
-                    <div class="col-xs-6">
-                        <label class="control-label">Search By</label>
-                    </div>
-                </div>
-                <div class="row show-grid">
-                    <div class="col-xs-6">
-                        <select id="fiscal_year_id" name="report[fiscal_year_id]" class="form-control">
-                            <option value=""><?php echo $this->lang->line('SELECT');?></option>
-                            <?php
-                            foreach($fiscal_years as $year)
-                            {?>
-                                <option value="<?php echo $year['value']?>"><?php echo $year['text'];?></option>
-                            <?php
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-xs-6">
-                        <label class="control-label"><?php echo $this->lang->line('LABEL_FISCAL_YEAR');?></label>
-                    </div>
-                </div>
                 <div class="row show-grid">
                     <div class="col-xs-6">
                         <input type="text" id="date_start" name="report[date_start]" class="form-control date_large" value="<?php echo System_helper::display_date(time()); ?>">
@@ -133,21 +81,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     jQuery(document).ready(function()
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-
         $(".date_large").datepicker({dateFormat : display_date_format,changeMonth: true,changeYear: true,yearRange: "c-2:c+2"});
-        $(document).off("change","#fiscal_year_id");
-
-        $(document).on("change","#fiscal_year_id",function()
-        {
-
-            var fiscal_year_ranges=$('#fiscal_year_id').val();
-            if(fiscal_year_ranges!='')
-            {
-                var dates = fiscal_year_ranges.split("/");
-                $("#date_start").val(dates[0]);
-                $("#date_end").val(dates[1]);
-
-            }
-        });
     });
 </script>
