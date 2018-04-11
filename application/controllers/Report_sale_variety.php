@@ -218,6 +218,7 @@ class Report_sale_variety extends Root_Controller
         $this->db->where('sale.date_sale >=',$date_start);
         $this->db->where('sale.date_sale <=',$date_end);
         $this->db->where('sale.outlet_id',$outlet_id);
+        $this->db->where_in('details.variety_id',$variety_ids);
         if($pack_size_id>0)
         {
             $this->db->where('details.pack_size_id',$pack_size_id);
@@ -368,17 +369,11 @@ class Report_sale_variety extends Root_Controller
     {
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="search_invoice"'),1);
-        $data['sl_no']= 1;
+        $data['crop_name']= 1;
+        $data['crop_type_name']= 1;
+        $data['variety_name']= 1;
+        $data['pack_size']= 1;
         $data['invoice_no']= 1;
-        $data['customer_name']= 1;
-        $data['date_sale']= 1;
-        $data['date_cancel']= 1;
-        $data['amount_total']= 1;
-        $data['amount_discount_variety']= 1;
-        $data['amount_discount_self']= 1;
-        $data['amount_payable']= 1;
-        $data['amount_payable_actual']= 1;
-        $data['amount_actual']= 1;
         if($result)
         {
             if($result['preferences']!=null)
@@ -402,99 +397,154 @@ class Report_sale_variety extends Root_Controller
     private function system_get_items_invoice()
     {
         $outlet_id=$this->input->post('outlet_id');
+        $crop_id=$this->input->post('crop_id');
+        $crop_type_id=$this->input->post('crop_type_id');
+        $variety_id=$this->input->post('variety_id');
+        $pack_size_id=$this->input->post('pack_size_id');
+        //remember pack_size_id replaced in final foreach loop
         $date_end=$this->input->post('date_end');
         $date_start=$this->input->post('date_start');
 
-        $this->db->from($this->config->item('table_pos_sale').' sale');
-        $this->db->select('sale.*');
-        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
-        $this->db->select('f.name customer_name');
-
-        $this->db->where('sale.outlet_id',$outlet_id);
-
-        $where='(sale.date_sale >='.$date_start.' AND sale.date_sale <='.$date_end.')';
-        $where.=' OR (sale.date_cancel >='.$date_start.' AND sale.date_cancel <='.$date_end.')';
-        $this->db->where('('.$where.')');
-        $this->db->order_by('sale.date_sale','DESC');
-
-        $items=$this->db->get()->result_array();
-        $grand_total=array();
-        $grand_total['sl_no']='';
-        $grand_total['invoice_no']='Grand Total';
-        $grand_total['customer_name']='';
-        $grand_total['date_sale']='';
-        $grand_total['date_cancel']='';
-        $grand_total['amount_total']=0;
-        $grand_total['amount_discount_variety']=0;
-        $grand_total['amount_discount_self']=0;
-        $grand_total['amount_payable']=0;
-        $grand_total['amount_payable_actual']=0;
-        $grand_total['amount_actual']=0;
-        $grand_total['status']='';
-        $i=0;
-        foreach($items as &$item)
+        $this->db->from($this->config->item('table_login_setup_classification_varieties').' v');
+        $this->db->select('v.id variety_id,v.name variety_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id=v.crop_type_id','INNER');
+        $this->db->select('crop_type.id crop_type_id, crop_type.name crop_type_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
+        $this->db->select('crop.id crop_id, crop.name crop_name');
+        if($crop_id>0)
         {
-            $i++;
-            if($item['status']==$this->config->item('system_status_active'))
+            $this->db->where('crop.id',$crop_id);
+            if($crop_type_id>0)
             {
-                $item['amount_actual']=$item['amount_payable_actual'];
-            }
-            else
-            {
-                if($item['date_sale']<$date_start)
+                $this->db->where('crop_type.id',$crop_type_id);
+                if($variety_id>0)
                 {
-                    $item['amount_actual']=0-$item['amount_payable'];
-
-                }
-                elseif($item['date_cancel']>$date_end)
-                {
-                    $item['amount_actual']=$item['amount_payable_actual'];
-                }
-                else
-                {
-                    $item['amount_actual']=0;
+                    $this->db->where('v.id',$variety_id);
                 }
             }
+        }
+        $this->db->order_by('crop.id','ASC');
+        $this->db->order_by('crop_type.id','ASC');
+        $this->db->order_by('v.id','ASC');
 
-            $item['sl_no']=$i;
-            $item['invoice_no']=Barcode_helper::get_barcode_sales($item['id']);
-            $item['date_sale']=System_helper::display_date($item['date_sale']);
-            if($item['date_cancel']>0)
+        $varieties=$this->db->get()->result_array();
+        $variety_ids=array();
+        $variety_ids[0]=0;
+        foreach($varieties as $result)
+        {
+            $variety_ids[$result['variety_id']]=$result['variety_id'];
+        }
+
+        $this->db->from($this->config->item('table_pos_sale_details').' details');
+        $this->db->select('details.variety_id,details.pack_size_id,details.pack_size,details.sale_id');
+        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id = details.sale_id','INNER');
+        $this->db->where('sale.status',$this->config->item('system_status_active'));
+        $this->db->where('sale.date_sale >=',$date_start);
+        $this->db->where('sale.date_sale <=',$date_end);
+        $this->db->where('sale.outlet_id',$outlet_id);
+        $this->db->where_in('details.variety_id',$variety_ids);
+        if($pack_size_id>0)
+        {
+            $this->db->where('details.pack_size_id',$pack_size_id);
+        }
+        $this->db->order_by('details.sale_id','DESC');
+        $results=$this->db->get()->result_array();
+        $sales=array();
+        foreach($results as $result)
+        {
+            $sales[$result['variety_id']][$result['pack_size_id']]=$result;
+        }
+
+        //final items
+        $type_total=$this->initialize_row_invoice('','','Total Type','');
+        $crop_total=$this->initialize_row_invoice('','Total Crop','','');
+        $grand_total=$this->initialize_row_invoice('Grand Total','','','');
+
+        $prev_crop_name='';
+        $prev_type_name='';
+        $first_row=true;
+        $items=array();
+        foreach($varieties as $variety)
+        {
+            if(isset($sales[$variety['variety_id']]))
             {
-                $item['date_canceled']=System_helper::display_date_time($item['date_cancel']);
+                foreach($sales[$variety['variety_id']] as $pack_size_id=>$sale_details)
+                {
+                    $info=$this->initialize_row_invoice($variety['crop_name'],$variety['crop_type_name'],$variety['variety_name'],$sale_details['pack_size']);
+                    if(!$first_row)
+                    {
+                        if($prev_crop_name!=$variety['crop_name'])
+                        {
+                            $items[]=$this->get_row_invoice($type_total);
+                            $items[]=$this->get_row_invoice($crop_total);
+                            $type_total=$this->reset_row_invoice($type_total);
+                            $crop_total=$this->reset_row_invoice($crop_total);
+
+                            $prev_crop_name=$variety['crop_name'];
+                            $prev_type_name=$variety['crop_type_name'];
+
+
+                        }
+                        elseif($prev_type_name!=$variety['crop_type_name'])
+                        {
+                            $items[]=$this->get_row_invoice($type_total);
+                            $type_total=$this->reset_row_invoice($type_total);
+
+                            $info['crop_name']='';
+                            $prev_type_name=$variety['crop_type_name'];
+                        }
+                        else
+                        {
+                            $info['crop_name']='';
+                            $info['crop_type_name']='';
+                        }
+                    }
+                    else
+                    {
+                        $prev_crop_name=$variety['crop_name'];
+                        $prev_type_name=$variety['crop_type_name'];
+                        $first_row=false;
+                    }
+                    $info['invoice_no']=Barcode_helper::get_barcode_sales($sale_details['sale_id']);
+
+                    $type_total['invoice_no']++;
+                    $crop_total['invoice_no']++;
+                    $grand_total['invoice_no']++;
+                    $items[]=$this->get_row_invoice($info);
+                }
             }
-            else
-            {
-                $item['date_canceled']='';
-            }
-            $grand_total['amount_total']+=$item['amount_total'];
-            $grand_total['amount_discount_variety']+=$item['amount_discount_variety'];
-            $grand_total['amount_discount_self']+=$item['amount_discount_self'];
-            $grand_total['amount_payable']+=$item['amount_payable'];
-            $grand_total['amount_payable_actual']+=$item['amount_payable_actual'];
-            $grand_total['amount_actual']+=$item['amount_actual'];
 
-
-
-            $item['amount_total']=number_format($item['amount_total'],2);
-            $item['amount_discount_variety']=number_format($item['amount_discount_variety'],2);
-            $item['amount_discount_self']=number_format($item['amount_discount_self'],2);
-            $item['amount_payable']=number_format($item['amount_payable'],2);
-            $item['amount_payable_actual']=number_format($item['amount_payable_actual'],2);
-            $item['amount_actual']=number_format($item['amount_actual'],2);
 
         }
-        $grand_total['sl_no']=$i;
-        $grand_total['amount_total']=number_format($grand_total['amount_total'],2);
-        $grand_total['amount_discount_variety']=number_format($grand_total['amount_discount_variety'],2);
-        $grand_total['amount_discount_self']=number_format($grand_total['amount_discount_self'],2);
-        $grand_total['amount_payable']=number_format($grand_total['amount_payable'],2);
-        $grand_total['amount_payable_actual']=number_format($grand_total['amount_payable_actual'],2);
-        $grand_total['amount_actual']=number_format($grand_total['amount_actual'],2);
-
-        $items[]=$grand_total;
-
+        $items[]=$this->get_row_invoice($type_total);
+        $items[]=$this->get_row_invoice($crop_total);
+        $items[]=$this->get_row_invoice($grand_total);
         $this->json_return($items);
+    }
+    private function initialize_row_invoice($crop_name,$crop_type_name,$variety_name,$pack_size)
+    {
+        $row=array();
+        $row['crop_name']=$crop_name;
+        $row['crop_type_name']=$crop_type_name;
+        $row['variety_name']=$variety_name;
+        $row['pack_size']=$pack_size;
+        $row['invoice_no']=0;
+        return $row;
+    }
+    private function reset_row_invoice($row)
+    {
+        $row['invoice_no']=0;
+        return $row;
+    }
+    private function get_row_invoice($info)
+    {
+        $row=array();
+        $row['crop_name']=$info['crop_name'];
+        $row['crop_type_name']=$info['crop_type_name'];
+        $row['variety_name']=$info['variety_name'];
+        $row['pack_size']=$info['pack_size'];
+        $row['invoice_no']=$info['invoice_no'];
+        return $row;
     }
     private function system_set_preference_invoice()
     {

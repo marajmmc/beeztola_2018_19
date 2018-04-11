@@ -88,6 +88,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <select id="report_name" name="report[report_name]" class="form-control">
                             <option value="quantity">Quantity Wise</option>
                             <option value="invoice">Invoice Wise</option>
+                            <option value="farmer">Customer Wise</option>
                         </select>
                     </div>
                     <div class="col-xs-6">
