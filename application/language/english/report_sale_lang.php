@@ -4,3 +4,5 @@ $lang['LABEL_AMOUNT_DISCOUNT_SELF']='Customer Discount';
 $lang['LABEL_AMOUNT_PAYABLE']='Payable';
 $lang['LABEL_AMOUNT_PAYABLE_ACTUAL']='Payable(rounded)';
 $lang['LABEL_AMOUNT_ACTUAL']='Actual Amount';
+$lang['LABEL_QUANTITY_PKT']='Quantity(pkt)';
+$lang['LABEL_QUANTITY_KG']='Quantity(kg)';
