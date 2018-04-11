@@ -647,7 +647,7 @@ class Transfer_wo_receive extends Root_Controller
             $user_ids[$data['item']['user_updated_delivery']]=$data['item']['user_updated_delivery'];
             $user_ids[$data['item']['user_updated_delivery_forward']]=$data['item']['user_updated_delivery_forward'];
             $user_ids[$data['item']['user_updated_receive_approve']]=$data['item']['user_updated_receive_approve'];
-            $data['users']=System_helper::get_users_info($user_ids);
+            $data['users']=$this->get_sms_users_info($user_ids);
 
             $this->db->from($this->config->item('table_sms_transfer_wo_details').' transfer_wo_details');
             $this->db->select('transfer_wo_details.*');
@@ -920,5 +920,24 @@ class Transfer_wo_receive extends Root_Controller
             }
         }
         return $data;
+    }
+    private function get_sms_users_info($user_ids)
+    {
+        $this->db->from($this->config->item('table_login_setup_user').' user');
+        $this->db->select('user.id,user.employee_id,user.user_name,user.status');
+        $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user.id = user_info.user_id','INNER');
+        $this->db->select('user_info.name,user_info.ordering,user_info.blood_group,user_info.mobile_no');
+        $this->db->where('user_info.revision',1);
+        if(sizeof($user_ids)>0)
+        {
+            $this->db->where_in('user.id',$user_ids);
+        }
+        $results=$this->db->get()->result_array();
+        $users=array();
+        foreach($results as $result)
+        {
+            $users[$result['id']]=$result;
+        }
+        return $users;
     }
 }
