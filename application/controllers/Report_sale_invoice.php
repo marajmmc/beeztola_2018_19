@@ -177,7 +177,7 @@ class Report_sale_invoice extends Root_Controller
         $grand_total['customer_name']='';
         $grand_total['date_sale']='';
         $grand_total['date_cancel']='';
-        $grand_total['amount_total']='';
+        $grand_total['amount_total']=0;
         $grand_total['amount_discount_variety']=0;
         $grand_total['amount_discount_self']=0;
         $grand_total['amount_payable']=0;
