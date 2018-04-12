@@ -4,11 +4,86 @@ class Transfer extends CI_Controller
 {
     public function index()
     {
+        $this->farmer();
         //$this->users();
         //$this->payment();
         //$this->sale_details();
         //$this->sale();
-        $this->stock();
+        //$this->stock();
+    }
+    private function farmer()
+    {
+        $source_tables=array(
+            'farmer'=>'arm_pos.pos_setup_farmer_farmer',
+            'farmer_outlet'=>'arm_pos.pos_setup_farmer_outlet'
+        );
+        $destination_tables=array(
+            'farmer'=>$this->config->item('table_pos_setup_farmer_farmer'),
+            'farmer_outlet'=>$this->config->item('table_pos_setup_farmer_outlet')
+        );
+        $farmers=Query_helper::get_info($source_tables['farmer'],'*',array());
+        $farmer_outlets=Query_helper::get_info($source_tables['farmer_outlet'],'*',array());
+        $this->db->trans_start();  //DB Transaction Handle START
+
+        foreach($farmers as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['name']=$result['name'];
+            $data['farmer_type_id']=$result['type_id'];
+            if($result['type_id']>1)
+            {
+
+                $data['farmer_type_id']=2;
+                $data['status_card_require']=$this->config->item('system_status_yes');
+            }
+            else
+            {
+                $data['farmer_type_id']=1;
+                $data['status_card_require']=$this->config->item('system_status_no');
+            }
+            $data['mobile_no']=$result['mobile_no'];
+            $data['nid']=$result['nid'];
+            $data['address']=$result['address'];
+            $data['time_card_off_end']=$result['time_card_off_end'];
+            if(in_array($result['id'],array(1,429,1520)))
+            {
+                $data['status']=$this->config->item('system_status_inactive');
+            }
+            else
+            {
+                $data['status']=$this->config->item('system_status_active');
+            }
+            $data['time_card_off_end']=$result['time_card_off_end'];
+            $data['date_created']=$result['date_created'];
+            $data['user_created']=$result['user_created'];
+            $data['date_updated']=$result['date_updated'];
+            $data['user_updated']=$result['user_updated'];
+            Query_helper::add($destination_tables['farmer'],$data,false);
+        }
+        foreach($farmer_outlets as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['farmer_id']=$result['farmer_id'];
+            $data['outlet_id']=$result['customer_id'];
+            $data['revision']=$result['revision'];
+            $data['date_created']=$result['date_created'];
+            $data['user_created']=$result['user_created'];
+            $data['date_updated']=$result['date_updated'];
+            $data['user_updated']=$result['user_updated'];
+            Query_helper::add($destination_tables['farmer_outlet'],$data,false);
+        }
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            echo 'Success Transfer Farmer';
+        }
+        else
+        {
+            echo 'Failed Transfer Farmer';
+        }
     }
     private function users()
     {

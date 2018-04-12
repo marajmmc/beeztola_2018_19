@@ -95,6 +95,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <label class="control-label">Report Type<span style="color:#FF0000">*</span></label>
                     </div>
                 </div>
+                <div style="display: none;" class="row show-grid" id="container_farmer_type">
+                    <div class="col-xs-6">
+                        <select name="report[farmer_type_id]" id="farmer_type_id" class="form-control">
+                            <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                            <?php
+                            foreach($farmer_types as $row)
+                            {?>
+                                <option value="<?php echo $row['value']?>"><?php echo $row['text'];?></option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="control-label"><?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME');?></label>
+                    </div>
+                </div>
                 <div class="row show-grid">
                     <div class="col-xs-6">
                         <input type="text" id="date_start" name="report[date_start]" class="form-control date_large" value="<?php echo System_helper::display_date(time()); ?>">
@@ -181,6 +198,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).off('change','#variety_id');
         $(document).off('change','#pack_size_id');
 
+        $(document).off("change", "#report_name");
+        $(document).on("change","#report_name",function()
+        {
+            $("#system_report_container").html("");
+            var report_name=$('#report_name').val();
+            if(report_name=='farmer')
+            {
+                $('#container_farmer_type').show();
+            }
+            else
+            {
+                $('#container_farmer_type').hide();
+            }
 
+
+        });
     });
 </script>

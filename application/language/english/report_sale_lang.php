@@ -6,3 +6,4 @@ $lang['LABEL_AMOUNT_PAYABLE_ACTUAL']='Payable(rounded)';
 $lang['LABEL_AMOUNT_ACTUAL']='Actual Amount';
 $lang['LABEL_QUANTITY_PKT']='Quantity(pkt)';
 $lang['LABEL_QUANTITY_KG']='Quantity(kg)';
+$lang['LABEL_NUM_INVOICE']='Number of invoice';
