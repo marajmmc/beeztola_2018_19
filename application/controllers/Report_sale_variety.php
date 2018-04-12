@@ -452,9 +452,8 @@ class Report_sale_variety extends Root_Controller
         $sales=array();
         foreach($results as $result)
         {
-            $sales[$result['variety_id']][$result['pack_size_id']]=$result;
+            $sales[$result['variety_id']][$result['pack_size_id']][]=$result;
         }
-
         //final items
         $type_total=$this->initialize_row_invoice('','','Total Type','');
         $crop_total=$this->initialize_row_invoice('','Total Crop','','');
@@ -470,47 +469,54 @@ class Report_sale_variety extends Root_Controller
             {
                 foreach($sales[$variety['variety_id']] as $pack_size_id=>$sale_details)
                 {
-                    $info=$this->initialize_row_invoice($variety['crop_name'],$variety['crop_type_name'],$variety['variety_name'],$sale_details['pack_size']);
-                    if(!$first_row)
+                    foreach($sale_details as $i=>$single_invoice)
                     {
-                        if($prev_crop_name!=$variety['crop_name'])
+                        $info=$this->initialize_row_invoice($variety['crop_name'],$variety['crop_type_name'],$variety['variety_name'],$single_invoice['pack_size']);
+                        if(!$first_row)
                         {
-                            $items[]=$this->get_row_invoice($type_total);
-                            $items[]=$this->get_row_invoice($crop_total);
-                            $type_total=$this->reset_row_invoice($type_total);
-                            $crop_total=$this->reset_row_invoice($crop_total);
+                            if($prev_crop_name!=$variety['crop_name'])
+                            {
+                                $items[]=$this->get_row_invoice($type_total);
+                                $items[]=$this->get_row_invoice($crop_total);
+                                $type_total=$this->reset_row_invoice($type_total);
+                                $crop_total=$this->reset_row_invoice($crop_total);
 
-                            $prev_crop_name=$variety['crop_name'];
-                            $prev_type_name=$variety['crop_type_name'];
+                                $prev_crop_name=$variety['crop_name'];
+                                $prev_type_name=$variety['crop_type_name'];
 
 
-                        }
-                        elseif($prev_type_name!=$variety['crop_type_name'])
-                        {
-                            $items[]=$this->get_row_invoice($type_total);
-                            $type_total=$this->reset_row_invoice($type_total);
+                            }
+                            elseif($prev_type_name!=$variety['crop_type_name'])
+                            {
+                                $items[]=$this->get_row_invoice($type_total);
+                                $type_total=$this->reset_row_invoice($type_total);
 
-                            $info['crop_name']='';
-                            $prev_type_name=$variety['crop_type_name'];
+                                $info['crop_name']='';
+                                $prev_type_name=$variety['crop_type_name'];
+                            }
+                            else
+                            {
+                                $info['crop_name']='';
+                                $info['crop_type_name']='';
+                            }
                         }
                         else
                         {
-                            $info['crop_name']='';
-                            $info['crop_type_name']='';
+                            $prev_crop_name=$variety['crop_name'];
+                            $prev_type_name=$variety['crop_type_name'];
+                            $first_row=false;
                         }
+                        if($i>0)
+                        {
+                            $info['variety_name']='';
+                            $info['pack_size']='';
+                        }
+                        $info['invoice_no']=Barcode_helper::get_barcode_sales($single_invoice['sale_id']);
+                        $type_total['invoice_no']++;
+                        $crop_total['invoice_no']++;
+                        $grand_total['invoice_no']++;
+                        $items[]=$this->get_row_invoice($info);
                     }
-                    else
-                    {
-                        $prev_crop_name=$variety['crop_name'];
-                        $prev_type_name=$variety['crop_type_name'];
-                        $first_row=false;
-                    }
-                    $info['invoice_no']=Barcode_helper::get_barcode_sales($sale_details['sale_id']);
-
-                    $type_total['invoice_no']++;
-                    $crop_total['invoice_no']++;
-                    $grand_total['invoice_no']++;
-                    $items[]=$this->get_row_invoice($info);
                 }
             }
 
