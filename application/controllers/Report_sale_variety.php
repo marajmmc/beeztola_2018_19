@@ -627,6 +627,7 @@ class Report_sale_variety extends Root_Controller
         $data['variety_name']= 1;
         $data['pack_size']= 1;
         $data['customer_name']= 1;
+        $data['mobile_no']= 1;
         $data['quantity_pkt']= 1;
         $data['quantity_kg']= 1;
         $data['num_invoice']= 1;
@@ -699,7 +700,7 @@ class Report_sale_variety extends Root_Controller
         $this->db->join($this->config->item('table_pos_sale').' sale','sale.id = details.sale_id','INNER');
         $this->db->select('sale.farmer_id');
         $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id = sale.farmer_id','INNER');
-        $this->db->select('farmer.name customer_name');
+        $this->db->select('farmer.name customer_name,farmer.mobile_no');
         $this->db->where('sale.status',$this->config->item('system_status_active'));
         $this->db->where('sale.date_sale >=',$date_start);
         $this->db->where('sale.date_sale <=',$date_end);
@@ -782,6 +783,7 @@ class Report_sale_variety extends Root_Controller
                         }
                         $i++;
                         $info['customer_name']=Barcode_helper::get_barcode_sales($single_customer['customer_name']);
+                        $info['mobile_no']=$single_customer['mobile_no'];
                         $info['quantity_pkt']=$single_customer['quantity'];
                         $info['quantity_kg']=$single_customer['quantity']*$single_customer['pack_size']/1000;
                         $info['num_invoice']=$single_customer['num_invoice'];
@@ -818,6 +820,7 @@ class Report_sale_variety extends Root_Controller
         $row['variety_name']=$variety_name;
         $row['pack_size']=$pack_size;
         $row['customer_name']=0;
+        $row['mobile_no']='';
         $row['quantity_pkt']=0;
         $row['quantity_kg']=0;
         $row['num_invoice']=0;
@@ -839,6 +842,7 @@ class Report_sale_variety extends Root_Controller
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
         $row['customer_name']=$info['customer_name'];
+        $row['mobile_no']=$info['mobile_no'];
         if($info['quantity_pkt']==0)
         {
             $row['quantity_pkt']='';
