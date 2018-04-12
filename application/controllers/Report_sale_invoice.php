@@ -214,11 +214,11 @@ class Report_sale_invoice extends Root_Controller
             $item['date_sale']=System_helper::display_date($item['date_sale']);
             if($item['date_cancel']>0)
             {
-                $item['date_canceled']=System_helper::display_date_time($item['date_cancel']);
+                $item['date_cancel']=System_helper::display_date_time($item['date_cancel']);
             }
             else
             {
-                $item['date_canceled']='';
+                $item['date_cancel']='';
             }
             $grand_total['amount_total']+=$item['amount_total'];
             $grand_total['amount_discount_variety']+=$item['amount_discount_variety'];
