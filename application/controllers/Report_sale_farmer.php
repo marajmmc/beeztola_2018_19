@@ -530,12 +530,12 @@ class Report_sale_farmer extends Root_Controller
     {
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="search_variety"'),1);
+        $data['customer_name']= 1;
+        $data['mobile_no']= 1;
         $data['crop_name']= 1;
         $data['crop_type_name']= 1;
         $data['variety_name']= 1;
         $data['pack_size']= 1;
-        $data['customer_name']= 1;
-        $data['mobile_no']= 1;
         $data['quantity_pkt']= 1;
         $data['quantity_kg']= 1;
         $data['num_invoice']= 1;
@@ -567,16 +567,33 @@ class Report_sale_farmer extends Root_Controller
         $variety_id=$this->input->post('variety_id');
         $pack_size_id=$this->input->post('pack_size_id');
         $farmer_type_id=$this->input->post('farmer_type_id');
-        //remember pack_size_id replaced in final foreach loop
+        $farmer_id=$this->input->post('farmer_id');
         $date_end=$this->input->post('date_end');
         $date_start=$this->input->post('date_start');
 
-        $this->db->from($this->config->item('table_login_setup_classification_varieties').' v');
+
+        $this->db->from($this->config->item('table_pos_sale_details').' details');
+        $this->db->select('details.variety_id,details.pack_size_id,details.pack_size');
+        $this->db->select('SUM(details.quantity) quantity',false);
+        $this->db->select('COUNT(details.id) num_invoice',false);
+        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id = details.sale_id','INNER');
+        $this->db->select('sale.farmer_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id = sale.farmer_id','INNER');
+        $this->db->select('farmer.name customer_name,farmer.mobile_no');
+
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = details.variety_id','INNER');
         $this->db->select('v.id variety_id,v.name variety_name');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id=v.crop_type_id','INNER');
         $this->db->select('crop_type.id crop_type_id, crop_type.name crop_type_name');
         $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
         $this->db->select('crop.id crop_id, crop.name crop_name');
+
+
+        $this->db->where('sale.status',$this->config->item('system_status_active'));
+        $this->db->where('sale.date_sale >=',$date_start);
+        $this->db->where('sale.date_sale <=',$date_end);
+        $this->db->where('sale.outlet_id',$outlet_id);
+        //$this->db->where_in('details.variety_id',$variety_ids);
         if($crop_id>0)
         {
             $this->db->where('crop.id',$crop_id);
@@ -589,31 +606,6 @@ class Report_sale_farmer extends Root_Controller
                 }
             }
         }
-        $this->db->order_by('crop.id','ASC');
-        $this->db->order_by('crop_type.id','ASC');
-        $this->db->order_by('v.id','ASC');
-
-        $varieties=$this->db->get()->result_array();
-        $variety_ids=array();
-        $variety_ids[0]=0;
-        foreach($varieties as $result)
-        {
-            $variety_ids[$result['variety_id']]=$result['variety_id'];
-        }
-
-        $this->db->from($this->config->item('table_pos_sale_details').' details');
-        $this->db->select('details.variety_id,details.pack_size_id,details.pack_size');
-        $this->db->select('SUM(details.quantity) quantity',false);
-        $this->db->select('COUNT(details.id) num_invoice',false);
-        $this->db->join($this->config->item('table_pos_sale').' sale','sale.id = details.sale_id','INNER');
-        $this->db->select('sale.farmer_id');
-        $this->db->join($this->config->item('table_pos_setup_variety_variety').' farmer','farmer.id = sale.farmer_id','INNER');
-        $this->db->select('farmer.name customer_name,farmer.mobile_no');
-        $this->db->where('sale.status',$this->config->item('system_status_active'));
-        $this->db->where('sale.date_sale >=',$date_start);
-        $this->db->where('sale.date_sale <=',$date_end);
-        $this->db->where('sale.outlet_id',$outlet_id);
-        $this->db->where_in('details.variety_id',$variety_ids);
         if($pack_size_id>0)
         {
             $this->db->where('details.pack_size_id',$pack_size_id);
@@ -621,114 +613,106 @@ class Report_sale_farmer extends Root_Controller
         if($farmer_type_id>0)
         {
            $this->db->where('farmer.farmer_type_id',$farmer_type_id);
+            if($farmer_id>0)
+            {
+                $this->db->where('farmer.id',$farmer_id);
+            }
         }
+        $this->db->group_by('sale.farmer_id');
         $this->db->group_by('details.variety_id');
         $this->db->group_by('details.pack_size_id');
-        $this->db->group_by('sale.farmer_id');
-        $results=$this->db->get()->result_array();
-        $sales=array();
-        foreach($results as $result)
-        {
-            $sales[$result['variety_id']][$result['pack_size_id']][$result['farmer_id']]=$result;
-        }
-        //final items
-        $type_total=$this->initialize_row_variety('','','Total Type','');
-        $crop_total=$this->initialize_row_variety('','Total Crop','','');
-        $grand_total=$this->initialize_row_variety('Grand Total','','','');
 
+        $this->db->order_by('farmer.id','ASC');
+        $this->db->order_by('crop.id','ASC');
+        $this->db->order_by('crop_type.id','ASC');
+        $this->db->order_by('v.id','ASC');
+
+        $results=$this->db->get()->result_array();
+        $crop_total=$this->initialize_row_variety('','','','Total Crop','','');
+        $customer_total=$this->initialize_row_variety('','','Customer Total','','','');
+        $grand_total=$this->initialize_row_variety('Grand Total','','','','','');
+        $prev_customer_name='';
         $prev_crop_name='';
         $prev_type_name='';
         $first_row=true;
         $items=array();
-        foreach($varieties as $variety)
+        foreach($results as $result)
         {
-            if(isset($sales[$variety['variety_id']]))
+            $info=$this->initialize_row_variety($result['customer_name'],$result['mobile_no'],$result['crop_name'],$result['crop_type_name'],$result['variety_name'],$result['pack_size']);
+            if(!$first_row)
             {
-                foreach($sales[$variety['variety_id']] as $pack_size_id=>$sale_details)
+                if($prev_customer_name!=$result['customer_name'])
                 {
-                    $i=0;
-                    foreach($sale_details as $single_customer)
-                    {
-                        $info=$this->initialize_row_variety($variety['crop_name'],$variety['crop_type_name'],$variety['variety_name'],$single_customer['pack_size']);
-                        if(!$first_row)
-                        {
-                            if($prev_crop_name!=$variety['crop_name'])
-                            {
-                                $items[]=$this->get_row_variety($type_total);
-                                $items[]=$this->get_row_variety($crop_total);
-                                $type_total=$this->reset_row_variety($type_total);
-                                $crop_total=$this->reset_row_variety($crop_total);
+                    $items[]=$this->get_row_variety($crop_total);
+                    $items[]=$this->get_row_variety($customer_total);
+                    $crop_total=$this->reset_row_variety($crop_total);
+                    $customer_total=$this->reset_row_variety($customer_total);
+                    $prev_customer_name=$result['customer_name'];
+                    $prev_crop_name=$result['crop_name'];
+                    $prev_type_name=$result['crop_type_name'];
 
-                                $prev_crop_name=$variety['crop_name'];
-                                $prev_type_name=$variety['crop_type_name'];
-
-
-                            }
-                            elseif($prev_type_name!=$variety['crop_type_name'])
-                            {
-                                $items[]=$this->get_row_variety($type_total);
-                                $type_total=$this->reset_row_variety($type_total);
-
-                                $info['crop_name']='';
-                                $prev_type_name=$variety['crop_type_name'];
-                            }
-                            else
-                            {
-                                $info['crop_name']='';
-                                $info['crop_type_name']='';
-                            }
-                        }
-                        else
-                        {
-                            $prev_crop_name=$variety['crop_name'];
-                            $prev_type_name=$variety['crop_type_name'];
-                            $first_row=false;
-                        }
-                        if($i>0)
-                        {
-                            $info['variety_name']='';
-                            $info['pack_size']='';
-                        }
-                        $i++;
-                        $info['customer_name']=Barcode_helper::get_barcode_sales($single_customer['customer_name']);
-                        $info['mobile_no']=$single_customer['mobile_no'];
-                        $info['quantity_pkt']=$single_customer['quantity'];
-                        $info['quantity_kg']=$single_customer['quantity']*$single_customer['pack_size']/1000;
-                        $info['num_invoice']=$single_customer['num_invoice'];
-
-                        $type_total['customer_name']++;
-                        $crop_total['customer_name']++;
-                        $grand_total['customer_name']++;
-                        $type_total['quantity_pkt']+=$info['quantity_pkt'];
-                        $type_total['quantity_kg']+=$info['quantity_kg'];
-                        $crop_total['quantity_pkt']+=$info['quantity_pkt'];
-                        $crop_total['quantity_kg']+=$info['quantity_kg'];
-                        $grand_total['quantity_pkt']+=$info['quantity_pkt'];
-                        $grand_total['quantity_kg']+=$info['quantity_kg'];
-                        $type_total['num_invoice']+=$info['num_invoice'];
-                        $crop_total['num_invoice']+=$info['num_invoice'];
-                        $grand_total['num_invoice']+=$info['num_invoice'];
-                        $items[]=$this->get_row_variety($info);
-                    }
+                }
+                elseif($prev_crop_name!=$result['crop_name'])
+                {
+                    $items[]=$this->get_row_variety($crop_total);
+                    $crop_total=$this->reset_row_variety($crop_total);
+                    $info['customer_name']='';
+                    $info['mobile_no']='';
+                    $prev_crop_name=$result['crop_name'];
+                    $prev_type_name=$result['crop_type_name'];
+                }
+                elseif($prev_type_name!=$result['crop_type_name'])
+                {
+                    $info['customer_name']='';
+                    $info['mobile_no']='';
+                    $info['crop_name']='';
+                    $prev_type_name=$result['crop_type_name'];
+                }
+                else
+                {
+                    $info['customer_name']='';
+                    $info['mobile_no']='';
+                    $info['crop_name']='';
+                    $info['crop_type_name']='';
                 }
             }
+            else
+            {
+                $prev_customer_name=$result['customer_name'];
+                $prev_crop_name=$result['crop_name'];
+                $prev_type_name=$result['crop_type_name'];
+                $first_row=false;
+            }
+            $info['quantity_pkt']=$result['quantity'];
+            $info['quantity_kg']=$result['quantity']*$result['pack_size']/1000;
+            $info['num_invoice']=$result['num_invoice'];
 
 
+            $crop_total['quantity_pkt']+=$info['quantity_pkt'];
+            $crop_total['quantity_kg']+=$info['quantity_kg'];
+            $customer_total['quantity_pkt']+=$info['quantity_pkt'];
+            $customer_total['quantity_kg']+=$info['quantity_kg'];
+            $grand_total['quantity_pkt']+=$info['quantity_pkt'];
+            $grand_total['quantity_kg']+=$info['quantity_kg'];
+            $crop_total['num_invoice']+=$info['num_invoice'];
+            $customer_total['num_invoice']+=$info['num_invoice'];
+            $grand_total['num_invoice']+=$info['num_invoice'];
+            $items[]=$this->get_row_variety($info);
         }
-        $items[]=$this->get_row_variety($type_total);
         $items[]=$this->get_row_variety($crop_total);
+        $items[]=$this->get_row_variety($customer_total);
         $items[]=$this->get_row_variety($grand_total);
         $this->json_return($items);
     }
-    private function initialize_row_variety($crop_name,$crop_type_name,$variety_name,$pack_size)
+    private function initialize_row_variety($customer_name,$mobile_no,$crop_name,$crop_type_name,$variety_name,$pack_size)
     {
         $row=array();
+        $row['customer_name']=$customer_name;
+        $row['mobile_no']=$mobile_no;
         $row['crop_name']=$crop_name;
         $row['crop_type_name']=$crop_type_name;
         $row['variety_name']=$variety_name;
         $row['pack_size']=$pack_size;
-        $row['customer_name']=0;
-        $row['mobile_no']='';
         $row['quantity_pkt']=0;
         $row['quantity_kg']=0;
         $row['num_invoice']=0;
@@ -736,7 +720,6 @@ class Report_sale_farmer extends Root_Controller
     }
     private function reset_row_variety($row)
     {
-        $row['customer_name']=0;
         $row['quantity_pkt']=0;
         $row['quantity_kg']=0;
         $row['num_invoice']=0;
@@ -745,12 +728,12 @@ class Report_sale_farmer extends Root_Controller
     private function get_row_variety($info)
     {
         $row=array();
+        $row['customer_name']=$info['customer_name'];
+        $row['mobile_no']=$info['mobile_no'];
         $row['crop_name']=$info['crop_name'];
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
-        $row['customer_name']=$info['customer_name'];
-        $row['mobile_no']=$info['mobile_no'];
         if($info['quantity_pkt']==0)
         {
             $row['quantity_pkt']='';
