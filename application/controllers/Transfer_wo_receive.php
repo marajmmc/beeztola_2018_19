@@ -506,7 +506,7 @@ class Transfer_wo_receive extends Root_Controller
             $data['user_updated_delivery_forward']=$user->user_id;*/
             $data['date_updated_receive_forward']=$time;
             $data['user_updated_receive_forward']=$user->user_id;
-            $this->db->set('revision_count_delivery', 'revision_count_delivery+1', FALSE);
+            $this->db->set('revision_count_receive', 'revision_count_receive+1', FALSE);
             Query_helper::update($this->config->item('table_sms_transfer_wo'),$data, array('id='.$id), false);
             foreach($items as $item)
             {

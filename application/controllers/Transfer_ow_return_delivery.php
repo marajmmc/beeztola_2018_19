@@ -435,7 +435,7 @@ class Transfer_ow_return_delivery extends Root_Controller
 
 
         /*date validation*/
-        if(!isset($courier['date_delivery']) || !strtotime($courier['date_delivery']))
+        if(!isset($courier['date_delivery']) || !System_helper::get_time($courier['date_delivery'])>0)
         {
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line('LABEL_DATE_DELIVERY'). ' field is required.';
@@ -550,16 +550,6 @@ class Transfer_ow_return_delivery extends Root_Controller
         }
 
         /* variety relational table insert & update*/
-        /* this query execute just for getting revision count number match (revision_count_delivery)*/
-        /*$data=array();
-        $data['date_updated'] = $time;
-        $data['user_updated'] = $user->user_id;
-        Query_helper::update($this->config->item('table_sms_transfer_ow_details_histories'),$data, array('transfer_ow_id='.$id,'revision=1'), false);
-
-        $this->db->where('transfer_ow_id',$id);
-        $this->db->set('revision', 'revision+1', FALSE);
-        $this->db->update($this->config->item('table_sms_transfer_ow_details_histories'));*/
-
         $data=array();
         $data['quantity_total_receive_kg']=$quantity_total_approve_kg;
         $data['remarks_challan']=$item_head['remarks_challan'];
@@ -567,9 +557,6 @@ class Transfer_ow_return_delivery extends Root_Controller
         $data['user_updated_delivery']=$user->user_id;
         //$this->db->set('revision_count_delivery', 'revision_count_delivery+1', FALSE);
         Query_helper::update($this->config->item('table_sms_transfer_ow'),$item_head, array('id='.$id), false);
-
-
-
 
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
@@ -953,12 +940,26 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->db->select('zones.id zone_id, zones.name zone_name');
             $this->db->join($this->config->item('table_login_setup_location_divisions').' divisions','divisions.id = zones.division_id','INNER');
             $this->db->select('divisions.id division_id, divisions.name division_name');
+            $this->db->join($this->config->item('table_sms_transfer_ow_courier_details').' wo_courier_details','wo_courier_details.transfer_ow_id=transfer_ow.id','LEFT');
+            $this->db->select('
+                                wo_courier_details.date_delivery courier_date_delivery,
+                                wo_courier_details.date_challan,
+                                wo_courier_details.challan_no,
+                                wo_courier_details.courier_tracing_no,
+                                wo_courier_details.place_booking_source,
+                                wo_courier_details.place_destination,
+                                wo_courier_details.date_booking,
+                                wo_courier_details.remarks remarks_couriers
+                                ');
+            $this->db->join($this->config->item('table_login_basic_setup_couriers').' courier','courier.id=wo_courier_details.courier_id','LEFT');
+            $this->db->select('courier.name courier_name');
             $this->db->where('transfer_ow.status !=',$this->config->item('system_status_delete'));
             $this->db->where('transfer_ow.id',$id);
             $this->db->where('outlet_info.revision',1);
             $this->db->where('transfer_ow.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
             $this->db->order_by('transfer_ow.id','DESC');
             $result['item']=$this->db->get()->row_array();
+
             if(!$result['item'])
             {
                 System_helper::invalid_try('save',$id,'Update Non Exists');
@@ -998,6 +999,28 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->json_return($ajax);
         }
 
+        if(!(System_helper::get_time(System_helper::display_date($result['item']['courier_date_delivery']))>0))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=' Courier information is empty. '.$this->lang->line('LABEL_DATE_DELIVERY'). ' field is required.';
+            $this->json_return($ajax);
+        }
+        if(!(System_helper::get_time(System_helper::display_date($result['item']['courier_date_delivery']))>=System_helper::get_time(System_helper::display_date($result['item']['date_approve']))))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$result['item']['date_approve'].'Delivery date should be is greater than approval date.';
+            $this->json_return($ajax);
+        }
+
+        if(System_helper::get_time($result['item']['date_challan'])>0)
+        {
+            if(!(System_helper::get_time(System_helper::display_date($result['item']['date_challan']))>=System_helper::get_time(System_helper::display_date($result['item']['courier_date_delivery']))))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Challan date should be is greater than delivery date.';
+                $this->json_return($ajax);
+            }
+        }
         $this->db->from($this->config->item('table_sms_transfer_ow_details').' transfer_ow_details');
         $this->db->select('transfer_ow_details.*');
         $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id=transfer_ow_details.variety_id','INNER');
@@ -1181,6 +1204,7 @@ class Transfer_ow_return_delivery extends Root_Controller
         $data['status_receive_approve']= 1;
         $data['status_system_delivery_receive']= 1;
         $data['status']= 1;
+
         if($result)
         {
             if($result['preferences']!=null)
