@@ -556,7 +556,7 @@ class Transfer_ow_return_delivery extends Root_Controller
         $data['date_updated_delivery']=$time;
         $data['user_updated_delivery']=$user->user_id;
         //$this->db->set('revision_count_delivery', 'revision_count_delivery+1', FALSE);
-        Query_helper::update($this->config->item('table_sms_transfer_ow'),$item_head, array('id='.$id), false);
+        Query_helper::update($this->config->item('table_sms_transfer_ow'),$data, array('id='.$id), false);
 
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
