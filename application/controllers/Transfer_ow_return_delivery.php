@@ -573,7 +573,6 @@ class Transfer_ow_return_delivery extends Root_Controller
     }
     private function system_details($id)
     {
-        $user=User_helper::get_user();
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             if($id>0)
@@ -596,8 +595,10 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->db->select('zones.id zone_id, zones.name zone_name');
             $this->db->join($this->config->item('table_login_setup_location_divisions').' divisions','divisions.id = zones.division_id','INNER');
             $this->db->select('divisions.id division_id, divisions.name division_name');
-            $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=transfer_ow.user_updated_receive_forward','LEFT');
-            $this->db->select('pos_setup_user_info.name full_name_receive_forward');
+            $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=transfer_ow.user_updated_delivery','LEFT');
+            $this->db->select('pos_setup_user_info.name full_name_delivery_edit');
+            $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info_forward','pos_setup_user_info_forward.user_id=transfer_ow.user_updated_delivery_forward','LEFT');
+            $this->db->select('pos_setup_user_info_forward.name full_name_delivery_forward');
             $this->db->join($this->config->item('table_sms_transfer_ow_courier_details').' wo_courier_details','wo_courier_details.transfer_ow_id=transfer_ow.id','LEFT');
             $this->db->select('
                                 wo_courier_details.date_delivery courier_date_delivery,
@@ -614,7 +615,6 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->db->where('transfer_ow.status !=',$this->config->item('system_status_delete'));
             $this->db->where('transfer_ow.id',$item_id);
             $this->db->where('outlet_info.revision',1);
-            $this->db->where('transfer_ow.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
             $this->db->order_by('transfer_ow.id','DESC');
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
@@ -631,9 +631,8 @@ class Transfer_ow_return_delivery extends Root_Controller
             $user_ids[$data['item']['user_updated_forward']]=$data['item']['user_updated_forward'];
             $user_ids[$data['item']['user_updated_approve']]=$data['item']['user_updated_approve'];
             $user_ids[$data['item']['user_updated_approve_forward']]=$data['item']['user_updated_approve_forward'];
-            $user_ids[$data['item']['user_updated_delivery']]=$data['item']['user_updated_delivery'];
-            $user_ids[$data['item']['user_updated_delivery_forward']]=$data['item']['user_updated_delivery_forward'];
-            $user_ids[$data['item']['user_updated_receive_approve']]=$data['item']['user_updated_receive_approve'];
+            $user_ids[$data['item']['user_updated_receive']]=$data['item']['user_updated_receive'];
+            $user_ids[$data['item']['user_updated_receive_forward']]=$data['item']['user_updated_receive_forward'];
             $data['users']=$this->get_sms_users_info($user_ids);
 
             $this->db->from($this->config->item('table_sms_transfer_ow_details').' transfer_ow_details');
@@ -651,7 +650,7 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->db->order_by('transfer_ow_details.id');
             $data['items']=$this->db->get()->result_array();
 
-            $data['title']="Outlet to HQ Transfer Return Delivery :: ". Barcode_helper::get_barcode_transfer_outlet_to_warehouse($data['item']['id']);
+            $data['title']="Outlet to HQ Transfer Details :: ". Barcode_helper::get_barcode_transfer_outlet_to_warehouse($data['item']['id']);
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
             if($this->message)

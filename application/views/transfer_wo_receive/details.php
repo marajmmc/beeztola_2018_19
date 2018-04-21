@@ -429,14 +429,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <th rowspan="2" style="width: 150px;"><?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?></th>
                     <th rowspan="2" style="width: 150px;"><?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?></th>
                     <th rowspan="2" class="text-right" style="width: 150px;"><?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?></th>
-                    <?php
-                    if($item['status_delivery']==$this->config->item('system_status_delivered'))
-                    {
-                        ?>
-                        <th rowspan="2" style="width: 150px;"><?php echo $CI->lang->line('LABEL_WAREHOUSE_NAME'); ?></th>
-                    <?php
-                    }
-                    ?>
                     <th colspan="2" class="text-center bg-info" style="width: 300px;"><?php echo $CI->lang->line('LABEL_QUANTITY_ORDER'); ?></th>
                     <?php
                     if($item['status_approve']==$this->config->item('system_status_approved'))
@@ -550,16 +542,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <td class="text-right">
                             <label><?php echo $value['pack_size']; ?></label>
                         </td>
-                        <?php
-                        if($item['status_delivery']==$this->config->item('system_status_delivered'))
-                        {
-                            ?>
-                            <td>
-                                <label><?php echo $value['warehouse_name']; ?></label>
-                            </td>
-                        <?php
-                        }
-                        ?>
                         <td class="text-right">
                             <label ><?php echo $value['quantity_request']; ?></label>
                         </td>
@@ -601,7 +583,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <tfoot>
                 <tr>
                     <?php
-                    $footer_colspan=5;
+                    $footer_colspan=4;
                     if($item['status_delivery']==$this->config->item('system_status_delivered'))
                     {
                         $footer_colspan+=1;
