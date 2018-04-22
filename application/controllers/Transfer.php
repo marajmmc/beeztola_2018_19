@@ -4,12 +4,12 @@ class Transfer extends CI_Controller
 {
     public function index()
     {
-        $this->farmer();
+        //$this->farmer();
         //$this->users();
         //$this->payment();
         //$this->sale_details();
         //$this->sale();
-        //$this->stock();
+        $this->stock();
     }
     private function farmer()
     {
@@ -223,7 +223,16 @@ class Transfer extends CI_Controller
             //$data['revision_count_deposit']=1;
 
             $data['date_deposit_updated']=$result['date_created'];
-            $data['user_deposit_updated']=$payment_users_new[$payment_users_old[$result['user_created']]];
+            $not_found_user_ids=array(191,192);
+            if(in_array($result['user_created'],$not_found_user_ids))
+            {
+                $data['user_deposit_updated']=1;
+            }
+            else
+            {
+                $data['user_deposit_updated']=$payment_users_new[$payment_users_old[$result['user_created']]];
+            }
+
             if(!($result['arm_bank_id']>0))
             {
                 $data['bank_account_id_destination']=0;
@@ -235,14 +244,30 @@ class Transfer extends CI_Controller
                 $data['bank_account_id_destination']=$result['arm_bank_id'];
                 $data['status_deposit_forward']=$this->config->item('system_status_forwarded');
                 $data['date_deposit_forwarded']=$result['date_created'];
-                $data['user_deposit_forwarded']=$payment_users_new[$payment_users_old[$result['user_created']]];
+                if(in_array($result['user_created'],$not_found_user_ids))
+                {
+                    $data['user_deposit_forwarded']=1;
+                }
+                else
+                {
+                    $data['user_deposit_forwarded']=$payment_users_new[$payment_users_old[$result['user_created']]];
+                }
+
+
                 $data['date_receive']=$result['date_payment_receive'];
                 $data['amount_bank_charge']=$result['amount']-$result['amount_customer'];
                 $data['amount_receive']=$result['amount'];
                 //$data['remarks_receive']='';
                 $data['status_payment_receive']=$this->config->item('system_status_received');
                 $data['date_payment_received']=$result['date_receive'];
-                $data['user_payment_received']=$payment_users_new[$payment_users_old[$result['user_receive']]];
+                if(in_array($result['user_created'],$not_found_user_ids))
+                {
+                    $data['user_payment_received']=1;
+                }
+                else
+                {
+                    $data['user_payment_received']=$payment_users_new[$payment_users_old[$result['user_receive']]];
+                }
             }
             //$data['status']=$result['status'];
 //            echo '<pre>';
