@@ -243,6 +243,7 @@ $lang['LABEL_REMARKS_COURIER']='Remarks for Courier';
 $lang['LABEL_REMARKS_CHALLAN']='Remarks for Challan';
 $lang['LABEL_REMARKS_DELIVERY']='Remarks for Delivery';
 $lang['LABEL_REMARKS_RECEIVE']='Remarks for Receive';
+$lang['LABEL_REMARKS_FORWARD']='Remarks for Forward';
 
 // Unit
 $lang['LABEL_PACK'] = 'Pkt';
@@ -266,6 +267,7 @@ $lang['LABEL_QUANTITY_APPROVE'] = 'Approve Quantity';
 $lang['LABEL_QUANTITY_TOTAL_REQUEST'] = 'Total Request Quantity (Kg)';
 $lang['LABEL_QUANTITY_TOTAL_RECEIVE'] = 'Total Receive Quantity (Kg)';
 $lang['LABEL_QUANTITY_TOTAL_APPROVE'] = 'Total Approve Quantity (Kg)';
+$lang['LABEL_QUANTITY_TOTAL_DIFFERENCE'] = 'Total Difference Quantity (Kg)';
 
 $lang['LABEL_WEIGHT_KG'] = 'Weight(kg)';
 

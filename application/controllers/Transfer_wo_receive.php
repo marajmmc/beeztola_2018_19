@@ -38,6 +38,14 @@ class Transfer_wo_receive extends Root_Controller
         {
             $this->system_save();
         }
+        elseif($action=="forward")
+        {
+            $this->system_forward($id);
+        }
+        elseif($action=="save_forward")
+        {
+            $this->system_save_forward();
+        }
         elseif($action=="details")
         {
             $this->system_details($id);
@@ -89,7 +97,14 @@ class Transfer_wo_receive extends Root_Controller
     {
         $user=User_helper::get_user();
         $this->db->from($this->config->item('table_sms_transfer_wo').' transfer_wo');
-        $this->db->select('transfer_wo.id, transfer_wo.date_request, transfer_wo.quantity_total_request_kg quantity_total_request, transfer_wo.quantity_total_approve_kg quantity_total_approve');
+        $this->db->select(
+            '
+            transfer_wo.id,
+            transfer_wo.date_request,
+            transfer_wo.quantity_total_request_kg quantity_total_request,
+            transfer_wo.quantity_total_approve_kg quantity_total_approve,
+            transfer_wo.quantity_total_receive_kg quantity_total_receive
+            ');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=transfer_wo.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name, outlet_info.customer_code outlet_code');
         $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = outlet_info.district_id','INNER');
@@ -122,6 +137,8 @@ class Transfer_wo_receive extends Root_Controller
             $item['territory_name']=$result['territory_name'];
             $item['district_name']=$result['district_name'];
             $item['quantity_total_approve']=number_format($result['quantity_total_approve'],3,'.','');
+            $item['quantity_total_receive']=number_format($result['quantity_total_receive'],3,'.','');
+            $item['quantity_total_difference']=number_format(($result['quantity_total_approve']-$result['quantity_total_receive']),3,'.','');
             $items[]=$item;
         }
         $this->json_return($items);
@@ -498,7 +515,7 @@ class Transfer_wo_receive extends Root_Controller
             $data['date_receive']=$time;
             $data['quantity_total_receive_kg']=$quantity_total_receive_kg;
             $data['status_receive']=$this->config->item('system_status_pending');
-            $data['status_receive_forward']=$this->config->item('system_status_forwarded');
+            $data['status_receive_forward']=$this->config->item('system_status_pending');
             $data['status_receive_approve']=$this->config->item('system_status_pending');
             $data['status_system_delivery_receive']=$this->config->item('system_status_no');
             $data['remarks_receive_forward']=$item_head['remarks_receive_forward'];
@@ -525,8 +542,7 @@ class Transfer_wo_receive extends Root_Controller
                 $data['user_created']=$user->user_id;
                 Query_helper::add($this->config->item('table_sms_transfer_wo_details_histories'),$data, false);
             }
-
-            $this->message='System automatically forwarded. Approve quantity is not equal to receive quantity.';
+            $this->message='TO not received, Go to forward option and send for approval. Approve quantity is not equal to receive quantity.';
         }
         else
         {
@@ -575,6 +591,256 @@ class Transfer_wo_receive extends Root_Controller
         if ($this->db->trans_status() === TRUE)
         {
             //$this->message=$this->message;
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_forward($id)
+    {
+        $user=User_helper::get_user();
+        if(isset($this->permissions['action2'])&&($this->permissions['action2']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+
+            $this->db->from($this->config->item('table_sms_transfer_wo').' transfer_wo');
+            $this->db->select('transfer_wo.*');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=transfer_wo.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('outlet_info.customer_id outlet_id, outlet_info.name outlet_name, outlet_info.customer_code outlet_code');
+            $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = outlet_info.district_id','INNER');
+            $this->db->select('districts.id district_id, districts.name district_name');
+            $this->db->join($this->config->item('table_login_setup_location_territories').' territories','territories.id = districts.territory_id','INNER');
+            $this->db->select('territories.id territory_id, territories.name territory_name');
+            $this->db->join($this->config->item('table_login_setup_location_zones').' zones','zones.id = territories.zone_id','INNER');
+            $this->db->select('zones.id zone_id, zones.name zone_name');
+            $this->db->join($this->config->item('table_login_setup_location_divisions').' divisions','divisions.id = zones.division_id','INNER');
+            $this->db->select('divisions.id division_id, divisions.name division_name');
+            $this->db->join($this->config->item('table_sms_transfer_wo_courier_details').' wo_courier_details','wo_courier_details.transfer_wo_id=transfer_wo.id','LEFT');
+            $this->db->select('
+                                wo_courier_details.date_delivery courier_date_delivery,
+                                wo_courier_details.date_challan,
+                                wo_courier_details.challan_no,
+                                wo_courier_details.courier_tracing_no,
+                                wo_courier_details.place_booking_source,
+                                wo_courier_details.place_destination,
+                                wo_courier_details.date_booking,
+                                wo_courier_details.remarks remarks_couriers
+                                ');
+            $this->db->join($this->config->item('table_login_basic_setup_couriers').' courier','courier.id=wo_courier_details.courier_id','LEFT');
+            $this->db->select('courier.name courier_name');
+            $this->db->join($this->config->item('table_login_setup_user_info').' ui_created','ui_created.user_id = transfer_wo.user_created_request','LEFT');
+            $this->db->select('ui_created.name user_created_full_name');
+            $this->db->join($this->config->item('table_login_setup_user_info').' ui_updated','ui_updated.user_id = transfer_wo.user_updated_request','LEFT');
+            $this->db->select('ui_updated.name user_updated_full_name');
+            $this->db->join($this->config->item('table_login_setup_user_info').' ui_updated_approve','ui_updated_approve.user_id = transfer_wo.user_updated_approve','LEFT');
+            $this->db->select('ui_updated_approve.name user_updated_approve_full_name');
+            $this->db->where('transfer_wo.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('transfer_wo.id',$item_id);
+            $this->db->where('outlet_info.revision',1);
+            $this->db->where('transfer_wo.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
+            $this->db->order_by('transfer_wo.id','DESC');
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('forward',$item_id,'Forward Non Exists');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_delivery']!=$this->config->item('system_status_delivered'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO is not delivered.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_receive']==$this->config->item('system_status_received'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO already received.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_receive_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO already forwarded.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_receive_approve']==$this->config->item('system_status_approved'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO already approved.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_system_delivery_receive']!=$this->config->item('system_status_no'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Receive TO first and after then forward.';
+                $this->json_return($ajax);
+            }
+
+            $this->db->from($this->config->item('table_sms_transfer_wo_details').' transfer_wo_details');
+            $this->db->select('transfer_wo_details.*');
+            $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id=transfer_wo_details.variety_id','INNER');
+            $this->db->select('v.name variety_name');
+            $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id=v.crop_type_id','INNER');
+            $this->db->select('crop_type.id crop_type_id, crop_type.name crop_type_name');
+            $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
+            $this->db->select('crop.id crop_id, crop.name crop_name');
+            $this->db->where('transfer_wo_details.transfer_wo_id',$item_id);
+            $this->db->where('transfer_wo_details.status',$this->config->item('system_status_active'));
+            $data['items']=$this->db->get()->result_array();
+
+            $variety_ids=array();
+            foreach($data['items'] as $row)
+            {
+                $variety_ids[$row['variety_id']]=$row['variety_id'];
+            }
+            $data['stocks']=Stock_helper::get_variety_stock($data['item']['outlet_id'],$variety_ids);
+
+            $data['title']="HQ to Outlet Receive Forward:: ". Barcode_helper::get_barcode_transfer_warehouse_to_outlet($data['item']['id']);
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/forward",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/forward/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_forward()
+    {
+        $id = $this->input->post("id");
+        $user = User_helper::get_user();
+        $time=time();
+        $item_head=$this->input->post('item');
+        //$items=$this->input->post('items');
+        if($id>0)
+        {
+            if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+            }
+            if($item_head['status_receive_forward']!=$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Receive forward field is required.';
+                $this->json_return($ajax);
+            }
+            $this->db->from($this->config->item('table_sms_transfer_wo').' transfer_wo');
+            $this->db->select('transfer_wo.*');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=transfer_wo.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('outlet_info.customer_id outlet_id, outlet_info.name outlet_name, outlet_info.customer_code outlet_code');
+            $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = outlet_info.district_id','INNER');
+            $this->db->select('districts.id district_id, districts.name district_name');
+            $this->db->join($this->config->item('table_login_setup_location_territories').' territories','territories.id = districts.territory_id','INNER');
+            $this->db->select('territories.id territory_id, territories.name territory_name');
+            $this->db->join($this->config->item('table_login_setup_location_zones').' zones','zones.id = territories.zone_id','INNER');
+            $this->db->select('zones.id zone_id, zones.name zone_name');
+            $this->db->join($this->config->item('table_login_setup_location_divisions').' divisions','divisions.id = zones.division_id','INNER');
+            $this->db->select('divisions.id division_id, divisions.name division_name');
+            $this->db->join($this->config->item('table_sms_transfer_wo_courier_details').' wo_courier_details','wo_courier_details.transfer_wo_id=transfer_wo.id','LEFT');
+            $this->db->select('
+                                wo_courier_details.date_delivery courier_date_delivery,
+                                wo_courier_details.date_challan,
+                                wo_courier_details.challan_no,
+                                wo_courier_details.courier_tracing_no,
+                                wo_courier_details.place_booking_source,
+                                wo_courier_details.place_destination,
+                                wo_courier_details.date_booking,
+                                wo_courier_details.remarks remarks_couriers
+                                ');
+            $this->db->join($this->config->item('table_login_basic_setup_couriers').' courier','courier.id=wo_courier_details.courier_id','LEFT');
+            $this->db->select('courier.name courier_name');
+            $this->db->where('transfer_wo.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('transfer_wo.id',$id);
+            $this->db->where('outlet_info.revision',1);
+            $this->db->where('transfer_wo.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
+            $this->db->order_by('transfer_wo.id','DESC');
+            $result['item']=$this->db->get()->row_array();
+            if(!$result['item'])
+            {
+                System_helper::invalid_try('save_forward',$id,'Update Forward Non Exists');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            if($result['item']['status_delivery']!=$this->config->item('system_status_delivered'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO is not delivered.';
+                $this->json_return($ajax);
+            }
+            if($result['item']['status_receive']==$this->config->item('system_status_received'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO already received.';
+                $this->json_return($ajax);
+            }
+            if($result['item']['status_receive_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO already forwarded.';
+                $this->json_return($ajax);
+            }
+            if($result['item']['status_receive_approve']==$this->config->item('system_status_approved'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='TO already approved.';
+                $this->json_return($ajax);
+            }
+            if($result['item']['status_system_delivery_receive']!=$this->config->item('system_status_no'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Receive TO after then forward.';
+                $this->json_return($ajax);
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+
+
+        $this->db->trans_start();
+
+        $data=array();
+        $data['date_receive']=$time;
+        $data['status_receive']=$this->config->item('system_status_pending');
+        $data['status_receive_forward']=$item_head['status_receive_forward'];
+        $data['status_receive_approve']=$this->config->item('system_status_pending');
+        $data['status_system_delivery_receive']=$this->config->item('system_status_no');
+        $data['remarks_receive_forward']=$item_head['remarks_receive_forward'];
+        $data['date_updated_receive_forward']=$time;
+        $data['user_updated_receive_forward']=$user->user_id;
+        //$this->db->set('revision_count_receive', 'revision_count_receive+1', FALSE);
+        Query_helper::update($this->config->item('table_sms_transfer_wo'),$data, array('id='.$id), false);
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->message;
             $this->system_list();
         }
         else
@@ -837,6 +1103,8 @@ class Transfer_wo_receive extends Root_Controller
         $data['territory_name']= 1;
         $data['district_name']= 1;
         $data['quantity_total_approve']= 1;
+        $data['quantity_total_receive']= 1;
+        $data['quantity_total_difference']= 1;
         if($result)
         {
             if($result['preferences']!=null)
