@@ -9,7 +9,7 @@ class Transfer extends CI_Controller
         //$this->payment();
         //$this->sale_details();
         //$this->sale();
-        $this->stock();
+        //$this->stock();
     }
     private function farmer()
     {
