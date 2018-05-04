@@ -130,6 +130,8 @@ class Report_stock_variety_details extends Root_Controller
         $data['opening_stock_kg']= 1;
         $data['in_wo_pkt']= 1;
         $data['in_wo_kg']= 1;
+        $data['out_ow_pkt']= 1;
+        $data['out_ow_kg']= 1;
         $data['out_sale_pkt']= 1;
         $data['out_sale_kg']= 1;
         $data['current_stock_pkt']= 1;
@@ -235,7 +237,35 @@ class Report_stock_variety_details extends Root_Controller
         }
         //write oo code
         //if not in $stock_in array initialize in_wo as 0
+        //return hq ow
+        $this->db->from($this->config->item('table_sms_transfer_ow_details').' details');
+        $this->db->select('details.variety_id,details.pack_size_id');
 
+        $this->db->select('SUM(CASE WHEN ow.date_delivery<'.$date_start.' then details.quantity_approve ELSE 0 END) out_ow_opening',false);
+
+        $this->db->select('SUM(CASE WHEN ow.date_delivery>='.$date_start.' and ow.date_delivery<='.$date_end.' then details.quantity_approve ELSE 0 END) out_ow',false);
+
+
+
+        $this->db->join($this->config->item('table_sms_transfer_ow').' ow','ow.id=details.transfer_ow_id','INNER');
+        $this->db->where('ow.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('ow.status_delivery',$this->config->item('system_status_delivered'));
+        $this->db->where_in('details.variety_id',$variety_ids);
+        $this->db->where('ow.outlet_id',$outlet_id);
+        if($pack_size_id>0)
+        {
+            $this->db->where('details.pack_size_id',$pack_size_id);
+        }
+        $this->db->group_by('details.variety_id');
+        $this->db->group_by('details.pack_size_id');
+        $results=$this->db->get()->result_array();
+        $out_ow=array();
+        foreach($results as $result)
+        {
+            $out_ow[$result['variety_id']][$result['pack_size_id']]['out_ow_opening']=$result['out_ow_opening'];
+            $out_ow[$result['variety_id']][$result['pack_size_id']]['out_ow']=$result['out_ow'];
+            //initialize in oo if includes
+        }
         //sales
         $this->db->from($this->config->item('table_pos_sale_details').' details');
         $this->db->select('details.variety_id,details.pack_size_id');
@@ -265,7 +295,7 @@ class Report_stock_variety_details extends Root_Controller
         }
 
         $type_total=$this->initialize_row('','','Total Type','');
-        $crop_total=$this->initialize_row('','','Total Crop','');
+        $crop_total=$this->initialize_row('','Total Crop','','');
         $grand_total=$this->initialize_row('Grand Total','','','');
 
         $prev_crop_name='';
@@ -315,6 +345,12 @@ class Report_stock_variety_details extends Root_Controller
                     }
                     $info['opening_stock_pkt']=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo_opening'];
                     $info['in_wo_pkt']=$stock_in[$variety['variety_id']][$pack_size_id]['in_wo'];
+                    $info['out_ow_pkt']=0;
+                    if(isset($out_ow[$variety['variety_id']][$pack_size_id]))
+                    {
+                        $info['opening_stock_pkt']-=$out_ow[$variety['variety_id']][$pack_size_id]['out_ow_opening'];
+                        $info['out_ow_pkt']+=$out_ow[$variety['variety_id']][$pack_size_id]['out_ow'];
+                    }
                     $info['out_sale_pkt']=0;
 
                     if(isset($sales[$variety['variety_id']][$pack_size_id]))
@@ -338,6 +374,14 @@ class Report_stock_variety_details extends Root_Controller
                     $crop_total['in_wo_kg']+=$info['in_wo_kg'];
                     $grand_total['in_wo_pkt']+=$info['in_wo_pkt'];
                     $grand_total['in_wo_kg']+=$info['in_wo_kg'];
+
+                    $info['out_ow_kg']=$info['out_ow_pkt']*$pack_sizes[$pack_size_id]/1000;
+                    $type_total['out_ow_pkt']+=$info['out_ow_pkt'];
+                    $type_total['out_ow_kg']+=$info['out_ow_kg'];
+                    $crop_total['out_ow_pkt']+=$info['out_ow_pkt'];
+                    $crop_total['out_ow_kg']+=$info['out_ow_kg'];
+                    $grand_total['out_ow_pkt']+=$info['out_ow_pkt'];
+                    $grand_total['out_ow_kg']+=$info['out_ow_kg'];
 
                     $info['out_sale_kg']=$info['out_sale_pkt']*$pack_sizes[$pack_size_id]/1000;
                     $type_total['out_sale_pkt']+=$info['out_sale_pkt'];
@@ -369,6 +413,8 @@ class Report_stock_variety_details extends Root_Controller
         $row['opening_stock_kg']=0;
         $row['in_wo_pkt']=0;
         $row['in_wo_kg']=0;
+        $row['out_ow_pkt']=0;
+        $row['out_ow_kg']=0;
         $row['out_sale_pkt']=0;
         $row['out_sale_kg']=0;
         //$row['current_stock_pkt']=0;
@@ -381,6 +427,8 @@ class Report_stock_variety_details extends Root_Controller
         $row['opening_stock_kg']=0;
         $row['in_wo_pkt']=0;
         $row['in_wo_kg']=0;
+        $row['out_ow_pkt']=0;
+        $row['out_ow_kg']=0;
         $row['out_sale_pkt']=0;
         $row['out_sale_kg']=0;
         //$row['current_stock_pkt']=0;
@@ -394,8 +442,8 @@ class Report_stock_variety_details extends Root_Controller
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
-        $row['current_stock_pkt']=$info['opening_stock_pkt']+$info['in_wo_pkt']-$info['out_sale_pkt'];
-        $row['current_stock_kg']=$info['opening_stock_kg']+$info['in_wo_kg']-$info['out_sale_kg'];
+        $row['current_stock_pkt']=$info['opening_stock_pkt']+$info['in_wo_pkt']-$info['out_ow_pkt']-$info['out_sale_pkt'];
+        $row['current_stock_kg']=$info['opening_stock_kg']+$info['in_wo_kg']-$info['out_ow_kg']-$info['out_sale_kg'];
         if($info['opening_stock_pkt']==0)
         {
             $row['opening_stock_pkt']='';
@@ -428,6 +476,22 @@ class Report_stock_variety_details extends Root_Controller
         else
         {
             $row['in_wo_kg']=number_format($info['in_wo_kg'],3,'.','');
+        }
+        if($info['out_ow_pkt']==0)
+        {
+            $row['out_ow_pkt']='';
+        }
+        else
+        {
+            $row['out_ow_pkt']=$info['out_ow_pkt'];
+        }
+        if($info['out_ow_kg']==0)
+        {
+            $row['out_ow_kg']='';
+        }
+        else
+        {
+            $row['out_ow_kg']=number_format($info['out_ow_kg'],3,'.','');
         }
         if($info['out_sale_pkt']==0)
         {
