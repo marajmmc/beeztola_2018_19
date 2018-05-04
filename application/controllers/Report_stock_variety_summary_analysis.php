@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Report_stock_variety_summary extends Root_Controller
+class Report_stock_variety_summary_analysis extends Root_Controller
 {
     public $message;
     public $permissions;
@@ -11,8 +11,8 @@ class Report_stock_variety_summary extends Root_Controller
     {
         parent::__construct();
         $this->message="";
-        $this->permissions=User_helper::get_permission('Report_stock_variety_summary');
-        $this->controller_url='report_stock_variety_summary';
+        $this->permissions=User_helper::get_permission('Report_stock_variety_summary_analysis');
+        $this->controller_url='report_stock_variety_summary_analysis';
         $this->user_outlet_ids=array();
         $this->user_outlets=User_helper::get_assigned_outlets();
         if(sizeof($this->user_outlets)>0)
@@ -28,6 +28,7 @@ class Report_stock_variety_summary extends Root_Controller
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
         }
+        $this->lang->load('report_stock_variety_details');
     }
     public function index($action="search")
     {
@@ -62,7 +63,7 @@ class Report_stock_variety_summary extends Root_Controller
         {
             $data['assigned_outlet']=$this->user_outlets;
             $data['pack_sizes']=Query_helper::get_info($this->config->item('table_login_setup_classification_pack_size'),array('id value','name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('name ASC'));
-            $data['title']="Outlet Current Stock Report Search";
+            $data['title']="Current Stock Analysis Report Search";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
             if($this->message)
@@ -92,7 +93,7 @@ class Report_stock_variety_summary extends Root_Controller
             }
             $data['options']=$reports;
             $data['system_preference_items']= $this->get_preference();
-            $data['title']="Outlet Current Stock Report";
+            $data['title']="Outlet Current Stock Analysis Report";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -156,8 +157,19 @@ class Report_stock_variety_summary extends Root_Controller
             $varieties[$result['variety_id']][$result['pack_size_id']]['crop_type_name']=$result['crop_type_name'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['variety_name']=$result['variety_name'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['pack_size']=$result['pack_size'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_pkt']=$result['in_wo'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_kg']=($result['in_wo']*$result['pack_size'])/1000;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_pkt']=$result['in_wo'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_kg']=($result['in_wo']*$result['pack_size'])/1000;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['out_ow_pkt']=$result['out_ow'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['out_ow_kg']=($result['out_ow']*$result['pack_size'])/1000;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['out_sale_pkt']=$result['out_sale'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['out_sale_kg']=($result['out_sale']*$result['pack_size'])/1000;
             $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt']=$result['current_stock'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg']=($result['current_stock']*$result['pack_size'])/1000;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt_cal']=$result['in_wo']-$result['out_ow']-$result['out_sale'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg_cal']=(($result['in_wo']-$result['out_ow']-$result['out_sale'])*$result['pack_size'])/1000;;
+
         }
         $type_total=array();
         $crop_total=array();
@@ -172,8 +184,16 @@ class Report_stock_variety_summary extends Root_Controller
         $grand_total['crop_type_name']='';
         $grand_total['variety_name']='';
         $grand_total['pack_size']=$crop_total['pack_size']=$type_total['pack_size']='';
+        $grand_total['in_wo_pkt']=$crop_total['in_wo_pkt']=$type_total['in_wo_pkt']=0;
+        $grand_total['in_wo_kg']=$crop_total['in_wo_kg']=$type_total['in_wo_kg']=0;
+        $grand_total['out_ow_pkt']=$crop_total['out_ow_pkt']=$type_total['out_ow_pkt']=0;
+        $grand_total['out_ow_kg']=$crop_total['out_ow_kg']=$type_total['out_ow_kg']=0;
+        $grand_total['out_sale_pkt']=$crop_total['out_sale_pkt']=$type_total['out_sale_pkt']=0;
+        $grand_total['out_sale_kg']=$crop_total['out_sale_kg']=$type_total['out_sale_kg']=0;
         $grand_total['current_stock_pkt']=$crop_total['current_stock_pkt']=$type_total['current_stock_pkt']=0;
+        $grand_total['current_stock_pkt_cal']=$crop_total['current_stock_pkt_cal']=$type_total['current_stock_pkt_cal']=0;
         $grand_total['current_stock_kg']=$crop_total['current_stock_kg']=$type_total['current_stock_kg']=0;
+        $grand_total['current_stock_kg_cal']=$crop_total['current_stock_kg_cal']=$type_total['current_stock_kg_cal']=0;
         $prev_crop_name='';
         $prev_type_name='';
         $first_row=true;
@@ -215,12 +235,40 @@ class Report_stock_variety_summary extends Root_Controller
                     $prev_type_name=$pack['crop_type_name'];
                     $first_row=false;
                 }
+                $type_total['in_wo_kg']+=$pack['in_wo_kg'];
+                $type_total['in_wo_pkt']+=$pack['in_wo_pkt'];
+                $crop_total['in_wo_kg']+=$pack['in_wo_kg'];
+                $crop_total['in_wo_pkt']+=$pack['in_wo_pkt'];
+                $grand_total['in_wo_kg']+=$pack['in_wo_kg'];
+                $grand_total['in_wo_pkt']+=$pack['in_wo_pkt'];
+
+                $type_total['out_ow_kg']+=$pack['out_ow_kg'];
+                $type_total['out_ow_pkt']+=$pack['out_ow_pkt'];
+                $crop_total['out_ow_kg']+=$pack['out_ow_kg'];
+                $crop_total['out_ow_pkt']+=$pack['out_ow_pkt'];
+                $grand_total['out_ow_kg']+=$pack['out_ow_kg'];
+                $grand_total['out_ow_pkt']+=$pack['out_ow_pkt'];
+
+                $type_total['out_sale_kg']+=$pack['out_sale_kg'];
+                $type_total['out_sale_pkt']+=$pack['out_sale_pkt'];
+                $crop_total['out_sale_kg']+=$pack['out_sale_kg'];
+                $crop_total['out_sale_pkt']+=$pack['out_sale_pkt'];
+                $grand_total['out_sale_kg']+=$pack['out_sale_kg'];
+                $grand_total['out_sale_pkt']+=$pack['out_sale_pkt'];
+
                 $type_total['current_stock_kg']+=$pack['current_stock_kg'];
                 $type_total['current_stock_pkt']+=$pack['current_stock_pkt'];
                 $crop_total['current_stock_kg']+=$pack['current_stock_kg'];
                 $crop_total['current_stock_pkt']+=$pack['current_stock_pkt'];
                 $grand_total['current_stock_kg']+=$pack['current_stock_kg'];
                 $grand_total['current_stock_pkt']+=$pack['current_stock_pkt'];
+
+                $type_total['current_stock_kg_cal']+=$pack['current_stock_kg_cal'];
+                $type_total['current_stock_pkt_cal']+=$pack['current_stock_pkt_cal'];
+                $crop_total['current_stock_kg_cal']+=$pack['current_stock_kg_cal'];
+                $crop_total['current_stock_pkt_cal']+=$pack['current_stock_pkt_cal'];
+                $grand_total['current_stock_kg_cal']+=$pack['current_stock_kg_cal'];
+                $grand_total['current_stock_pkt_cal']+=$pack['current_stock_pkt_cal'];
                 $items[]=$this->get_row($pack);
             }
         }
@@ -237,6 +285,55 @@ class Report_stock_variety_summary extends Root_Controller
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
+        if($info['in_wo_pkt']==0)
+        {
+            $row['in_wo_pkt']='';
+        }
+        else
+        {
+            $row['in_wo_pkt']=$info['in_wo_pkt'];
+        }
+        if($info['in_wo_kg']==0)
+        {
+            $row['in_wo_kg']='';
+        }
+        else
+        {
+            $row['in_wo_kg']=number_format($info['in_wo_kg'],3,'.','');
+        }
+        if($info['out_ow_pkt']==0)
+        {
+            $row['out_ow_pkt']='';
+        }
+        else
+        {
+            $row['out_ow_pkt']=$info['out_ow_pkt'];
+        }
+        if($info['out_ow_kg']==0)
+        {
+            $row['out_ow_kg']='';
+        }
+        else
+        {
+            $row['out_ow_kg']=number_format($info['out_ow_kg'],3,'.','');
+        }
+        if($info['out_sale_pkt']==0)
+        {
+            $row['out_sale_pkt']='';
+        }
+        else
+        {
+            $row['out_sale_pkt']=$info['out_sale_pkt'];
+        }
+        if($info['out_sale_kg']==0)
+        {
+            $row['out_sale_kg']='';
+        }
+        else
+        {
+            $row['out_sale_kg']=number_format($info['out_sale_kg'],3,'.','');
+        }
+
         if($info['current_stock_pkt']==0)
         {
             $row['current_stock_pkt']='';
@@ -252,6 +349,22 @@ class Report_stock_variety_summary extends Root_Controller
         else
         {
             $row['current_stock_kg']=number_format($info['current_stock_kg'],3,'.','');
+        }
+        if($info['current_stock_pkt_cal']==0)
+        {
+            $row['current_stock_pkt_cal']='';
+        }
+        else
+        {
+            $row['current_stock_pkt_cal']=$info['current_stock_pkt_cal'];
+        }
+        if($info['current_stock_kg_cal']==0)
+        {
+            $row['current_stock_kg_cal']='';
+        }
+        else
+        {
+            $row['current_stock_kg_cal']=number_format($info['current_stock_kg_cal'],3,'.','');
         }
         return $row;
     }
@@ -281,8 +394,16 @@ class Report_stock_variety_summary extends Root_Controller
         $data['crop_type_name']= 1;
         $data['variety_name']= 1;
         $data['pack_size']= 1;
+        $data['in_wo_pkt']= 1;
+        $data['in_wo_kg']= 1;
+        $data['out_ow_pkt']= 1;
+        $data['out_ow_kg']= 1;
+        $data['out_sale_pkt']= 1;
+        $data['out_sale_kg']= 1;
         $data['current_stock_pkt']= 1;
+        $data['current_stock_pkt_cal']= 1;
         $data['current_stock_kg']= 1;
+        $data['current_stock_kg_cal']= 1;
         if($result)
         {
             if($result['preferences']!=null)

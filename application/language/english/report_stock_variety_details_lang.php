@@ -10,5 +10,7 @@ $lang['LABEL_OUT_OW_KG']='To HQ(kg)';
 $lang['LABEL_OUT_SALE_PKT']='Sales(pkt)';
 $lang['LABEL_OUT_SALE_KG']='Sales(kg)';
 
-$lang['LABEL_CURRENT_STOCK_PKT']='Current Stock(pkt)';
-$lang['LABEL_CURRENT_STOCK_KG']='Current Stock(kg)';
+$lang['LABEL_CURRENT_STOCK_PKT']='CS(pkt)';
+$lang['LABEL_CURRENT_STOCK_PKT_CAL']='CS(pkt) Sum';
+$lang['LABEL_CURRENT_STOCK_KG']='CS(kg)';
+$lang['LABEL_CURRENT_STOCK_KG_CAL']='CS(kg) Sum';
