@@ -6,6 +6,7 @@ class Transfer2 extends CI_Controller
     {
         //$this->check_sales_validation();
         //$this->sale();
+        //$this->farmer();
     }
     private function check_sales_validation()
     {
@@ -193,6 +194,85 @@ class Transfer2 extends CI_Controller
         else
         {
             echo 'Failed transfer Sale';
+        }
+    }
+    private function farmer()
+    {
+        $source_tables=array(
+            'farmer'=>'arm_pos.pos_setup_farmer_farmer',
+            'farmer_outlet'=>'arm_pos.pos_setup_farmer_outlet',
+            'farmer_new'=>$this->config->item('table_pos_setup_farmer_farmer'),
+            'farmer_outlet_new'=>$this->config->item('table_pos_setup_farmer_outlet')
+        );
+        $destination_tables=array(
+            'farmer'=>$this->config->item('table_pos_setup_farmer_farmer'),
+            'farmer_outlet'=>$this->config->item('table_pos_setup_farmer_outlet')
+        );
+        $beeztola_last_farmer=Query_helper::get_info($source_tables['farmer_new'],'*',array(),1,0,array('id DESC'));
+        $pos_farmer=Query_helper::get_info($source_tables['farmer'],array(),array('id> '.$beeztola_last_farmer['id']),0,0,array('id ASC'));
+        $beeztola_last_farmer_outlet=Query_helper::get_info($source_tables['farmer_outlet_new'],'*',array(),1,0,array('id DESC'));
+        $pos_farmer_outlet=Query_helper::get_info($source_tables['farmer_outlet'],array(),array('id> '.$beeztola_last_farmer_outlet['id']),0,0,array('id ASC'));
+
+        $this->db->trans_start();  //DB Transaction Handle START
+
+        foreach($pos_farmer as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['name']=$result['name'];
+            $data['farmer_type_id']=$result['type_id'];
+            if($result['type_id']>1)
+            {
+
+                $data['farmer_type_id']=2;
+                $data['status_card_require']=$this->config->item('system_status_yes');
+            }
+            else
+            {
+                $data['farmer_type_id']=1;
+                $data['status_card_require']=$this->config->item('system_status_no');
+            }
+            $data['mobile_no']=$result['mobile_no'];
+            $data['nid']=$result['nid'];
+            $data['address']=$result['address'];
+            $data['time_card_off_end']=$result['time_card_off_end'];
+            if(in_array($result['id'],array(1,429,1520)))
+            {
+                $data['status']=$this->config->item('system_status_inactive');
+            }
+            else
+            {
+                $data['status']=$this->config->item('system_status_active');
+            }
+            $data['time_card_off_end']=$result['time_card_off_end'];
+            $data['date_created']=$result['date_created'];
+            $data['user_created']=$result['user_created'];
+            $data['date_updated']=$result['date_updated'];
+            $data['user_updated']=$result['user_updated'];
+            Query_helper::add($destination_tables['farmer'],$data,false);
+        }
+        foreach($pos_farmer_outlet as $result)
+        {
+            $data=array();
+            $data['id']=$result['id'];
+            $data['farmer_id']=$result['farmer_id'];
+            $data['outlet_id']=$result['customer_id'];
+            $data['revision']=$result['revision'];
+            $data['date_created']=$result['date_created'];
+            $data['user_created']=$result['user_created'];
+            $data['date_updated']=$result['date_updated'];
+            $data['user_updated']=$result['user_updated'];
+            Query_helper::add($destination_tables['farmer_outlet'],$data,false);
+        }
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            echo 'Success Transfer Farmer';
+        }
+        else
+        {
+            echo 'Failed Transfer Farmer';
         }
     }
 }
