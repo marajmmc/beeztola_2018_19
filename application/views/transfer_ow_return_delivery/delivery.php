@@ -231,14 +231,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     </tfoot>
                 </table>
             </div>
-            <div class="row show-grid">
-                <div class="col-xs-4">
-                    <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_CHALLAN');?></label>
+            <?php
+            if($item['remarks_challan'])
+            {
+                ?>
+                <div class="row show-grid">
+                    <div class="col-xs-4">
+                        <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_CHALLAN');?></label>
+                    </div>
+                    <div class="col-sm-4 col-xs-8">
+                        <?php echo nl2br($item['remarks_challan']);?>
+                    </div>
                 </div>
-                <div class="col-sm-4 col-xs-8">
-                    <?php echo nl2br($item['remarks_challan']);?>
-                </div>
-            </div>
+            <?php
+            }
+            ?>
         </div>
         <div class="widget-header">
             <div class="title">
@@ -270,8 +277,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
             </div>
             <div class="col-sm-4 col-xs-4">
-                <div class="action_button">
-                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Outlet to HQ transfer delivery done?">HQ to Outlet `TR` Delivered</button>
+                <div class="action_button pull-right">
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Outlet to HQ transfer delivery done?">Save</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">

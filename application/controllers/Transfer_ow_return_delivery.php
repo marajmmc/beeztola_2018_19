@@ -345,7 +345,7 @@ class Transfer_ow_return_delivery extends Root_Controller
 
             $data['title']="Outlet to HQ Transfer Return Delivery :: ". Barcode_helper::get_barcode_transfer_outlet_to_warehouse($data['item']['id']);
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;

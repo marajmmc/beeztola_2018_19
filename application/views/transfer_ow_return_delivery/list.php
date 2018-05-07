@@ -14,7 +14,7 @@ if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
     $action_buttons[]=array
     (
         'type'=>'button',
-        'label'=>'Return Delivery Edit',
+        'label'=>'Edit',
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/edit')
     );
@@ -67,7 +67,7 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
     $action_buttons[]=array
     (
         'type'=>'button',
-        'label'=>'Return Delivery',
+        'label'=>'Delivery',
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/delivery')
     );
@@ -143,6 +143,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 height: '350px',
                 autorowheight: true,
                 columnsreorder: true,
+                enablebrowserselection: true,
                 columns:
                 [
                     { text: '<?php echo $CI->lang->line('LABEL_BARCODE'); ?>', dataField: 'barcode',pinned:true, width:'80',hidden: <?php echo $system_preference_items['barcode']?0:1;?>},
