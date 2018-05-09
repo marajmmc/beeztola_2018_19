@@ -29,6 +29,9 @@ $config['table_pos_sale_cancel'] = 'arm_beeztola_2018_19.pos_sale_cancel';
 $config['table_pos_sale_manual'] = 'arm_beeztola_2018_19.pos_sale_manual';
 $config['table_pos_sale_manual_details'] = 'arm_beeztola_2018_19.pos_sale_manual_details';
 
+$config['table_pos_budget_dealer_monthly'] = 'arm_beeztola_2018_19.pos_budget_dealer_monthly';
+$config['table_pos_budget_dealer_monthly_details'] = 'arm_beeztola_2018_19.pos_budget_dealer_monthly_details';
+
 
 
 
