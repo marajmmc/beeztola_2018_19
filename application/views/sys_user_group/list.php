@@ -75,6 +75,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $("#system_jqx_container").jqxGrid(
             {
                 width: '100%',
+                height: '350px',
                 source: dataAdapter,
                 pageable: true,
                 filterable: true,
@@ -87,7 +88,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 enablebrowserselection: true,
                 columnsreorder: true,
                 altrows: true,
-                autoheight: true,
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name'},
                     { text: '<?php echo $CI->lang->line('TOTAL_TASK'); ?>', dataField: 'total_task',width:'150',cellsalign: 'right'},

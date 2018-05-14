@@ -96,7 +96,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsreorder: true,
                 enablebrowserselection: true,
                 altrows: true,
-                autoheight: true,
                 rowsheight: 35,
                 editable:true,
                 columns: [
