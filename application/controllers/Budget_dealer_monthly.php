@@ -260,7 +260,7 @@ class Budget_dealer_monthly extends Root_Controller
 
             foreach($dealers as $dealer)
             {
-                $item['amount_budget_'.$dealer['farmer_id']]=0;
+                $item['amount_budget_'.$dealer['farmer_id']]='--';
             }
             $items[]=$item;
         }

@@ -22,6 +22,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <div id="jqx_inputs">
     </div>
 </form>
+<div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
+    <div class="col-xs-4"></div>
+    <div class="col-sm-4 col-xs-8 text-center">
+        <strong>Note:</strong> Budget input will be in packet.
+    </div>
+</div>
 <div class="row widget">
     <div class="col-xs-12" id="system_jqx_container"></div>
 </div>
