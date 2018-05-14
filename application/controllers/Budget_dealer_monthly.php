@@ -172,15 +172,24 @@ class Budget_dealer_monthly extends Root_Controller
             $data['options']=$this->input->post();
             $outlet_id=$this->input->post('outlet_id');
             $month_id=$this->input->post('month_id');
-            $dealer_id=$this->input->post('dealer_id');
             $crop_id=$this->input->post('crop_id');
-            if(!$outlet_id || !$month_id || !$dealer_id || !$crop_id)
+            if(!$outlet_id || !$month_id || !$crop_id)
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid input. Following required field. Ex: Star mark (*)';
                 $this->json_return($ajax);
                 die();
             }
+            //$data['dealers']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('status ="Active" AND farmer_type_id>1'));
+            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+            $this->db->select('farmer_outlet.farmer_id');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+            $this->db->select('farmer_farmer.name farmer_name');
+            $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
+            $this->db->where('farmer_farmer.farmer_type_id > ',1);
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where('farmer_outlet.outlet_id',$outlet_id);
+            $data['dealers']=$this->db->get()->result_array();
 
             $data['title']="Variety List";
             $ajax['status']=true;
@@ -204,8 +213,18 @@ class Budget_dealer_monthly extends Root_Controller
         $id=$this->input->post('id');
         $outlet_id=$this->input->post('outlet_id');
         $month_id=$this->input->post('month_id');
-        $dealer_id=$this->input->post('dealer_id');
         $crop_id=$this->input->post('crop_id');
+
+        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+        $this->db->select('farmer_outlet.farmer_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+        $this->db->select('farmer_farmer.name farmer_name');
+        $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
+        $this->db->where('farmer_farmer.farmer_type_id > ',1);
+        $this->db->where('farmer_outlet.revision',1);
+        $this->db->where('farmer_outlet.outlet_id',$outlet_id);
+        $dealers=$this->db->get()->result_array();
+
 
         $data=array();
         $results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly_details'),'*',array('budget_dealer_monthly_id ='.$id));
@@ -238,14 +257,10 @@ class Budget_dealer_monthly extends Root_Controller
             $item['crop_type_name']=$result['crop_type_name'];
             $item['variety_name']=$result['variety_name'];
             $item['pack_size']=$result['pack_size'];
-            $item['quantity_min']=$result['quantity_min'];
-            if(isset($data[$result['variety_id']][$result['pack_size_id']]))
+
+            foreach($dealers as $dealer)
             {
-                $item['amount_budget']=$data[$result['variety_id']][$result['pack_size_id']]['quantity_min'];
-            }
-            else
-            {
-                $item['amount_budget']=0;
+                $item['amount_budget_'.$dealer['farmer_id']]=0;
             }
             $items[]=$item;
         }
@@ -355,18 +370,10 @@ class Budget_dealer_monthly extends Root_Controller
     {
         $user = User_helper::get_user();
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
-        //$data['id']= 1;
-        $data['barcode']= 1;
+        $data['id']= 1;
         $data['outlet_name']= 1;
-        $data['date_request']= 1;
-        $data['outlet_code']= 1;
-        $data['division_name']= 1;
-        $data['zone_name']= 1;
-        $data['territory_name']= 1;
-        $data['district_name']= 1;
-        $data['quantity_total_approve']= 1;
-        $data['quantity_total_receive']= 1;
-        $data['quantity_total_difference']= 1;
+        $data['month']= 1;
+        $data['crop_name']= 1;
         if($result)
         {
             if($result['preferences']!=null)

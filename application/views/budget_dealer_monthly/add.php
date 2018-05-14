@@ -80,31 +80,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             ?>
         </div>
     </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
-            <label class="control-label pull-right">Dealer <span style="color:#FF0000">*</span></label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <?php
-            if($item['id']>0)
-            {
-                ?>
-                <label class="control-label"><?php echo '';?></label>
-            <?php
-            }
-            else
-            {
-                ?>
-                <select id="dealer_id" class="form-control" name="item[dealer_id]" >
-                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
-                    <option value="1">Test</option>
-
-                </select>
-            <?php
-            }
-            ?>
-        </div>
-    </div>
     <div style="" class="row show-grid" id="crop_id_container">
         <div class="col-xs-4">
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label>
@@ -133,18 +108,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             $("#system_report_container").html("");
             $("#month_id").val("");
-            $("#dealer_id").val("");
             $("#crop_id").val("");
         });
         $(document).off("change", "#month_id");
         $(document).on("change","#month_id",function()
-        {
-            $("#system_report_container").html("");
-            $("#dealer_id").val("");
-            $("#crop_id").val("");
-        });
-        $(document).off("change", "#dealer_id");
-        $(document).on("change","#dealer_id",function()
         {
             $("#system_report_container").html("");
             $("#crop_id").val("");
@@ -160,7 +127,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     url:'<?php echo site_url($CI->controller_url.'/index/variety_list') ?>',
                     type: 'POST',
                     datatype: "JSON",
-                    data:{outlet_id:$("#outlet_id").val(),month_id:$("#month_id").val(),dealer_id:$("#dealer_id").val(),crop_id:crop_id},
+                    data:{outlet_id:$("#outlet_id").val(),month_id:$("#month_id").val(),crop_id:crop_id},
                     success: function (data, status)
                     {
 
