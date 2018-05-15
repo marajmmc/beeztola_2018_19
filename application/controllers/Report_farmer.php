@@ -5,17 +5,17 @@ class Report_farmer extends Root_Controller
     public $message;
     public $permissions;
     public $controller_url;
-    public $user_outlets;
-    public $user_outlet_ids;
+    //public $user_outlets;
+    //public $user_outlet_ids;
     public function __construct()
     {
         parent::__construct();
         $this->message="";
         $this->permissions = User_helper::get_permission(get_class($this));
         $this->controller_url = strtolower(get_class($this));
-        $this->user_outlet_ids=array();
-        $this->user_outlets=User_helper::get_assigned_outlets();
-        if(sizeof($this->user_outlets)>0)
+        //$this->user_outlet_ids=array();
+        //$this->user_outlets=User_helper::get_assigned_outlets();
+        /*if(sizeof($this->user_outlets)>0)
         {
             foreach($this->user_outlets as $row)
             {
@@ -27,7 +27,7 @@ class Report_farmer extends Root_Controller
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
-        }
+        }*/
     }
 
     public function index($action="search",$id=0)
@@ -66,7 +66,8 @@ class Report_farmer extends Root_Controller
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
-            $data['assigned_outlet']=$this->user_outlets;
+            //$data['assigned_outlet']=$this->user_outlets;
+            $data['assigned_outlet']=User_helper::get_assigned_outlets();
             $data['title']="Farmer Report Search";
             $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),'*',array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC','id ASC'));
             $ajax['status']=true;
