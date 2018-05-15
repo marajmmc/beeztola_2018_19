@@ -22,15 +22,25 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
                 </div>
                 <div class="col-sm-4 col-xs-8">
-                    <select name="report[outlet_id]" class="form-control">
+                    <?php if(count($assigned_outlet)>2){?>
+                        <select name="report[outlet_id]" class="form-control">
+                            <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                            <?php
+                            foreach($assigned_outlet as $outlet)
+                            {?>
+                                <option value="<?php echo $outlet['customer_id']?>"><?php echo $outlet['name'];?></option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    <?php } else{?>
                         <?php
                         foreach($assigned_outlet as $outlet)
                         {?>
-                            <option value="<?php echo $outlet['customer_id']?>"><?php echo $outlet['name'];?></option>
-                        <?php
-                        }
-                        ?>
-                    </select>
+                            <label class="control-label"><?php echo $outlet['name'];?></label>
+                            <input type="hidden" name="report[outlet_id]" value="<?php echo $outlet['customer_id']?>">
+                        <?php } ?>
+                    <?php } ?>
                 </div>
             </div>
         </div>
@@ -51,7 +61,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </select>
             </div>
         </div>
-
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $this->lang->line('STATUS');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="farmer_type" name="report[status]" class="form-control">
+                    <option value="">All</option>
+                    <option value="<?php echo $this->config->item('system_status_active');?>"><?php echo $this->lang->line('ACTIVE');?></option>
+                    <option value="<?php echo $this->config->item('system_status_inactive');?>"><?php echo $this->lang->line('INACTIVE');?></option>
+                </select>
+            </div>
+        </div>
         <?php if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)){?>
             <div class="row show-grid">
                 <span class="text-center"><p><label class="control-label">OR</label></p></span>

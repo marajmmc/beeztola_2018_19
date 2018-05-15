@@ -94,6 +94,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'status_card_require', type: 'string' },
                 { name: 'address', type: 'string' },
                 { name: 'total_invoice', type: 'string'},
+                { name: 'status', type: 'string'},
                 { name: 'details_button', type: 'string' }
             ],
             id: 'id',
@@ -163,6 +164,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_STATUS_CARD_REQUIRE'); ?>', dataField: 'status_card_require',width:'100',hidden: <?php echo $system_preference_items['status_card_require']?0:1;?>,filtertype: 'list'},
                     { text: '<?php echo $CI->lang->line('LABEL_ADDRESS'); ?>', dataField: 'address',hidden: <?php echo $system_preference_items['address']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL_INVOICE'); ?>', dataField: 'total_invoice',width:'80',hidden: <?php echo $system_preference_items['total_invoice']?0:1;?>,cellsAlign:'right',filtertype: 'list'},
+                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>', dataField: 'status',width:'80',filtertype: 'list',hidden: <?php echo $system_preference_items['status']?0:1;?>},
                     <?php if(isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)){?>
                     { text: '<?php echo $CI->lang->line('ACTION_DETAILS'); ?>',dataField: 'details_button',width:'150',cellsrenderer:cellsrenderer}
                     <?php } ?>

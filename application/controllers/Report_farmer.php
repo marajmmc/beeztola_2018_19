@@ -5,29 +5,19 @@ class Report_farmer extends Root_Controller
     public $message;
     public $permissions;
     public $controller_url;
-    //public $user_outlets;
-    //public $user_outlet_ids;
     public function __construct()
     {
         parent::__construct();
         $this->message="";
         $this->permissions = User_helper::get_permission(get_class($this));
         $this->controller_url = strtolower(get_class($this));
-        //$this->user_outlet_ids=array();
-        //$this->user_outlets=User_helper::get_assigned_outlets();
-        /*if(sizeof($this->user_outlets)>0)
-        {
-            foreach($this->user_outlets as $row)
-            {
-                $this->user_outlet_ids[]=$row['customer_id'];
-            }
-        }
-        else
+        $this->user_outlets=User_helper::get_assigned_outlets();
+        if(!(sizeof($this->user_outlets)>0))
         {
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
-        }*/
+        }
     }
 
     public function index($action="search",$id=0)
@@ -66,8 +56,7 @@ class Report_farmer extends Root_Controller
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
-            //$data['assigned_outlet']=$this->user_outlets;
-            $data['assigned_outlet']=User_helper::get_assigned_outlets();
+            $data['assigned_outlet']=$this->user_outlets;
             $data['title']="Farmer Report Search";
             $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),'*',array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC','id ASC'));
             $ajax['status']=true;
@@ -100,6 +89,7 @@ class Report_farmer extends Root_Controller
         $data['status_card_require']= 1;
         $data['address']= 1;
         $data['total_invoice']= 1;
+        $data['status']= 1;
         return $data;
     }
 
@@ -164,6 +154,7 @@ class Report_farmer extends Root_Controller
     {
         $outlet_id=$this->input->post('outlet_id');
         $farmer_type=$this->input->post('farmer_type');
+        $status=$this->input->post('status');
         $mobile_no=$this->input->post('mobile_no');
         $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' farmer');
         $this->db->select('farmer.*');
@@ -177,6 +168,11 @@ class Report_farmer extends Root_Controller
         {
             $this->db->where('farmer_type.id',$farmer_type);
         }
+        if($status)
+        {
+            $this->db->where('farmer.status',$status);
+        }
+
         if($mobile_no)
         {
             $this->db->where('farmer.mobile_no',$mobile_no);
@@ -196,7 +192,6 @@ class Report_farmer extends Root_Controller
             {
                 $item['status_card_require']=$this->config->item('system_status_no');
             }
-
         }
         $this->json_return($items);
     }
@@ -228,27 +223,16 @@ class Report_farmer extends Root_Controller
             {
                 $item_id=$id;
             }
-            else if(($this->input->post('id')))
+            else
             {
                 $item_id=$this->input->post('id');
             }
-            else
-            {
-                $item_id=$id;
-            }
-            $ajax['status']=true;
-
-            $ajax['system_content'][]=array("id"=>"#popup_content","html"=>'Ok');
-
-            $item=$this->input->post('item');
             $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' farmer');
             $this->db->select('farmer.*');
             $this->db->join($this->config->item('table_pos_setup_farmer_type').' farmer_type','farmer_type.id = farmer.farmer_type_id','INNER');
             $this->db->select('farmer_type.name farmer_type_name,farmer_type.discount_self_percentage');
             $this->db->where('farmer.id',$item_id);
             $data['item']=$this->db->get()->row_array();
-//            print_r($data['item']);
-//            exit;
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#popup_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
             if($this->message)
