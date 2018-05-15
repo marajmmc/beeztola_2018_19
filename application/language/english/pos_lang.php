@@ -38,7 +38,8 @@ $lang['ACTION_DELETE'] = 'Delete';
 $lang['ACTION_FORWARD'] = 'Forward';
 $lang['ACTION_DETAILS'] = 'Details';
 $lang['ACTION_PRINT'] = 'Print';
-$lang['ACTION_DETAILS_PRINT'] = 'Print View';
+$lang['admin028799011022
+'] = 'Print View';
 $lang['ACTION_DOWNLOAD'] = 'Download';
 $lang['ACTION_DOCUMENT'] = 'Documents';
 $lang['ACTION_CLEAR'] = 'Clear';
@@ -421,6 +422,7 @@ $lang['LABEL_STATUS_PAYMENT_EDIT'] = 'Payment Edit Status';
 
 //Label Lang
 $lang['LABEL_INVOICE_NO'] = 'Invoice No';
+$lang['LABEL_TOTAL_INVOICE'] = 'Total Invoice';
 // Transfer HQ to Outlet
 $lang['LABEL_ORDER_ITEMS']='Order Items (Variety Information)';
 $lang['LABEL_STATUS_RECEIVE_FORWARD']='Receive Forward Status';
