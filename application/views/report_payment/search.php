@@ -23,7 +23,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
                     </div>
                     <div class="col-xs-6">
-
                         <select name="report[outlet_id]" class="form-control">
                             <?php
                             foreach($assigned_outlet as $outlet)
