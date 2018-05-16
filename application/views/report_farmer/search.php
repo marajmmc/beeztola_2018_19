@@ -61,19 +61,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </select>
             </div>
         </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('STATUS');?></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <select id="farmer_type" name="report[status]" class="form-control">
-                    <option value="">All</option>
-                    <option value="<?php echo $this->config->item('system_status_active');?>"><?php echo $this->lang->line('ACTIVE');?></option>
-                    <option value="<?php echo $this->config->item('system_status_inactive');?>"><?php echo $this->lang->line('INACTIVE');?></option>
-                </select>
-            </div>
-        </div>
-        <?php if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)){?>
+        <?php if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))
+        {
+            ?>
             <div class="row show-grid">
                 <span class="text-center"><p><label class="control-label">OR</label></p></span>
                 <div class="col-xs-4">
@@ -82,10 +72,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     </label>
                 </div>
                 <div class="col-sm-4 col-xs-8">
-                    <input type="text" name="report[mobile_no]" class="form-control text-right float_type_positive" value=""/>
+                    <input type="text" name="report[mobile_no]" class="form-control" value="" />
                 </div>
             </div>
-        <?php } ?>
+        <?php
+        }
+        ?>
         <div class="row show-grid">
             <div class="col-xs-4">
 

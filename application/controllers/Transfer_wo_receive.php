@@ -840,7 +840,7 @@ class Transfer_wo_receive extends Root_Controller
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
-            $this->message=$this->message;
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
             $this->system_list();
         }
         else

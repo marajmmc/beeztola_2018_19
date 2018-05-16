@@ -79,10 +79,7 @@ class Report_farmer extends Root_Controller
     private function get_preference_headers()
     {
         $data['sl_no']= 1;
-        if(isset($this->permissions['action2'])&&($this->permissions['action2']==1))
-        {
-            $data['barcode']= 1;
-        }
+        $data['barcode']= 1;
         $data['name']= 1;
         $data['mobile_no']= 1;
         $data['farmer_type_name']= 1;
@@ -124,11 +121,14 @@ class Report_farmer extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $reports=$this->input->post('report');
-            if(!$reports['outlet_id'])
+            if(!$reports['mobile_no'])
             {
-                $ajax['status']=false;
-                $ajax['system_message']='This outlet field is required';
-                $this->json_return($ajax);
+                if(!$reports['outlet_id'])
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='This outlet field is required';
+                    $this->json_return($ajax);
+                }
             }
             $data['options']=$reports;
             $data['system_preference_items']= $this->get_preference();
@@ -154,41 +154,40 @@ class Report_farmer extends Root_Controller
     {
         $outlet_id=$this->input->post('outlet_id');
         $farmer_type=$this->input->post('farmer_type');
-        $status=$this->input->post('status');
         $mobile_no=$this->input->post('mobile_no');
         $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' farmer');
         $this->db->select('farmer.*');
         $this->db->join($this->config->item('table_pos_setup_farmer_type').' farmer_type','farmer_type.id = farmer.farmer_type_id','INNER');
         $this->db->select('farmer_type.name farmer_type_name, farmer_type.discount_self_percentage');
-        $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id = farmer.id and farmer_outlet.revision =1','LEFT');
-        $this->db->join($this->config->item('table_pos_sale').' sale','sale.farmer_id = farmer.id','LEFT');
-        $this->db->select('count(sale.id) total_invoice',true);
-        $this->db->where('farmer_outlet.outlet_id',$outlet_id);
-        if($farmer_type>0)
-        {
-            $this->db->where('farmer_type.id',$farmer_type);
-        }
-        if($status)
-        {
-            $this->db->where('farmer.status',$status);
-        }
-
         if($mobile_no)
         {
-            $this->db->where('farmer.mobile_no',$mobile_no);
+            $this->db->or_where('farmer.mobile_no',$mobile_no);
+            $this->db->join("(SELECT count(sale.id) total_invoice, sale.farmer_id FROM ".$this->config->item('table_pos_sale')." sale WHERE sale.status='".$this->config->item('system_status_active')."' GROUP BY sale.farmer_id) saleTbl",'saleTbl.farmer_id=farmer.id','LEFT');
+            $this->db->select('saleTbl.total_invoice');
         }
+        else
+        {
+            $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id = farmer.id and farmer_outlet.revision =1','INNER');
+            $this->db->where('farmer_outlet.outlet_id',$outlet_id);
+            $this->db->join("(SELECT count(sale.id) total_invoice, sale.farmer_id FROM ".$this->config->item('table_pos_sale')." sale WHERE sale.outlet_id = $outlet_id AND sale.status='".$this->config->item('system_status_active')."' GROUP BY sale.farmer_id) saleTbl",'saleTbl.farmer_id=farmer.id','LEFT');
+            $this->db->select('saleTbl.total_invoice');
+            if($farmer_type>0)
+            {
+                $this->db->where('farmer_type.id',$farmer_type);
+            }
+        }
+        /*$this->db->join($this->config->item('table_pos_sale').' sale','sale.farmer_id = farmer.id AND sale.outlet_id ='.$outlet_id,'LEFT');
+        $this->db->select('count(sale.id) total_invoice',true);*/
+
         $this->db->order_by('farmer.id DESC');
         $this->db->group_by('farmer.id');
         $items=$this->db->get()->result_array();
+        //echo $this->db->last_query();
         $time=time();
         foreach($items as &$item)
         {
             $item['barcode']=Barcode_helper::get_barcode_farmer($item['id']);
-            if(($item['discount_self_percentage']>0)&&($item['time_card_off_end']<$time))
-            {
-                $item['status_card_require']=$this->config->item('system_status_yes');
-            }
-            else
+            if($item['time_card_off_end']>$time)
             {
                 $item['status_card_require']=$this->config->item('system_status_no');
             }
