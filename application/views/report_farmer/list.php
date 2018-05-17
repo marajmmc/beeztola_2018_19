@@ -134,7 +134,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 rowsheight: 40,
                 columns: [
                     {
-                        text: '<?php echo $CI->lang->line('LABEL_SL_NO'); ?>',datafield: 'sl_no',width:'30', columntype: 'number',cellsalign: 'right', sortable: false, menu: false,
+                        text: '<?php echo $CI->lang->line('LABEL_SL_NO'); ?>',datafield: 'sl_no',width:'50', columntype: 'number',cellsalign: 'right', sortable: false, menu: false,
                         cellsrenderer: function(row, column, value, defaultHtml, columnSettings, record)
                         {
                             var element = $(defaultHtml);
