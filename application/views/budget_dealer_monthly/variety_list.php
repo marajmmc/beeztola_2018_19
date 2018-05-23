@@ -43,7 +43,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var data=$('#system_jqx_container').jqxGrid('getrows');
             for(var i=0;i<data.length;i++)
             {
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][amount_budget]" value="'+data[i]['amount_budget']+'">');
+                <?php
+                foreach($dealers as $dealer)
+                {
+                ?>
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][<?php echo $dealer['farmer_id']?>][amount_budget]" value="'+data[i]['amount_budget_<?php echo $dealer['farmer_id']?>']+'">');
+                <?php
+                }
+                ?>
+                //$('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][amount_budget]" value="'+data[i]['amount_budget']+'">');
             }
             var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
             if(sure)
