@@ -582,7 +582,7 @@ class Transfer_wo_receive extends Root_Controller
                     $data['pack_size_id']=$item['pack_size_id'];
                     $data['outlet_id']=$result['item']['outlet_id'];
                     $data['in_wo']=$item['quantity_receive'];
-                    $data['current_stock']=($item['quantity_receive']);
+                    $data['current_stock']=$item['quantity_receive'];
                     $data['date_updated'] = $time;
                     $data['user_updated'] = $user->user_id;
                     Query_helper::add($this->config->item('table_pos_stock_summary_variety'),$data);
