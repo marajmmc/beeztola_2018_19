@@ -67,52 +67,11 @@ class Budget_dealer_monthly extends Root_Controller
     }
     private function system_get_items()
     {
-        /*$user=User_helper::get_user();
-        $this->db->from($this->config->item('table_sms_transfer_wo').' transfer_wo');
-        $this->db->select(
-            '
-            transfer_wo.id,
-            transfer_wo.date_request,
-            transfer_wo.quantity_total_request_kg quantity_total_request,
-            transfer_wo.quantity_total_approve_kg quantity_total_approve,
-            transfer_wo.quantity_total_receive_kg quantity_total_receive
-            ');
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=transfer_wo.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-        $this->db->select('outlet_info.name outlet_name, outlet_info.customer_code outlet_code');
-        $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = outlet_info.district_id','INNER');
-        $this->db->select('districts.name district_name');
-        $this->db->join($this->config->item('table_login_setup_location_territories').' territories','territories.id = districts.territory_id','INNER');
-        $this->db->select('territories.name territory_name');
-        $this->db->join($this->config->item('table_login_setup_location_zones').' zones','zones.id = territories.zone_id','INNER');
-        $this->db->select('zones.name zone_name');
-        $this->db->join($this->config->item('table_login_setup_location_divisions').' divisions','divisions.id = zones.division_id','INNER');
-        $this->db->select('divisions.name division_name');
-        $this->db->where('transfer_wo.status !=',$this->config->item('system_status_delete'));
-        $this->db->where('transfer_wo.status_delivery',$this->config->item('system_status_delivered'));
-        $this->db->where('transfer_wo.status_receive',$this->config->item('system_status_pending'));
-        $this->db->where('transfer_wo.status_receive_forward',$this->config->item('system_status_pending'));
-        $this->db->where('outlet_info.revision',1);
-        $this->db->where('transfer_wo.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
-        $this->db->order_by('transfer_wo.id','DESC');
-        $results=$this->db->get()->result_array();
-        $items=array();
-        foreach($results as $result)
-        {
-            $item=array();
-            $item['id']=$result['id'];
-            $item['barcode']=Barcode_helper::get_barcode_transfer_warehouse_to_outlet($result['id']);
-            $item['outlet_name']=$result['outlet_name'];
-            $item['date_request']=System_helper::display_date($result['date_request']);
-            $item['outlet_code']=$result['outlet_code'];
-            $item['division_name']=$result['division_name'];
-            $item['zone_name']=$result['zone_name'];
-            $item['territory_name']=$result['territory_name'];
-            $item['district_name']=$result['district_name'];
-            $item['quantity_total_approve']=number_format($result['quantity_total_approve'],3,'.','');
-            $item['quantity_total_receive']=number_format($result['quantity_total_receive'],3,'.','');
-            $item['quantity_total_difference']=number_format(($result['quantity_total_approve']-$result['quantity_total_receive']),3,'.','');
-            $items[]=$item;
-        }*/
+        //$items=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('status !="'.$this->config->item('system_status_delete').'"'));
+        $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' dealer_monthly');
+        $this->db->select('dealer_monthly.*');
+        $this->db->join($this->config->item('table_pos_setup_user_outlet').' ','','INNER');
+        $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $items=array();
         $this->json_return($items);
     }

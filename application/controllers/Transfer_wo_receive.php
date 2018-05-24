@@ -561,12 +561,16 @@ class Transfer_wo_receive extends Root_Controller
             Query_helper::update($this->config->item('table_sms_transfer_wo'),$data, array('id='.$id));
             foreach($items as $item)
             {
+                $data=array();
+                $data['quantity_receive']=$item['quantity_receive'];
+                Query_helper::update($this->config->item('table_sms_transfer_wo_details'),$data, array('transfer_wo_id='.$id, 'variety_id ='.$item['variety_id'], 'pack_size_id ='.$item['pack_size_id']), false);
+
                 if(isset($current_stocks[$item['variety_id']][$item['pack_size_id']]))
                 {
                     $current_stock=$current_stocks[$item['variety_id']][$item['pack_size_id']]['current_stock'];
                     $data=array();
-                    $data['current_stock']=($current_stock+$old_items[$item['variety_id']][$item['pack_size_id']]['quantity_receive']);
-                    $data['in_wo']=($current_stocks[$item['variety_id']][$item['pack_size_id']]['in_wo']+$old_items[$item['variety_id']][$item['pack_size_id']]['quantity_receive']);
+                    $data['current_stock']=($current_stock+$item['quantity_receive']);
+                    $data['in_wo']=($current_stocks[$item['variety_id']][$item['pack_size_id']]['in_wo']+$item['quantity_receive']);
                     $data['date_updated'] = $time;
                     $data['user_updated'] = $user->user_id;
                     Query_helper::update($this->config->item('table_pos_stock_summary_variety'),$data,array('variety_id='.$item['variety_id'],'pack_size_id='.$item['pack_size_id'],'outlet_id='.$result['item']['outlet_id']));
@@ -577,8 +581,8 @@ class Transfer_wo_receive extends Root_Controller
                     $data['variety_id']=$item['variety_id'];
                     $data['pack_size_id']=$item['pack_size_id'];
                     $data['outlet_id']=$result['item']['outlet_id'];
-                    $data['in_wo']=$old_items[$item['variety_id']][$item['pack_size_id']]['quantity_receive'];
-                    $data['current_stock']=($old_items[$item['variety_id']][$item['pack_size_id']]['quantity_receive']);
+                    $data['in_wo']=$item['quantity_receive'];
+                    $data['current_stock']=($item['quantity_receive']);
                     $data['date_updated'] = $time;
                     $data['user_updated'] = $user->user_id;
                     Query_helper::add($this->config->item('table_pos_stock_summary_variety'),$data);
