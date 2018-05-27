@@ -856,6 +856,19 @@ class Transfer_ow_return_delivery extends Root_Controller
                 $this->json_return($ajax);
             }
 
+            if(!(System_helper::get_time(System_helper::display_date($data['item']['courier_date_delivery']))>0))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='At first edit HQ to outlet delivery & provide required information';
+                $this->json_return($ajax);
+            }
+            if(!(System_helper::get_time(System_helper::display_date($data['item']['courier_date_delivery']))>=System_helper::get_time(System_helper::display_date($data['item']['date_approve']))))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='At first edit HQ to outlet delivery & provide required information';
+                $this->json_return($ajax);
+            }
+
             $this->db->from($this->config->item('table_sms_transfer_ow_details').' transfer_ow_details');
             $this->db->select('transfer_ow_details.*');
             $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id=transfer_ow_details.variety_id','INNER');
