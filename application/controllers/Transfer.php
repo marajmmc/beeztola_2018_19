@@ -260,7 +260,7 @@ class Transfer extends CI_Controller
                 //$data['remarks_receive']='';
                 $data['status_payment_receive']=$this->config->item('system_status_received');
                 $data['date_payment_received']=$result['date_receive'];
-                if(in_array($result['user_created'],$not_found_user_ids))
+                if(in_array($result['user_receive'],$not_found_user_ids))
                 {
                     $data['user_payment_received']=1;
                 }
