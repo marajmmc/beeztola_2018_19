@@ -607,7 +607,7 @@ class Transfer_wo_receive extends Root_Controller
     private function system_forward($id)
     {
         $user=User_helper::get_user();
-        if(isset($this->permissions['action2'])&&($this->permissions['action2']==1))
+        if(isset($this->permissions['action7'])&&($this->permissions['action7']==1))
         {
             if($id>0)
             {
@@ -738,7 +738,7 @@ class Transfer_wo_receive extends Root_Controller
         //$items=$this->input->post('items');
         if($id>0)
         {
-            if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+            if(!(isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
             {
                 $ajax['status']=false;
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
@@ -966,7 +966,14 @@ class Transfer_wo_receive extends Root_Controller
             $this->db->from($this->config->item('table_sms_transfer_wo').' transfer_wo');
             $this->db->select('transfer_wo.*');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=transfer_wo.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-            $this->db->select('outlet_info.customer_id outlet_id, outlet_info.name outlet_name, outlet_info.customer_code outlet_code');
+            $this->db->select(
+                '
+                outlet_info.customer_id outlet_id,
+                outlet_info.name outlet_name, outlet_info.customer_code outlet_code,
+                outlet_info.address outlet_address,
+                outlet_info.phone outlet_phone
+                '
+            );
             $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = outlet_info.district_id','INNER');
             $this->db->select('districts.id district_id, districts.name district_name');
             $this->db->join($this->config->item('table_login_setup_location_territories').' territories','territories.id = districts.territory_id','INNER');

@@ -95,9 +95,47 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-            //if(record[column+'_editable'])
-            element.html('<div class="jqxgrid_input">'+value+'</div>');
+
+            if(column=='total_budget')
+            {
+                var total_budget=0;
+                <?php
+                foreach($dealers as $dealer)
+                {
+                ?>
+                if(!isNaN(parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>'])))
+                {
+                    total_budget+=parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>']);
+                }
+                <?php
+                }
+                ?>
+
+                if(total_budget==0)
+                {
+                    element.html('');
+                    element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
+                else
+                {
+                    element.html(total_budget);
+                    element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
+            }
+            <?php
+            foreach($dealers as $dealer)
+            {
+            ?>
+            if(column=='amount_budget_<?php echo $dealer['farmer_id']?>')
+            {
+                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                element.html('<div class="jqxgrid_input">'+value+'</div>');
+            }
+            <?php
+            }
+            ?>
+
+
             return element[0].outerHTML;
         };
         // create jqxgrid.
@@ -144,7 +182,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <?php
                     }
                     ?>
-
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?>', dataField: 'total_budget',width:'200',cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false}
                 ]
             });
     });
