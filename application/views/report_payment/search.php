@@ -54,7 +54,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <select id="status_payment_receive" name="report[status_payment_receive]" class="form-control">
                             <option value="<?php echo $this->config->item('system_status_received')?>">Received</option>
                             <option value="<?php echo $this->config->item('system_status_pending')?>">Pending</option>
-
+                            <option value="">ALL</option>
                         </select>
                     </div>
                 </div>
@@ -65,6 +65,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <select id="search_by" name="report[search_by]" class="form-control">
                             <option value="search_by_sale_date">Sale Date</option>
                             <option value="search_by_payment_date">Payment Date</option>
+                            <option value="search_by_forward_time">Deposit Forward Time</option>
+                            <option value="search_by_receive_time">Receive time</option>
                         </select>
                     </div>
                     <div class="col-xs-6">

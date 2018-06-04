@@ -130,6 +130,8 @@ class Report_payment extends Root_Controller
         $data['barcode']= 1;
         $data['date_payment']= 1;
         $data['date_sale']= 1;
+        $data['date_deposit_forwarded']= 1;
+        $data['date_payment_received']= 1;
         $data['payment_way']= 1;
         $data['reference_no']= 1;
         $data['amount_payment']= 1;
@@ -180,7 +182,11 @@ class Report_payment extends Root_Controller
 
         $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
         $this->db->where('payment.status_deposit_forward',$status_deposit_forward);
-        $this->db->where('payment.status_payment_receive',$status_payment_receive);
+        if($status_payment_receive)
+        {
+            $this->db->where('payment.status_payment_receive',$status_payment_receive);
+        }
+
         if($search_by=='search_by_sale_date')
         {
             $this->db->where('payment.date_sale >=',$date_start);
@@ -191,6 +197,16 @@ class Report_payment extends Root_Controller
             $this->db->where('payment.date_payment >=',$date_start);
             $this->db->where('payment.date_payment <=',$date_end);
         }
+        else if($search_by=='search_by_forward_time')
+        {
+            $this->db->where('payment.date_deposit_forwarded >=',$date_start);
+            $this->db->where('payment.date_deposit_forwarded <=',$date_end);
+        }
+        else if($search_by=='search_by_receive_time')
+        {
+            $this->db->where('payment.date_payment_received >=',$date_start);
+            $this->db->where('payment.date_payment_received <=',$date_end);
+        }
         $this->db->where('payment.outlet_id',$outlet_id);
         $this->db->order_by('payment.id','DESC');
         $items=$this->db->get()->result_array();
@@ -199,6 +215,8 @@ class Report_payment extends Root_Controller
         $grand_total['barcode']='Grand Total';
         $grand_total['date_payment']='';
         $grand_total['date_sale']='';
+        $grand_total['date_deposit_forwarded']='';
+        $grand_total['date_payment_received']='';
         $grand_total['payment_way']='';
         $grand_total['reference_no']='';
         $grand_total['amount_payment']=0;
@@ -215,6 +233,8 @@ class Report_payment extends Root_Controller
             $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
+            $item['date_deposit_forwarded']=System_helper::display_date_time($item['date_deposit_forwarded']);
+            $item['date_payment_received']=System_helper::display_date_time($item['date_payment_received']);
             $grand_total['amount_payment']+=$item['amount_payment'];
             $grand_total['amount_bank_charge']+=$item['amount_bank_charge'];
             $grand_total['amount_receive']+=$item['amount_receive'];

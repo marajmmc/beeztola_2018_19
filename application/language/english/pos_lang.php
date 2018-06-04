@@ -401,6 +401,8 @@ $lang['LABEL_STATUS_CARD_REQUIRE'] = 'Card Required?';
 // Label Lang Added By Saiful
 $lang['LABEL_DATE_PAYMENT'] = 'Payment Date';
 $lang['LABEL_DATE_SALE'] = 'Sale Date';
+$lang['LABEL_DATE_DEPOSIT_FORWARDED'] = 'Deposit Forward Time';
+$lang['LABEL_DATE_PAYMENT_RECEIVED'] = 'Receive Time';
 $lang['LABEL_DATE_CANCEL'] = 'Cancel Date';
 $lang['LABEL_DATE_RECEIVE'] = 'Receive Date';
 $lang['LABEL_OUTLET'] = 'Outlet';
