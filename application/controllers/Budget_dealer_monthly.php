@@ -110,6 +110,7 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $this->db->where('dealer_monthly.status_forward',$this->config->item('system_status_pending'));
         $this->db->where('user_outlet.user_id',$user->user_id);
+        $this->db->group_by('dealer_monthly.fiscal_year_id, dealer_monthly.outlet_id, dealer_monthly.month_id');
         $results=$this->db->get()->result_array();
         $items=array();
         foreach($results as $result)
@@ -274,7 +275,79 @@ class Budget_dealer_monthly extends Root_Controller
         $outlet_id=$this->input->post('outlet_id');
         $month_id=$this->input->post('month_id');
         $crop_id=$this->input->post('crop_id');
-        $items=$this->get_variety($outlet_id, $month_id, $crop_id);
+        //$items=$this->get_variety($outlet_id, $month_id, $crop_id);
+        $data=array();
+
+        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+        $this->db->select('farmer_outlet.farmer_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+        $this->db->select('farmer_farmer.name farmer_name');
+        $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
+        $this->db->where('farmer_farmer.farmer_type_id > ',1);
+        $this->db->where('farmer_outlet.revision',1);
+        $this->db->where('farmer_outlet.outlet_id',$outlet_id);
+        $dealers=$this->db->get()->result_array();
+
+        //$results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly_details'),'*',array('budget_dealer_monthly_id ='.$id));
+        $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' budget_dealer_monthly');
+        $this->db->select('budget_dealer_monthly.*');
+        $this->db->join($this->config->item('table_pos_budget_dealer_monthly_details').' details','budget_dealer_monthly.id=details.budget_dealer_monthly_id','INNER');
+        $this->db->select('details.*, details.id details_id');
+        $this->db->where('budget_dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
+        $this->db->where('budget_dealer_monthly.outlet_id',$outlet_id);
+        $this->db->where('budget_dealer_monthly.month_id',$month_id);
+        $this->db->where('budget_dealer_monthly.crop_id',$crop_id);
+        $results=$this->db->get()->result_array();
+        //$crop_ids=array();
+        foreach($results as $result)
+        {
+            $data[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
+            //$crop_ids[$result['crop_id']]=$result['crop_id'];
+        }
+
+        $this->db->from($this->config->item('table_login_setup_classification_variety_price').' variety_price');
+        $this->db->select('variety_price.id');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = variety_price.variety_id','INNER');
+        $this->db->select('v.id variety_id,v.name variety_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->select('crop_type.id crop_type_id,crop_type.name crop_type_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
+        $this->db->select('crop.id crop_id, crop.name crop_name');
+        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = variety_price.pack_size_id','INNER');
+        $this->db->select('pack.name pack_size,pack.id pack_size_id');
+        $this->db->select('variety_price.variety_id quantity_min, variety_price.variety_id quantity_max');
+        $this->db->where_in('crop_type.crop_id',$crop_id);
+        //$this->db->order_by('crop_type.ordering ASC');
+        $this->db->order_by('crop.id, crop_type.id, v.id, pack.id ASC');
+        $results=$this->db->get()->result_array();
+
+        $items=array();
+        foreach($results as $result)
+        {
+            $item=array();
+            $item['id']=$result['id'];
+            $item['crop_id']=$result['crop_id'];
+            $item['crop_type_id']=$result['crop_type_id'];
+            $item['variety_id']=$result['variety_id'];
+            $item['pack_size_id']=$result['pack_size_id'];
+            $item['crop_name']=$result['crop_name'];
+            $item['crop_type_name']=$result['crop_type_name'];
+            $item['variety_name']=$result['variety_name'];
+            $item['pack_size']=$result['pack_size'];
+
+            foreach($dealers as $dealer)
+            {
+                if(isset($data[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]))
+                {
+                    $item['amount_budget_'.$dealer['farmer_id']]=$data[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget'];
+                }
+                else
+                {
+                    $item['amount_budget_'.$dealer['farmer_id']]='';
+                }
+            }
+            $items[]=$item;
+        }
         $this->json_return($items);
     }
     private function system_save()
@@ -636,7 +709,7 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->where('budget_dealer_monthly.month_id',$month_id);
         //$this->db->where('budget_dealer_monthly.crop_id',$crop_id);
         $results=$this->db->get()->result_array();
-        $crop_ids=array();
+        $crop_ids[0]=0;
         foreach($results as $result)
         {
             $data[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
