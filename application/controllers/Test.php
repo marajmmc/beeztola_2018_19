@@ -5,14 +5,7 @@ class Test extends CI_Controller
 {
     public function index()
     {
-        $a['1']='10';
-        $a['2']='20';
-        $b=$a;
-        unset($b[1]);
-       echo '<pre>';
-       print_r($a);
-       print_r($b);
-       echo '</pre>';
+        echo System_helper::get_time('09-SEP-2017 03:14:49 PM');
 
     }
 

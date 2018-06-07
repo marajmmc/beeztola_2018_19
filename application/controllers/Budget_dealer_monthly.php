@@ -759,7 +759,8 @@ class Budget_dealer_monthly extends Root_Controller
             }
             $items[]=$item;
         }
-        $this->json_return($items);
+        return $items;
+
     }
     /*private function check_validation()
     {
