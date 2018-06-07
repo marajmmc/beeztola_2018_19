@@ -186,8 +186,7 @@ class Transfer_ow_return_delivery extends Root_Controller
         $this->db->select('divisions.name division_name');
         $this->db->where('outlet_info.revision',1);
         $this->db->where('transfer_ow.status !=',$this->config->item('system_status_delete'));
-        $this->db->where('transfer_ow.status_delivery',$this->config->item('system_status_delivered'));
-        //$this->db->where('transfer_ow.status_receive',$this->config->item('system_status_pending'));
+        $this->db->where('transfer_ow.status_approve',$this->config->item('system_status_approved'));
         $this->db->where('transfer_ow.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
         $this->db->order_by('transfer_ow.id','DESC');
         $results=$this->db->get()->result_array();
