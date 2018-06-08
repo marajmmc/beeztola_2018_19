@@ -28,6 +28,7 @@ class Report_stock_variety_summary extends Root_Controller
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
         }
+        $this->lang->load('report_stock_variety_details');
     }
     public function index($action="search")
     {
@@ -111,12 +112,23 @@ class Report_stock_variety_summary extends Root_Controller
     }
     private function system_get_items()
     {
+        $items=array();
         $outlet_id=$this->input->post('outlet_id');
         $crop_id=$this->input->post('crop_id');
         $crop_type_id=$this->input->post('crop_type_id');
         $variety_id=$this->input->post('variety_id');
         $pack_size_id=$this->input->post('pack_size_id');
-        $items=array();
+
+        $this->db->from($this->config->item('table_login_setup_classification_variety_price').' price');
+        $this->db->select('price.variety_id,price.pack_size_id,price.price_net');
+        $results=$this->db->get()->result_array();
+        $price_units=array();
+        foreach($results as $result)
+        {
+            $price_units[$result['variety_id']][$result['pack_size_id']]=$result['price_net'];
+        }
+
+
         $this->db->from($this->config->item('table_pos_stock_summary_variety').' stock_summary_variety');
         $this->db->select('stock_summary_variety.*');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=stock_summary_variety.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
@@ -156,8 +168,17 @@ class Report_stock_variety_summary extends Root_Controller
             $varieties[$result['variety_id']][$result['pack_size_id']]['crop_type_name']=$result['crop_type_name'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['variety_name']=$result['variety_name'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['pack_size']=$result['pack_size'];
+            if(isset($price_units[$result['variety_id']][$result['pack_size_id']]))
+            {
+                $varieties[$result['variety_id']][$result['pack_size_id']]['amount_price_unit']=$price_units[$result['variety_id']][$result['pack_size_id']];
+            }
+            else
+            {
+                $varieties[$result['variety_id']][$result['pack_size_id']]['amount_price_unit']=0;
+            }
             $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt']=$result['current_stock'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg']=($result['current_stock']*$result['pack_size'])/1000;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['amount_price_total']=$result['current_stock']*$varieties[$result['variety_id']][$result['pack_size_id']]['amount_price_unit'];
         }
         $type_total=array();
         $crop_total=array();
@@ -172,8 +193,10 @@ class Report_stock_variety_summary extends Root_Controller
         $grand_total['crop_type_name']='';
         $grand_total['variety_name']='';
         $grand_total['pack_size']=$crop_total['pack_size']=$type_total['pack_size']='';
+        $grand_total['amount_price_unit']=$crop_total['amount_price_unit']=$type_total['amount_price_unit']=0;
         $grand_total['current_stock_pkt']=$crop_total['current_stock_pkt']=$type_total['current_stock_pkt']=0;
         $grand_total['current_stock_kg']=$crop_total['current_stock_kg']=$type_total['current_stock_kg']=0;
+        $grand_total['amount_price_total']=$crop_total['amount_price_total']=$type_total['amount_price_total']=0;
         $prev_crop_name='';
         $prev_type_name='';
         $first_row=true;
@@ -192,8 +215,10 @@ class Report_stock_variety_summary extends Root_Controller
                         $prev_type_name=$pack['crop_type_name'];
                         $type_total['current_stock_kg']=0;
                         $type_total['current_stock_pkt']=0;
+                        $type_total['amount_price_total']=0;
                         $crop_total['current_stock_kg']=0;
                         $crop_total['current_stock_pkt']=0;
+                        $crop_total['amount_price_total']=0;
                     }
                     elseif($prev_type_name!=$pack['crop_type_name'])
                     {
@@ -202,6 +227,7 @@ class Report_stock_variety_summary extends Root_Controller
                         $prev_type_name=$pack['crop_type_name'];
                         $type_total['current_stock_kg']=0;
                         $type_total['current_stock_pkt']=0;
+                        $type_total['amount_price_total']=0;
                     }
                     else
                     {
@@ -217,10 +243,13 @@ class Report_stock_variety_summary extends Root_Controller
                 }
                 $type_total['current_stock_kg']+=$pack['current_stock_kg'];
                 $type_total['current_stock_pkt']+=$pack['current_stock_pkt'];
+                $type_total['amount_price_total']+=$pack['amount_price_total'];
                 $crop_total['current_stock_kg']+=$pack['current_stock_kg'];
                 $crop_total['current_stock_pkt']+=$pack['current_stock_pkt'];
+                $crop_total['amount_price_total']+=$pack['amount_price_total'];
                 $grand_total['current_stock_kg']+=$pack['current_stock_kg'];
                 $grand_total['current_stock_pkt']+=$pack['current_stock_pkt'];
+                $grand_total['amount_price_total']+=$pack['amount_price_total'];
                 $items[]=$this->get_row($pack);
             }
         }
@@ -237,6 +266,15 @@ class Report_stock_variety_summary extends Root_Controller
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['pack_size']=$info['pack_size'];
+        if($info['amount_price_unit']==0)
+        {
+            $row['amount_price_unit']='';
+        }
+        else
+        {
+            $row['amount_price_unit']=number_format($info['amount_price_unit'],2);
+        }
+
         if($info['current_stock_pkt']==0)
         {
             $row['current_stock_pkt']='';
@@ -252,6 +290,15 @@ class Report_stock_variety_summary extends Root_Controller
         else
         {
             $row['current_stock_kg']=number_format($info['current_stock_kg'],3,'.','');
+        }
+
+        if($info['amount_price_total']==0)
+        {
+            $row['amount_price_total']='';
+        }
+        else
+        {
+            $row['amount_price_total']=number_format($info['amount_price_total'],2);
         }
         return $row;
     }
@@ -281,8 +328,10 @@ class Report_stock_variety_summary extends Root_Controller
         $data['crop_type_name']= 1;
         $data['variety_name']= 1;
         $data['pack_size']= 1;
+        $data['amount_price_unit']= 1;
         $data['current_stock_pkt']= 1;
         $data['current_stock_kg']= 1;
+        $data['amount_price_total']= 1;
         if($result)
         {
             if($result['preferences']!=null)

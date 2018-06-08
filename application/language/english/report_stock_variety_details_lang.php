@@ -14,3 +14,5 @@ $lang['LABEL_CURRENT_STOCK_PKT']='CS(pkt)';
 $lang['LABEL_CURRENT_STOCK_PKT_CAL']='CS(pkt) Sum';
 $lang['LABEL_CURRENT_STOCK_KG']='CS(kg)';
 $lang['LABEL_CURRENT_STOCK_KG_CAL']='CS(kg) Sum';
+$lang['LABEL_AMOUNT_PRICE_UNIT']="Unit Price";
+$lang['LABEL_AMOUNT_PRICE_TOTAL']="Total Price";
