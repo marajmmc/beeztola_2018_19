@@ -157,7 +157,7 @@ $CI=& get_instance();
         </table>
     </div>
 </div>
-<form id="sale_form" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
+<form id="sale_form" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post" style="padding-top: 12px;">
     <input type="hidden" name="item[id]" id="sale_id" value="<?php echo $item['id']; ?>" />
     <div class="row widget">
         <div class="row show-grid">
@@ -165,7 +165,7 @@ $CI=& get_instance();
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CANCEL');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[date_cancel]" class="form-control datepicker" value="" readonly/>
+                <input type="text" name="item[date_cancel]" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date_sale']);?>" readonly/>
             </div>
         </div>
         <div class="row show-grid">
