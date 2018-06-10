@@ -501,14 +501,14 @@ class Transfer_wo_receive extends Root_Controller
 
         if($status_quantity_deference)
         {
-            $data=array();
+            /*$data=array();
             $data['date_updated'] = $time;
             $data['user_updated'] = $user->user_id;
             Query_helper::update($this->config->item('table_sms_transfer_wo_details_histories'),$data, array('transfer_wo_id='.$id,'revision=1'), false);
 
             $this->db->where('transfer_wo_id',$id);
             $this->db->set('revision', 'revision+1', FALSE);
-            $this->db->update($this->config->item('table_sms_transfer_wo_details_histories'));
+            $this->db->update($this->config->item('table_sms_transfer_wo_details_histories'));*/
 
             $data=array();
             $data['date_receive']=$time;
@@ -530,7 +530,7 @@ class Transfer_wo_receive extends Root_Controller
                 $data['quantity_receive']=$item['quantity_receive'];
                 Query_helper::update($this->config->item('table_sms_transfer_wo_details'),$data, array('transfer_wo_id='.$id, 'variety_id ='.$item['variety_id'], 'pack_size_id ='.$item['pack_size_id']), false);
 
-                $data=array();
+                /*$data=array();
                 $data['transfer_wo_id']=$id;
                 $data['variety_id']=$item['variety_id'];
                 $data['pack_size_id']=$item['pack_size_id'];
@@ -539,7 +539,7 @@ class Transfer_wo_receive extends Root_Controller
                 $data['revision']=1;
                 $data['date_created']=$time;
                 $data['user_created']=$user->user_id;
-                Query_helper::add($this->config->item('table_sms_transfer_wo_details_histories'),$data, false);
+                Query_helper::add($this->config->item('table_sms_transfer_wo_details_histories'),$data, false);*/
             }
             $this->message='TO not received, Go to forward option and send for approval. Approve quantity is not equal to receive quantity.';
         }
