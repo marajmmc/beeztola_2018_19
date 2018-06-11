@@ -31,7 +31,7 @@ $next_year = date('Y', strtotime('+1 month'));
             if(sizeof($user_outlets)>1)
             {
                 ?>
-                <select id="outlet_id" name="item['outlet_id']" class="form-control">
+                <select id="outlet_id" name="item[outlet_id]" class="form-control">
                     <?php
                     foreach($user_outlets as $row)
                     {?>
@@ -46,7 +46,7 @@ $next_year = date('Y', strtotime('+1 month'));
             {
                 ?>
                 <label class="control-label"><?php echo $user_outlets[0]['name'];?></label>
-                <input type="hidden" id='outlet_id' name="item['outlet_id']" value="<?php echo $user_outlets[0]['id'];?>">
+                <input type="hidden" id='outlet_id' name="item[outlet_id]" value="<?php echo $user_outlets[0]['id'];?>">
             <?php
             }
             ?>
@@ -67,7 +67,7 @@ $next_year = date('Y', strtotime('+1 month'));
             else
             {
                 ?>
-                <select id="month_id" class="form-control" name="item[month_id]" >
+                <select id="year_id" class="form-control" name="item[year_id]" >
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <?php
                     for($i=date('Y', strtotime('-1 year'));$i<date('Y', strtotime('+2 year'));$i++)
@@ -119,7 +119,7 @@ $next_year = date('Y', strtotime('+1 month'));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <select id="crop_id" name="item['crop_id']" class="form-control">
+            <select id="crop_id" name="item[crop_id]" class="form-control">
                 <option value=""><?php echo $CI->lang->line('SELECT');?></option>
             </select>
         </div>
@@ -161,7 +161,7 @@ $next_year = date('Y', strtotime('+1 month'));
                     url:'<?php echo site_url($CI->controller_url.'/index/variety_list') ?>',
                     type: 'POST',
                     datatype: "JSON",
-                    data:{outlet_id:$("#outlet_id").val(),month_id:$("#month_id").val(),crop_id:crop_id},
+                    data:{outlet_id:$("#outlet_id").val(),year_id:$("#year_id").val(),month_id:$("#month_id").val(),crop_id:crop_id},
                     success: function (data, status)
                     {
 

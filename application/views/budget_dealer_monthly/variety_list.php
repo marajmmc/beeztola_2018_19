@@ -18,6 +18,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
     <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
     <input type="hidden" name="item[month_id]" value="<?php echo $options['month_id']; ?>" />
+    <input type="hidden" name="item[year_id]" value="<?php echo $options['year_id']; ?>" />
     <input type="hidden" name="item[crop_id]" value="<?php echo $options['crop_id']; ?>" />
     <div id="jqx_inputs">
     </div>
@@ -76,6 +77,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'variety_name', type: 'string' },
                 { name: 'pack_size_id', type: 'string' },
                 { name: 'pack_size', type: 'string' },
+                { name: 'current_stock', type: 'string' },
                 { name: 'price_net', type: 'string' },
                 <?php
                 foreach($dealers as $dealer)
@@ -112,19 +114,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php
                 }
                 ?>
-
                 if(total_budget==0)
                 {
                     element.html('');
-                    element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    //element.css({'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
                 else
                 {
                     element.html(total_budget);
-                    element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    //element.css({'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
-
-
             }
             if(column=='total_price')
             {
@@ -143,12 +142,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 if(total_budget==0)
                 {
                     element.html('0');
-                    element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    //element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
                 else
                 {
-                    element.html(total_budget*price_net);
-                    element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html(number_format(total_budget*price_net,2));
+                    //element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
             }
 
@@ -164,8 +163,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <?php
             }
             ?>
-
-
             return element[0].outerHTML;
         };
         // create jqxgrid.
@@ -181,10 +178,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 rowsheight: 35,
                 editable:true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'200',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'200',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'200',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_CURRENT_STOCK'); ?>', dataField: 'current_stock',width:'100',pinned:true,cellsalign: 'right',editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_PRICE_NET'); ?>', dataField: 'price_net',width:'200',editable:false, hidden: 1},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?> Budget', dataField: 'total_budget',width:'100',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'total_price',width:'130',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
                     $serial=0;
                     foreach($dealers as $dealer)
@@ -192,7 +192,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ++$serial;
                     ?>
                     {
-                        text: '<?php echo $serial.'. '.$dealer['farmer_name']?>', dataField: 'amount_budget_<?php echo $dealer['farmer_id']?>', width:'200',cellsalign: 'right', cellsrenderer: cellsrenderer, columntype:'custom',
+                        text: '<?php echo $serial.'. '.$dealer['farmer_name']?>', dataField: 'amount_budget_<?php echo $dealer['farmer_id']?>', width:'100',cellsalign: 'right', cellsrenderer: cellsrenderer, columntype:'custom',
                         editable:true,
                         cellbeginedit: function (row)
                         {
@@ -213,8 +213,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <?php
                     }
                     ?>
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?>', dataField: 'total_budget',width:'200',cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'total_price',width:'200',cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false}
+
                 ]
             });
     });

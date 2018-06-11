@@ -287,11 +287,16 @@ $lang['LABEL_STARTING_STOCK'] = 'Starting Stock';
 $lang['LABEL_TOTAL_STOCK_IN'] = 'Total Stock In';
 $lang['LABEL_TOTAL_STOCK_OUT'] = 'Total Stock Out';
 
+$lang['LABEL_TOTAL_PRICE']='Total Price';
+
+$lang['LABEL_TOTAL_STOCK_OUT'] = 'Total Stock Out';
 
 /* Currency */
 $lang['LABEL_CURRENCY_SYMBOL'] = 'Currency Symbol';
 $lang['LABEL_CURRENCY_RATE'] = 'Currency Rate';
 $lang['LABEL_CURRENCY_NAME']='Currency';
+$lang['LABEL_PRICE_TAKA_UNIT'] = 'Unit Price (Taka)';
+$lang['LABEL_PRICE_TAKA_TOTAL']='Total Price (Taka)';
 $lang['LABEL_PRICE_CURRENCY_UNIT'] = 'Unit Price (Currency)';
 $lang['LABEL_PRICE_CURRENCY_TOTAL']='Total Price (Currency)';
 $lang['LABEL_GRAND_TOTAL_CURRENCY']='Grand Total (Currency)';

@@ -102,6 +102,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             dataFields: [
                 { name: 'id', type: 'int' },
                 { name: 'outlet_name', type: 'string'},
+                { name: 'year', type: 'string'},
                 { name: 'month', type: 'string'}
             ],
             id: 'id',
@@ -131,6 +132,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 [
                     //{ text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width:'50', cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name',filtertype: 'list', hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_YEAR'); ?>', dataField: 'year',filtertype: 'list', hidden: <?php echo $system_preference_items['year']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_MONTH'); ?>', dataField: 'month', width:'200',filtertype: 'list',hidden: <?php echo $system_preference_items['month']?0:1;?>}
                 ]
             });
