@@ -11,6 +11,9 @@ $action_buttons[]=array(
     'href'=>site_url($CI->controller_url.'/index/add')
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
+
+$next_month = date('n', strtotime('+1 month'));
+$next_year = date('Y', strtotime('+1 month'));
 ?>
 <div class="row widget">
     <div class="widget-header">
@@ -51,6 +54,37 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div class="row show-grid">
         <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_YEAR');?><span style="color:#FF0000">*</span></label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <?php
+            if($item['id']>0)
+            {
+                ?>
+                <label class="control-label"><?php echo date("Y",mktime(0,0,0,1,1,$item['year_id']))?></label>
+            <?php
+            }
+            else
+            {
+                ?>
+                <select id="month_id" class="form-control" name="item[month_id]" >
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <?php
+                    for($i=date('Y', strtotime('-1 year'));$i<date('Y', strtotime('+2 year'));$i++)
+                    {
+                        ?>
+                        <option value="<?php echo $i;?>" <?php if($i==$next_year){echo "selected='selected'";}?>><?php echo date("Y",mktime(0,0,0,1,1,$i))?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+    <div class="row show-grid">
+        <div class="col-xs-4">
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MONTH');?><span style="color:#FF0000">*</span></label>
         </div>
         <div class="col-sm-4 col-xs-8">
@@ -70,7 +104,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     for($i=1;$i<13;$i++)
                     {
                         ?>
-                        <option value="<?php echo $i;?>"><?php echo date("F", mktime(0, 0, 0,  $i,1, 2000));?></option>
+                        <option value="<?php echo $i;?>" <?php if($i==$next_month){echo "selected='selected'";}?>><?php echo date("F", mktime(0, 0, 0,  $i,1, 2000));?></option>
                     <?php
                     }
                     ?>

@@ -76,6 +76,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'variety_name', type: 'string' },
                 { name: 'pack_size_id', type: 'string' },
                 { name: 'pack_size', type: 'string' },
+                { name: 'price_net', type: 'string' },
                 <?php
                 foreach($dealers as $dealer)
                 {
@@ -95,10 +96,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
+            var total_budget=0;
+            var price_net=parseFloat(record['price_net']);
 
             if(column=='total_budget')
             {
-                var total_budget=0;
                 <?php
                 foreach($dealers as $dealer)
                 {
@@ -121,7 +123,35 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     element.html(total_budget);
                     element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
+
+
             }
+            if(column=='total_price')
+            {
+                <?php
+                foreach($dealers as $dealer)
+                {
+                ?>
+                if(!isNaN(parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>'])))
+                {
+                    total_budget+=parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>']);
+                }
+                <?php
+                }
+                ?>
+
+                if(total_budget==0)
+                {
+                    element.html('0');
+                    element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
+                else
+                {
+                    element.html(total_budget*price_net);
+                    element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
+            }
+
             <?php
             foreach($dealers as $dealer)
             {
@@ -154,6 +184,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'200',editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'200',editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'200',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_PRICE_NET'); ?>', dataField: 'price_net',width:'200',editable:false, hidden: 1},
                     <?php
                     $serial=0;
                     foreach($dealers as $dealer)
@@ -182,7 +213,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <?php
                     }
                     ?>
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?>', dataField: 'total_budget',width:'200',cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false}
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?>', dataField: 'total_budget',width:'200',cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'total_price',width:'200',cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false}
                 ]
             });
     });
