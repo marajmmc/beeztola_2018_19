@@ -14,7 +14,7 @@ if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))
     $action_buttons[]=array
     (
         'label'=>$CI->lang->line('ACTION_NEW'),
-        'href'=>site_url($CI->controller_url.'/index/add')
+        'href'=>site_url($CI->controller_url.'/index/search')
     );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))

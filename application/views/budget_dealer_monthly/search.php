@@ -158,7 +158,7 @@ $next_year = date('Y', strtotime('+1 month'));
             if(crop_id>0)
             {
                 $.ajax({
-                    url:'<?php echo site_url($CI->controller_url.'/index/variety_list') ?>',
+                    url:'<?php echo site_url($CI->controller_url.'/index/add_edit') ?>',
                     type: 'POST',
                     datatype: "JSON",
                     data:{outlet_id:$("#outlet_id").val(),year_id:$("#year_id").val(),month_id:$("#month_id").val(),crop_id:crop_id},

@@ -30,17 +30,17 @@ class Budget_dealer_monthly extends Root_Controller
         {
             $this->system_get_items_all();
         }
-        elseif($action=="add")
+        elseif($action=="search")
         {
-            $this->system_add();
+            $this->system_search();
         }
-        elseif($action=="variety_list")
+        elseif($action=="add_edit")
         {
-            $this->system_variety_list();
+            $this->system_add_edit();
         }
-        elseif($action=="get_items_variety")
+        elseif($action=="get_items_add_edit")
         {
-            $this->system_get_items_variety();
+            $this->system_get_items_add_edit();
         }
         elseif($action=="save")
         {
@@ -175,7 +175,7 @@ class Budget_dealer_monthly extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function system_add()
+    private function system_search()
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
@@ -208,13 +208,13 @@ class Budget_dealer_monthly extends Root_Controller
 
             $data['item']['id']='';
             $data['title']="Monthly Dealer Budget Add";
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
             $ajax['status']=true;
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/add');
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/search');
             $this->json_return($ajax);
         }
         else
@@ -224,7 +224,7 @@ class Budget_dealer_monthly extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_variety_list()
+    private function system_add_edit()
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
@@ -244,7 +244,7 @@ class Budget_dealer_monthly extends Root_Controller
             if($result['status_forward']==$this->config->item('system_status_forwarded'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Budget forwarded in this month ('.date("F", mktime(0, 0, 0,  $month_id,1, 2000)).')';
+                $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $month_id,1, $year_id)).') already Forwarded';
                 $this->json_return($ajax);
             }
 
@@ -259,9 +259,9 @@ class Budget_dealer_monthly extends Root_Controller
             $this->db->where('farmer_outlet.outlet_id',$outlet_id);
             $data['dealers']=$this->db->get()->result_array();
 
-            $data['title']="Variety List";
+            $data['title']="Budget For Varieties";
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/variety_list",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
@@ -276,7 +276,7 @@ class Budget_dealer_monthly extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_get_items_variety()
+    private function system_get_items_add_edit()
     {
         $outlet_id=$this->input->post('outlet_id');
         $year_id=$this->input->post('year_id');

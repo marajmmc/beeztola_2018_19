@@ -65,7 +65,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 
 
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_variety/');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_add_edit/');?>";
         // prepare the data
         var source =
         {
