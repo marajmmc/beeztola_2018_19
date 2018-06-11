@@ -70,24 +70,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var source =
         {
             dataType: "json",
-            dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'variety_id', type: 'string' },
-                { name: 'crop_type_name', type: 'string' },
-                { name: 'variety_name', type: 'string' },
-                { name: 'pack_size_id', type: 'string' },
-                { name: 'pack_size', type: 'string' },
-                { name: 'current_stock', type: 'string' },
-                { name: 'price_net', type: 'string' },
-                <?php
+            datafields:
+                [
+                    { name: 'crop_type_name', type: 'string' },
+                    { name: 'variety_id', type: 'string' },
+                    { name: 'variety_name', type: 'string' },
+                    { name: 'pack_size_id', type: 'string' },
+                    { name: 'pack_size', type: 'string' },
+                    { name: 'current_stock', type: 'string' },
+                    { name: 'price_net', type: 'string' },
+                    <?php
                 foreach($dealers as $dealer)
                 {
                 ?>
-                { name: 'amount_budget_<?php echo $dealer['farmer_id']?>', type: 'string' },
-                <?php
-                }
-                ?>
-            ],
+                    { name: 'amount_budget_<?php echo $dealer['farmer_id']?>', type: 'string' },
+                    <?php
+                    }
+                    ?>
+                ],
             id: 'id',
             url: url,
             type: 'POST',
@@ -150,7 +150,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     //element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
             }
-
             <?php
             foreach($dealers as $dealer)
             {
@@ -176,13 +175,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 enablebrowserselection: true,
                 altrows: true,
                 rowsheight: 35,
+                columnsheight: 70,
                 editable:true,
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_CURRENT_STOCK'); ?>', dataField: 'current_stock',width:'100',pinned:true,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PRICE_NET'); ?>', dataField: 'price_net',width:'200',editable:false, hidden: 1},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?> Budget', dataField: 'total_budget',width:'100',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'total_price',width:'130',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
@@ -191,9 +190,27 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     {
                     ++$serial;
                     ?>
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: function (text, align)
                     {
-                        text: '<?php echo $serial.'. '.$dealer['farmer_name']?>', dataField: 'amount_budget_<?php echo $dealer['farmer_id']?>', width:'100',cellsalign: 'right', cellsrenderer: cellsrenderer, columntype:'custom',
-                        editable:true,
+                        var words = text.split(" ");
+                        var label=words[0];
+                        var count=words[0].length;
+                        for (i = 1; i < words.length; i++)
+                        {
+                            if((count+words[i].length)>10)
+                            {
+                                label=label+'</br>'+words[i];
+                                count=words[i].length;
+                            }
+                            else
+                            {
+                                label=label+' '+words[i];
+                                count=count+words[i].length;
+                            }
+
+                        }
+                        return '<div style="margin: 5px;">'+label+'</div>';
+                    },datafield: 'amount_budget_<?php echo $dealer['farmer_id']?>', width: 100,cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
                         cellbeginedit: function (row)
                         {
                             return <?php if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))){ echo 'true';}else{echo 'false';}?>;
@@ -212,8 +229,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     },
                     <?php
                     }
-                    ?>
-
+                     ?>
                 ]
             });
     });
