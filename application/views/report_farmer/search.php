@@ -22,7 +22,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
                 </div>
                 <div class="col-sm-4 col-xs-8">
-                    <?php if(count($assigned_outlet)>2){?>
+                    <?php if(count($assigned_outlet)>1){?>
                         <select name="report[outlet_id]" class="form-control">
                             <option value=""><?php echo $this->lang->line('SELECT');?></option>
                             <?php
@@ -33,12 +33,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             }
                             ?>
                         </select>
-                    <?php } else{?>
+                    <?php }
+                    else{?>
                         <?php
-                        foreach($assigned_outlet as $outlet)
                         {?>
-                            <label class="control-label"><?php echo $outlet['name'];?></label>
-                            <input type="hidden" name="report[outlet_id]" value="<?php echo $outlet['customer_id']?>">
+                            <label class="control-label"><?php echo $assigned_outlet[0]['name'];?></label>
+                            <input type="hidden" name="report[outlet_id]" value="<?php echo $assigned_outlet[0]['customer_id']?>">
                         <?php } ?>
                     <?php } ?>
                 </div>
