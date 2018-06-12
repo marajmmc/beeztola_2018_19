@@ -63,8 +63,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
         });
 
-
-
         var url = "<?php echo site_url($CI->controller_url.'/index/get_items_add_edit/');?>";
         // prepare the data
         var source =
@@ -217,7 +215,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         },
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
-                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
+                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input style="z-index: 1 !important;" type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
                         },
                         geteditorvalue: function (row, cellvalue, editor)
                         {
