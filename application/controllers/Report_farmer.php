@@ -121,7 +121,45 @@ class Report_farmer extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $reports=$this->input->post('report');
-            if(!$reports['mobile_no'])
+            if(isset($reports['mobile_no']))
+            {
+                if(!$reports['mobile_no'])
+                {
+                    if(!$reports['outlet_id'])
+                    {
+                        $ajax['status']=false;
+                        $ajax['system_message']='This outlet field is required';
+                        $this->json_return($ajax);
+                    }
+                }
+                if($reports['mobile_no'])
+                {
+                    $outlet_ids=array();
+                    foreach($this->user_outlets as $outlet)
+                    {
+                        $outlet_ids[$outlet['customer_id']]=$outlet['customer_id'];
+                    }
+                    $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+                    $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id = farmer_outlet.farmer_id','INNER');
+                    $this->db->select('farmer.mobile_no');
+                    $this->db->where_in('farmer_outlet.outlet_id',$outlet_ids);
+                    $this->db->where('farmer_outlet.revision',1);
+                    $results=$this->db->get()->result_array();
+                    $farmers_mobile_no=array();
+                    foreach($results as $result)
+                    {
+                        $farmers_mobile_no[$result['mobile_no']]=$result['mobile_no'];
+                    }
+                    if(!in_array($reports['mobile_no'],$farmers_mobile_no))
+                    {
+                        $ajax['status']=false;
+                        $ajax['system_message']='You can not search report for this mobile number.';
+                        $this->json_return($ajax);
+                        die();
+                    }
+                }
+            }
+            else
             {
                 if(!$reports['outlet_id'])
                 {
@@ -130,6 +168,7 @@ class Report_farmer extends Root_Controller
                     $this->json_return($ajax);
                 }
             }
+
             $data['options']=$reports;
             $data['system_preference_items']= $this->get_preference();
             $data['title']="Farmer Info";
@@ -176,13 +215,9 @@ class Report_farmer extends Root_Controller
                 $this->db->where('farmer_type.id',$farmer_type);
             }
         }
-        /*$this->db->join($this->config->item('table_pos_sale').' sale','sale.farmer_id = farmer.id AND sale.outlet_id ='.$outlet_id,'LEFT');
-        $this->db->select('count(sale.id) total_invoice',true);*/
-
         $this->db->order_by('farmer.id DESC');
         $this->db->group_by('farmer.id');
         $items=$this->db->get()->result_array();
-        //echo $this->db->last_query();
         $time=time();
         foreach($items as &$item)
         {
