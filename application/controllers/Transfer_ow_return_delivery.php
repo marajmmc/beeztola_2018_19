@@ -449,8 +449,7 @@ class Transfer_ow_return_delivery extends Root_Controller
                 $this->json_return($ajax);
             }
         }
-
-        if(System_helper::get_time($courier['date_challan'])>0)
+        /*if(System_helper::get_time($courier['date_challan'])>0)
         {
             if(!(System_helper::get_time($courier['date_challan'])>=System_helper::get_time($courier['date_delivery'])))
             {
@@ -458,7 +457,7 @@ class Transfer_ow_return_delivery extends Root_Controller
                 $ajax['system_message']='Challan date should be is greater than delivery date.';
                 $this->json_return($ajax);
             }
-        }
+        }*/
 
         $this->db->from($this->config->item('table_sms_transfer_ow_details').' transfer_ow_details');
         $this->db->select('transfer_ow_details.*');
@@ -858,13 +857,13 @@ class Transfer_ow_return_delivery extends Root_Controller
                 $this->json_return($ajax);
             }
 
-            if(!(System_helper::get_time(System_helper::display_date($data['item']['courier_date_delivery']))>0))
+            if(!($data['item']['courier_date_delivery']>0))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='At first edit HQ to outlet delivery & provide required information';
                 $this->json_return($ajax);
             }
-            if(!(System_helper::get_time(System_helper::display_date($data['item']['courier_date_delivery']))>=System_helper::get_time(System_helper::display_date($data['item']['date_approve']))))
+            if(!($data['item']['courier_date_delivery']>=System_helper::get_time(System_helper::display_date($data['item']['date_approve']))))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='At first edit HQ to outlet delivery & provide required information';
@@ -1013,20 +1012,20 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->json_return($ajax);
         }
 
-        if(!(System_helper::get_time(System_helper::display_date($result['item']['courier_date_delivery']))>0))
+        if(!($result['item']['courier_date_delivery']>0))
         {
             $ajax['status']=false;
             $ajax['system_message']=' Courier information is empty. '.$this->lang->line('LABEL_DATE_DELIVERY'). ' field is required.';
             $this->json_return($ajax);
         }
-        if(!(System_helper::get_time(System_helper::display_date($result['item']['courier_date_delivery']))>=System_helper::get_time(System_helper::display_date($result['item']['date_approve']))))
+        if(!($result['item']['courier_date_delivery']>=System_helper::get_time(System_helper::display_date($result['item']['date_approve']))))
         {
             $ajax['status']=false;
-            $ajax['system_message']=$result['item']['date_approve'].'Delivery date should be is greater than approval date.';
+            $ajax['system_message']=System_helper::display_date($result['item']['courier_date_delivery']).' Delivery date should be is greater than approval ('.System_helper::display_date($result['item']['date_approve']).') date.';
             $this->json_return($ajax);
         }
 
-        if(System_helper::get_time($result['item']['date_challan'])>0)
+        /*if(System_helper::get_time($result['item']['date_challan'])>0)
         {
             if(!(System_helper::get_time(System_helper::display_date($result['item']['date_challan']))>=System_helper::get_time(System_helper::display_date($result['item']['courier_date_delivery']))))
             {
@@ -1034,7 +1033,7 @@ class Transfer_ow_return_delivery extends Root_Controller
                 $ajax['system_message']='Challan date should be is greater than delivery date.';
                 $this->json_return($ajax);
             }
-        }
+        }*/
         $this->db->from($this->config->item('table_sms_transfer_ow_details').' transfer_ow_details');
         $this->db->select('transfer_ow_details.*');
         $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id=transfer_ow_details.variety_id','INNER');
