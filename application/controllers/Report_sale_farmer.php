@@ -623,8 +623,11 @@ class Report_sale_farmer extends Root_Controller
         $this->db->group_by('details.pack_size_id');
 
         $this->db->order_by('farmer.id','ASC');
+        $this->db->order_by('crop.ordering','ASC');
         $this->db->order_by('crop.id','ASC');
+        $this->db->order_by('crop_type.ordering','ASC');
         $this->db->order_by('crop_type.id','ASC');
+        $this->db->order_by('v.ordering','ASC');
         $this->db->order_by('v.id','ASC');
 
         $results=$this->db->get()->result_array();
