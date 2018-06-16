@@ -8,12 +8,9 @@ $action_buttons[]=array(
 );
 $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_REFRESH"),
-    'href'=>site_url($CI->controller_url.'/index/add')
+    'href'=>site_url($CI->controller_url.'/index/search')
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
-
-$next_month = date('n', strtotime('+1 month'));
-$next_year = date('Y', strtotime('+1 month'));
 ?>
 <div class="row widget">
     <div class="widget-header">
@@ -24,29 +21,29 @@ $next_year = date('Y', strtotime('+1 month'));
     </div>
     <div class="row show-grid">
         <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label>
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
-            if(sizeof($user_outlets)>1)
+            if(sizeof($CI->user_outlets)==1)
             {
                 ?>
-                <select id="outlet_id" name="item[outlet_id]" class="form-control">
+                <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $CI->user_outlets[0]['customer_id'] ?>" />
+                <label class="control-label"><?php echo $CI->user_outlets[0]['name'] ?></label>
+            <?php
+            }
+            else
+            {
+                ?>
+                <select name="item[outlet_id]" id="outlet_id" class="form-control">
                     <?php
-                    foreach($user_outlets as $row)
+                    foreach($CI->user_outlets as $row)
                     {?>
                         <option value="<?php echo $row['customer_id']?>"><?php echo $row['name'];?></option>
                     <?php
                     }
                     ?>
                 </select>
-            <?php
-            }
-            else
-            {
-                ?>
-                <label class="control-label"><?php echo $user_outlets[0]['name'];?></label>
-                <input type="hidden" id='outlet_id' name="item[outlet_id]" value="<?php echo $user_outlets[0]['id'];?>">
             <?php
             }
             ?>
@@ -58,29 +55,21 @@ $next_year = date('Y', strtotime('+1 month'));
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
-            if($item['id']>0)
-            {
-                ?>
-                <label class="control-label"><?php echo date("Y",mktime(0,0,0,1,1,$item['year_id']))?></label>
-            <?php
-            }
-            else
-            {
-                ?>
-                <select id="year_id" class="form-control" name="item[year_id]" >
-                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                $year_budget = date('Y', strtotime('+1 month'));
+                $year_next=date('Y', strtotime('+1 year'));
+
+            ?>
+                <select id="year" class="form-control" name="item[year]" >
                     <?php
-                    for($i=date('Y', strtotime('-1 year'));$i<date('Y', strtotime('+2 year'));$i++)
+                    for($i=2018;$i<=$year_next;$i++)
                     {
                         ?>
-                        <option value="<?php echo $i;?>" <?php if($i==$next_year){echo "selected='selected'";}?>><?php echo date("Y",mktime(0,0,0,1,1,$i))?></option>
+                        <option value="<?php echo $i;?>" <?php if($i==$year_budget){echo "selected='selected'";}?>><?php echo date("Y",mktime(0,0,0,1,1,$i))?></option>
                     <?php
                     }
                     ?>
                 </select>
-            <?php
-            }
-            ?>
+
         </div>
     </div>
     <div class="row show-grid">
@@ -89,29 +78,20 @@ $next_year = date('Y', strtotime('+1 month'));
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
-            if($item['id']>0)
-            {
+
+            $month_budget = date('n', strtotime('+1 month'));
                 ?>
-                <label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month_id'],1, 2000));?></label>
-            <?php
-            }
-            else
-            {
-                ?>
-                <select id="month_id" class="form-control" name="item[month_id]" >
-                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                <select id="month" class="form-control" name="item[month]" >
                     <?php
                     for($i=1;$i<13;$i++)
                     {
                         ?>
-                        <option value="<?php echo $i;?>" <?php if($i==$next_month){echo "selected='selected'";}?>><?php echo date("F", mktime(0, 0, 0,  $i,1, 2000));?></option>
+                        <option value="<?php echo $i;?>" <?php if($i==$month_budget){echo "selected='selected'";}?>><?php echo date("F", mktime(0, 0, 0,  $i,1, 2000));?></option>
                     <?php
                     }
                     ?>
                 </select>
-            <?php
-            }
-            ?>
+
         </div>
     </div>
     <div style="" class="row show-grid" id="crop_id_container">
@@ -141,11 +121,16 @@ $next_year = date('Y', strtotime('+1 month'));
         $(document).on("change","#outlet_id",function()
         {
             $("#system_report_container").html("");
-            $("#month_id").val("");
             $("#crop_id").val("");
         });
-        $(document).off("change", "#month_id");
-        $(document).on("change","#month_id",function()
+        $(document).off("change", "#year");
+        $(document).on("change","#year",function()
+        {
+            $("#system_report_container").html("");
+            $("#crop_id").val("");
+        });
+        $(document).off("change", "#month");
+        $(document).on("change","#month",function()
         {
             $("#system_report_container").html("");
             $("#crop_id").val("");
@@ -161,7 +146,7 @@ $next_year = date('Y', strtotime('+1 month'));
                     url:'<?php echo site_url($CI->controller_url.'/index/add_edit') ?>',
                     type: 'POST',
                     datatype: "JSON",
-                    data:{outlet_id:$("#outlet_id").val(),year_id:$("#year_id").val(),month_id:$("#month_id").val(),crop_id:crop_id},
+                    data:{outlet_id:$("#outlet_id").val(),year:$("#year").val(),month:$("#month").val(),crop_id:crop_id},
                     success: function (data, status)
                     {
 

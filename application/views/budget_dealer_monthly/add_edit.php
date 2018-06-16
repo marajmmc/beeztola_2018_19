@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 $CI = & get_instance();
-if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)))
+if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
 {
     $action_buttons[]=array(
         'type'=>'button',
@@ -8,18 +8,13 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)))
         'id'=>'button_action_save_jqx'
     );
 }
-/*$action_buttons[]=array(
-    'label'=>$CI->lang->line("ACTION_BACK"),
-    'href'=>site_url($CI->controller_url)
-);*/
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 ?>
 <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
     <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
-    <input type="hidden" name="item[month_id]" value="<?php echo $options['month_id']; ?>" />
-    <input type="hidden" name="item[year_id]" value="<?php echo $options['year_id']; ?>" />
-    <input type="hidden" name="item[crop_id]" value="<?php echo $options['crop_id']; ?>" />
+    <input type="hidden" name="item[year]" value="<?php echo $options['year']; ?>" />
+    <input type="hidden" name="item[month]" value="<?php echo $options['month']; ?>" />
     <div id="jqx_inputs">
     </div>
 </form>
@@ -44,15 +39,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var data=$('#system_jqx_container').jqxGrid('getrows');
             for(var i=0;i<data.length;i++)
             {
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][amount_price_net]" value="'+data[i]['amount_price_net']+'">');
                 <?php
                 foreach($dealers as $dealer)
                 {
                 ?>
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][<?php echo $dealer['farmer_id']?>][amount_budget]" value="'+data[i]['amount_budget_<?php echo $dealer['farmer_id']?>']+'">');
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][quantity_budget][<?php echo $dealer['farmer_id']?>]" value="'+data[i]['quantity_budget_<?php echo $dealer['farmer_id']?>']+'">');
                 <?php
                 }
                 ?>
-                //$('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']['+data[i]['pack_size_id']+'][amount_budget]" value="'+data[i]['amount_budget']+'">');
+
             }
             var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
             if(sure)
@@ -68,24 +64,25 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var source =
         {
             dataType: "json",
-            datafields:
-                [
-                    { name: 'crop_type_name', type: 'string' },
-                    { name: 'variety_id', type: 'string' },
-                    { name: 'variety_name', type: 'string' },
-                    { name: 'pack_size_id', type: 'string' },
-                    { name: 'pack_size', type: 'string' },
-                    { name: 'current_stock', type: 'string' },
-                    { name: 'price_net', type: 'string' },
-                    <?php
-                foreach($dealers as $dealer)
-                {
-                ?>
-                    { name: 'amount_budget_<?php echo $dealer['farmer_id']?>', type: 'string' },
-                    <?php
-                    }
+            dataFields: [
+                <?php
+                 foreach($system_preference_items as $key=>$item)
+                 {
+                 if(($key=='crop_type_name')||($key=='variety_id')||($key=='variety_name')||($key=='pack_size_id')||($key=='pack_size'))
+                 {
+                 ?>
+                { name: '<?php echo $key ?>', type: 'string' },
+                <?php
+                 }
+                 else
+                 {
                     ?>
-                ],
+                { name: '<?php echo $key ?>', type: 'number' },
+                <?php
+                }
+             }
+            ?>
+            ],
             id: 'id',
             url: url,
             type: 'POST',
@@ -93,73 +90,110 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var header_render=function (text, align)
+        {
+            var words = text.split(" ");
+            var label=words[0];
+            var count=words[0].length;
+            for (i = 1; i < words.length; i++)
+            {
+                if((count+words[i].length)>10)
+                {
+                    label=label+'</br>'+words[i];
+                    count=words[i].length;
+                }
+                else
+                {
+                    label=label+' '+words[i];
+                    count=count+words[i].length;
+                }
+
+            }
+            return '<div style="margin: 5px;">'+label+'</div>';
+        };
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            var total_budget=0;
+
             var price_net=parseFloat(record['price_net']);
 
-            if(column=='total_budget')
+            if(column=='quantity_total_budget')
             {
+                var total_quantity=0;
                 <?php
                 foreach($dealers as $dealer)
                 {
                 ?>
-                if(!isNaN(parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>'])))
+                if(!isNaN(parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>'])))
                 {
-                    total_budget+=parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>']);
+                    total_quantity+=parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>']);
                 }
                 <?php
                 }
                 ?>
-                if(total_budget==0)
+                if(total_quantity==0)
                 {
                     element.html('');
-                    //element.css({'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
                 else
                 {
-                    element.html(total_budget);
-                    //element.css({'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html(total_quantity);
                 }
             }
-            if(column=='total_price')
+            else if(column=='amount_price_total')
             {
+                var total_quantity=0;
                 <?php
                 foreach($dealers as $dealer)
                 {
                 ?>
-                if(!isNaN(parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>'])))
+                if(!isNaN(parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>'])))
                 {
-                    total_budget+=parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>']);
+                    total_quantity+=parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>']);
                 }
                 <?php
                 }
                 ?>
-
-                if(total_budget==0)
+                if((total_quantity==0)||(record['amount_price_net']==0))
                 {
-                    element.html('0');
-                    //element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html('');
                 }
                 else
                 {
-                    element.html(number_format(total_budget*price_net,2));
-                    //element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html(number_format(total_quantity*record['amount_price_net'],2));
                 }
             }
-            <?php
-            foreach($dealers as $dealer)
+            else if(column.substr(0,6)=='amount')
             {
-            ?>
-            if(column=='amount_budget_<?php echo $dealer['farmer_id']?>')
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(number_format(value,2));
+                }
+            }
+            else if(column.substr(0,16)=='quantity_budget_')
             {
                 element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-                element.html('<div class="jqxgrid_input">'+value+'</div>');
+
+                if(value==0)
+                {
+                    element.html('<div class="jqxgrid_input"></div>');
+                }
+                else
+                {
+                    element.html('<div class="jqxgrid_input">'+value+'</div>');
+                }
             }
-            <?php
+            else if(column=='current_stock')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
             }
-            ?>
             return element[0].outerHTML;
         };
         // create jqxgrid.
@@ -176,46 +210,28 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsheight: 70,
                 editable:true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_CURRENT_STOCK'); ?>', dataField: 'current_stock',width:'100',pinned:true,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?> Budget', dataField: 'total_budget',width:'100',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'total_price',width:'130',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_CURRENT_STOCK_PKT'); ?>', dataField: 'current_stock',width:'100',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
                     $serial=0;
                     foreach($dealers as $dealer)
                     {
                     ++$serial;
                     ?>
-                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: function (text, align)
-                    {
-                        var words = text.split(" ");
-                        var label=words[0];
-                        var count=words[0].length;
-                        for (i = 1; i < words.length; i++)
-                        {
-                            if((count+words[i].length)>10)
-                            {
-                                label=label+'</br>'+words[i];
-                                count=words[i].length;
-                            }
-                            else
-                            {
-                                label=label+' '+words[i];
-                                count=count+words[i].length;
-                            }
-
-                        }
-                        return '<div style="margin: 5px;">'+label+'</div>';
-                    },datafield: 'amount_budget_<?php echo $dealer['farmer_id']?>', width: 100,cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render,datafield: 'quantity_budget_<?php echo $dealer['farmer_id'];?>', width: 100,cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
                         cellbeginedit: function (row)
                         {
-                            return <?php if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))){ echo 'true';}else{echo 'false';}?>;
+                            var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected
+                            return selectedRowData['editable_<?php echo $dealer['farmer_id'];?>'];
                         },
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
-                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input style="z-index: 1 !important;" type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
+                            editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input style="z-index: 1 !important;" type="text" value="'+cellvalue+'" class="jqxgrid_input integer_type_positive"><div>');
                         },
                         geteditorvalue: function (row, cellvalue, editor)
                         {

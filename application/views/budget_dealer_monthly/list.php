@@ -9,7 +9,7 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'href'=>site_url($CI->controller_url.'/index/list_all')
     );
 }
-if(isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))
+if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
 {
     $action_buttons[]=array
     (
@@ -100,10 +100,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             dataType: "json",
             dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'outlet_name', type: 'string'},
-                { name: 'year', type: 'string'},
-                { name: 'month', type: 'string'}
+                <?php
+                 foreach($system_preference_items as $key=>$item)
+                 {
+                    ?>
+                { name: '<?php echo $key ?>', type: 'string' },
+                <?php
+             }
+            ?>
             ],
             id: 'id',
             type: 'POST',

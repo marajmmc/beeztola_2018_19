@@ -5,12 +5,29 @@ class Budget_dealer_monthly extends Root_Controller
     public $message;
     public $permissions;
     public $controller_url;
+    public $user_outlets;
+    public $user_outlet_ids;
     public function __construct()
     {
         parent::__construct();
         $this->message="";
         $this->permissions=User_helper::get_permission(get_class());
         $this->controller_url=strtolower(get_class());
+        $this->user_outlet_ids=array();
+        $this->user_outlets=User_helper::get_assigned_outlets();
+        if(sizeof($this->user_outlets)>0)
+        {
+            foreach($this->user_outlets as $row)
+            {
+                $this->user_outlet_ids[]=$row['customer_id'];
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
+            $this->json_return($ajax);
+        }
     }
     public function index($action="list", $id=0)
     {
@@ -21,14 +38,6 @@ class Budget_dealer_monthly extends Root_Controller
         elseif($action=="get_items")
         {
             $this->system_get_items();
-        }
-        if($action=="list_all")
-        {
-            $this->system_list_all();
-        }
-        elseif($action=="get_items_all")
-        {
-            $this->system_get_items_all();
         }
         elseif($action=="search")
         {
@@ -42,10 +51,25 @@ class Budget_dealer_monthly extends Root_Controller
         {
             $this->system_get_items_add_edit();
         }
+        elseif($action=="set_preference")
+        {
+            $this->system_set_preference('list');
+        }
         elseif($action=="save")
         {
             $this->system_save();
         }
+        /*if($action=="list_all")
+        {
+            $this->system_list_all();
+        }
+        elseif($action=="get_items_all")
+        {
+            $this->system_get_items_all();
+        }
+
+
+
         elseif($action=="details")
         {
             $this->system_details($id);
@@ -61,15 +85,12 @@ class Budget_dealer_monthly extends Root_Controller
         elseif($action=="save_forward")
         {
             $this->system_save_forward();
-        }
-        elseif($action=="set_preference")
-        {
-            $this->system_set_preference();
-        }
-        elseif($action=="set_preference_all")
-        {
-            $this->system_set_preference_all();
-        }
+        }*/
+
+//        elseif($action=="set_preference_all")
+//        {
+//            $this->system_set_preference_all();
+//        }
         elseif($action=="save_preference")
         {
             System_helper::save_preference();
@@ -79,11 +100,41 @@ class Budget_dealer_monthly extends Root_Controller
             $this->system_list();
         }
     }
+    private function get_preference_headers($method)
+    {
+        $data['id']= 1;
+        $data['outlet_name']= 1;
+        $data['year']= 1;
+        $data['month']= 1;
+        return $data;
+    }
+    private function system_set_preference($method='list')
+    {
+        $user = User_helper::get_user();
+        if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
+        {
+
+            $data['system_preference_items']=System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
+            $data['preference_method_name']=$method;
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference');
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
     private function system_list()
     {
+        $user = User_helper::get_user();
+        $method='list';
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
-            $data['system_preference_items']= $this->get_preference();
+            $data['system_preference_items']= System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
             $data['title']="Monthly Dealer Budget List";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
@@ -103,8 +154,9 @@ class Budget_dealer_monthly extends Root_Controller
     }
     private function system_get_items()
     {
+        $items=array();
         //$items=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('status !="'.$this->config->item('system_status_delete').'"'));
-        $user=User_helper::get_user();
+        /*$user=User_helper::get_user();
         $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' dealer_monthly');
         $this->db->select('dealer_monthly.*');
         $this->db->join($this->config->item('table_pos_setup_user_outlet').' user_outlet','user_outlet.customer_id=dealer_monthly.outlet_id AND user_outlet.revision=1','INNER');
@@ -114,18 +166,18 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $this->db->where('dealer_monthly.status_forward',$this->config->item('system_status_pending'));
         $this->db->where('user_outlet.user_id',$user->user_id);
-        $this->db->group_by('dealer_monthly.year_id, dealer_monthly.outlet_id, dealer_monthly.month_id');
+        $this->db->group_by('dealer_monthly.year, dealer_monthly.outlet_id, dealer_monthly.month');
         $results=$this->db->get()->result_array();
-        $items=array();
+
         foreach($results as $result)
         {
             $item=array();
             $item['id']=$result['id'];
             $item['outlet_name']=$result['outlet_name'];
-            $item['year']=date("Y",mktime(0,0,0,1,1,$result['year_id']));
-            $item['month']=date("F", mktime(0, 0, 0,  $result['month_id'],1, 2000));
+            $item['year']=date("Y",mktime(0,0,0,1,1,$result['year']));
+            $item['month']=date("F", mktime(0, 0, 0,  $result['month'],1, 2000));
             $items[]=$item;
-        }
+        }*/
         $this->json_return($items);
     }
     private function system_list_all()
@@ -169,7 +221,7 @@ class Budget_dealer_monthly extends Root_Controller
             $item=array();
             $item['id']=$result['id'];
             $item['outlet_name']=$result['outlet_name'];
-            $item['month']=date("F", mktime(0, 0, 0,  $result['month_id'],1, 2000));
+            $item['month']=date("F", mktime(0, 0, 0,  $result['month'],1, 2000));
             $item['status_forward']=$result['status_forward'];
             $items[]=$item;
         }
@@ -179,34 +231,7 @@ class Budget_dealer_monthly extends Root_Controller
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
-            $user=User_helper::get_user();
 
-            $data['user_outlet_ids']=array();
-            //$data['user_outlets']=User_helper::get_assigned_outlets();
-            $this->db->from($this->config->item('table_pos_setup_user_outlet').' user_outlet');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = user_outlet.customer_id','INNER');
-            $this->db->select('customer_info.*');
-            $this->db->where('user_outlet.revision',1);
-            $this->db->where('customer_info.revision',1);
-            $this->db->where('user_outlet.user_id',$user->user_id);
-            $this->db->order_by('customer_info.ordering ASC');
-            $data['user_outlets'] = $this->db->get()->result_array();
-
-            if(sizeof($data['user_outlets'])>0)
-            {
-                foreach($data['user_outlets'] as $row)
-                {
-                    $data['user_outlet_ids'][]=$row['id'];
-                }
-            }
-            else
-            {
-                $ajax['status']=false;
-                $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
-                $this->json_return($ajax);
-            }
-
-            $data['item']['id']='';
             $data['title']="Monthly Dealer Budget Add";
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
             $ajax['status']=true;
@@ -224,29 +249,45 @@ class Budget_dealer_monthly extends Root_Controller
             $this->json_return($ajax);
         }
     }
+    private function get_headers_add_edit($dealers)
+    {
+        $data['crop_type_name']= 1;
+        $data['variety_id']= 1;
+        $data['variety_name']= 1;
+        $data['pack_size_id']= 1;
+        $data['pack_size']= 1;
+        $data['current_stock']= 1;
+        $data['amount_price_net']= 1;
+        foreach($dealers as $dealer)
+        {
+            $data['quantity_budget_'.$dealer['farmer_id']]= 1;
+            $data['editable_'.$dealer['farmer_id']]= 1;
+        }
+        return $data;
+    }
     private function system_add_edit()
     {
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['options']=$this->input->post();
             $outlet_id=$this->input->post('outlet_id');
-            $year_id=$this->input->post('year_id');
-            $month_id=$this->input->post('month_id');
+            $year=$this->input->post('year');
+            $month=$this->input->post('month');
             $crop_id=$this->input->post('crop_id');
-            if(!$outlet_id || !$year_id || !$month_id || !$crop_id)
+            if(!$outlet_id || !$year || !$month || !$crop_id)
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid input. Following required field. Ex: Star mark (*)';
                 $this->json_return($ajax);
             }
 
-            $result=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('outlet_id ='.$outlet_id,'year_id ='.$year_id,'month_id ='.$month_id, 'status !="'.$this->config->item('system_status_delete').'"'),1);
+            /*$result=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('outlet_id ='.$outlet_id,'year ='.$year,'month ='.$month, 'status !="'.$this->config->item('system_status_delete').'"'),1);
             if($result['status_forward']==$this->config->item('system_status_forwarded'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $month_id,1, $year_id)).') already Forwarded';
+                $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $month,1, $year)).') already Forwarded';
                 $this->json_return($ajax);
-            }
+            }*/
 
             //$data['dealers']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('status ="Active" AND farmer_type_id>1'));
             $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
@@ -258,6 +299,7 @@ class Budget_dealer_monthly extends Root_Controller
             $this->db->where('farmer_outlet.revision',1);
             $this->db->where('farmer_outlet.outlet_id',$outlet_id);
             $data['dealers']=$this->db->get()->result_array();
+            $data['system_preference_items']=$this->get_headers_add_edit($data['dealers']);
 
             $data['title']="Budget For Varieties";
             $ajax['status']=true;
@@ -266,7 +308,6 @@ class Budget_dealer_monthly extends Root_Controller
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/add');
             $this->json_return($ajax);
         }
         else
@@ -276,15 +317,16 @@ class Budget_dealer_monthly extends Root_Controller
             $this->json_return($ajax);
         }
     }
+
     private function system_get_items_add_edit()
     {
         $outlet_id=$this->input->post('outlet_id');
-        $year_id=$this->input->post('year_id');
-        $month_id=$this->input->post('month_id');
+        $year=$this->input->post('year');
+        $month=$this->input->post('month');
         $crop_id=$this->input->post('crop_id');
-        //$items=$this->get_variety($outlet_id, $month_id, $crop_id);
-        $data=array();
 
+
+        $data=array();
         $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
         $this->db->select('farmer_outlet.farmer_id');
         $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
@@ -296,7 +338,7 @@ class Budget_dealer_monthly extends Root_Controller
         $dealers=$this->db->get()->result_array();
 
         //$results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly_details'),'*',array('budget_monthly_id ='.$id));
-        $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' budget_dealer_monthly');
+        /*$this->db->from($this->config->item('table_pos_budget_dealer_monthly').' budget_dealer_monthly');
         $this->db->select('budget_dealer_monthly.*');
         $this->db->join($this->config->item('table_pos_budget_dealer_monthly_details').' details','budget_dealer_monthly.id=details.budget_monthly_id','INNER');
         $this->db->select('details.*, details.id details_id');
@@ -311,8 +353,8 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->where('crop_type.crop_id',$crop_id);
         $this->db->where('budget_dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $this->db->where('budget_dealer_monthly.outlet_id',$outlet_id);
-        $this->db->where('budget_dealer_monthly.year_id',$year_id);
-        $this->db->where('budget_dealer_monthly.month_id',$month_id);
+        $this->db->where('budget_dealer_monthly.year',$year);
+        $this->db->where('budget_dealer_monthly.month',$month);
         $results=$this->db->get()->result_array();
 
         $variety_ids=array();
@@ -323,42 +365,37 @@ class Budget_dealer_monthly extends Root_Controller
             $budget_stocks[$result['variety_id']][$result['pack_size_id']]=$result;
             $variety_ids[$result['variety_id']]=$result['variety_id'];
         }
-
-        $current_stocks=Stock_helper::get_variety_stock($outlet_id, $variety_ids);
+*/
+        //$current_stocks=Stock_helper::get_variety_stock($outlet_id, $variety_ids);
 
         $this->db->from($this->config->item('table_login_setup_classification_variety_price').' variety_price');
-        $this->db->select('variety_price.id, variety_price.price_net');
+        $this->db->select('variety_price.price_net amount_price_net');
         $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = variety_price.variety_id','INNER');
         $this->db->select('v.id variety_id,v.name variety_name');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
         $this->db->select('crop_type.id crop_type_id,crop_type.name crop_type_name');
-        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
-        $this->db->select('crop.id crop_id, crop.name crop_name');
+
         $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = variety_price.pack_size_id','INNER');
         $this->db->select('pack.name pack_size,pack.id pack_size_id');
         $this->db->where('crop_type.crop_id',$crop_id);
         $this->db->where('v.status !=',$this->config->item('system_status_delete'));
         $this->db->where('pack.status !=',$this->config->item('system_status_delete'));
         //$this->db->order_by('crop_type.ordering ASC');
-        $this->db->order_by('crop.id, crop_type.id, v.id, pack.id ASC');
+        $this->db->order_by('crop_type.ordering','ASC');
+        $this->db->order_by('crop_type.id','ASC');
+        $this->db->order_by('v.ordering','ASC');
+        $this->db->order_by('v.id','ASC');
+        $this->db->order_by('pack.id');
         $results=$this->db->get()->result_array();
         //echo $this->db->last_query();
         $items=array();
         foreach($results as $result)
         {
-            $item=array();
-            $item['id']=$result['id'];
-            $item['crop_id']=$result['crop_id'];
-            $item['crop_type_id']=$result['crop_type_id'];
-            $item['variety_id']=$result['variety_id'];
-            $item['pack_size_id']=$result['pack_size_id'];
-            $item['crop_name']=$result['crop_name'];
-            $item['crop_type_name']=$result['crop_type_name'];
-            $item['variety_name']=$result['variety_name'];
-            $item['pack_size']=$result['pack_size'];
-            $item['price_net']=$result['price_net'];
+            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$dealers);
 
-            $item['current_stock']=0;
+            $item['amount_price_net']=$result['amount_price_net'];
+
+            /*$item['current_stock']=0;
             if(isset($budget_stocks[$result['variety_id']][$result['pack_size_id']]) && $budget_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'])
             {
                 $item['current_stock']=$budget_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'];
@@ -381,15 +418,47 @@ class Budget_dealer_monthly extends Root_Controller
                 {
                     $item['amount_budget_'.$dealer['farmer_id']]='';
                 }
-            }
+            }*/
             $items[]=$item;
         }
         $this->json_return($items);
+    }
+    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$dealers)
+    {
+        $row=$this->get_headers_add_edit($dealers);
+        foreach($row  as $key=>$r)
+        {
+            if(substr($key,0,9)=='editable_')
+            {
+                if((isset($this->permissions['action1']) && ($this->permissions['action1']==1))||(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+                {
+                    $row[$key]= true;
+                }
+                else
+                {
+                    $row[$key]= false;
+                }
+            }
+            else
+            {
+                $row[$key]= 0;
+            }
+        }
+        $row['crop_type_name']=$crop_type_name;
+        $row['variety_name']=$variety_name;
+        $row['variety_id']=$variety_id;
+        $row['pack_size']=$pack_size;
+        $row['pack_size_id']=$pack_size_id;
+        return $row;
     }
     private function system_save()
     {
         $user = User_helper::get_user();
         $time=time();
+        echo '<pre>';
+        print_r($this->input->post());
+        echo '</pre>';
+        die();
         $item_head=$this->input->post('item');
         $items=$this->input->post('items');
 
@@ -400,15 +469,15 @@ class Budget_dealer_monthly extends Root_Controller
             $this->json_return($ajax);
         }
 
-        //$results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('outlet_id ='.$item_head['outlet_id'],'month_id ='.$item_head['month_id'],'crop_id ='.$item_head['crop_id']));
+        //$results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('outlet_id ='.$item_head['outlet_id'],'month ='.$item_head['month'],'crop_id ='.$item_head['crop_id']));
         $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' budget_dealer_monthly');
         $this->db->select('budget_dealer_monthly.*');
         $this->db->join($this->config->item('table_pos_budget_dealer_monthly_details').' details','budget_dealer_monthly.id=details.budget_monthly_id','INNER');
         $this->db->select('details.*, details.id details_id');
         $this->db->where('budget_dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $this->db->where('budget_dealer_monthly.outlet_id',$item_head['outlet_id']);
-        $this->db->where('budget_dealer_monthly.year_id',$item_head['year_id']);
-        $this->db->where('budget_dealer_monthly.month_id',$item_head['month_id']);
+        $this->db->where('budget_dealer_monthly.year',$item_head['year']);
+        $this->db->where('budget_dealer_monthly.month',$item_head['month']);
         //$this->db->where('budget_dealer_monthly.crop_id',$item_head['crop_id']);
         $results=$this->db->get()->result_array();
 
@@ -435,8 +504,8 @@ class Budget_dealer_monthly extends Root_Controller
         {
             $data=array();
             $data['outlet_id']=$item_head['outlet_id'];
-            $data['year_id']=$item_head['year_id'];
-            $data['month_id']=$item_head['month_id'];
+            $data['year']=$item_head['year'];
+            $data['month']=$item_head['month'];
             //$data['crop_id']=$item_head['crop_id'];
             //$data['revision_count']=1;
             $data['date_created']=$time;
@@ -721,8 +790,8 @@ class Budget_dealer_monthly extends Root_Controller
     private function system_get_variety()
     {
         $outlet_id=$this->input->post('outlet_id');
-        $year_id=$this->input->post('year_id');
-        $month_id=$this->input->post('month_id');
+        $year=$this->input->post('year');
+        $month=$this->input->post('month');
         $crop_id=$this->input->post('crop_id');
         $data=array();
 
@@ -744,8 +813,8 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->select('details.*, details.id details_id');
         $this->db->where('budget_dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $this->db->where('budget_dealer_monthly.outlet_id',$outlet_id);
-        $this->db->where('budget_dealer_monthly.year_id',$year_id);
-        $this->db->where('budget_dealer_monthly.month_id',$month_id);
+        $this->db->where('budget_dealer_monthly.year',$year);
+        $this->db->where('budget_dealer_monthly.month',$month);
         //$this->db->where('budget_dealer_monthly.crop_id',$crop_id);
         $results=$this->db->get()->result_array();
 
@@ -864,24 +933,7 @@ class Budget_dealer_monthly extends Root_Controller
         }
         return true;
     }*/
-    private function system_set_preference()
-    {
-        if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
-        {
-            $data['system_preference_items']=$this->get_preference();
-            $data['preference_method_name']='list';
-            $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference');
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
+
     private function system_set_preference_all()
     {
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
@@ -900,38 +952,7 @@ class Budget_dealer_monthly extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function get_preference($method = 'list')
-    {
-        $user = User_helper::get_user();
-        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="'.$method.'"'),1);
-        $data['id']= 1;
-        $data['outlet_name']= 1;
-        $data['year']= 1;
-        $data['month']= 1;
-        if($method=='list_all')
-        {
-            $data['status_forward']=1;
-        }
-        if($result)
-        {
-            if($result['preferences']!=null)
-            {
-                $preferences=json_decode($result['preferences'],true);
-                foreach($data as $key=>$value)
-                {
-                    if(isset($preferences[$key]))
-                    {
-                        $data[$key]=$value;
-                    }
-                    else
-                    {
-                        $data[$key]=0;
-                    }
-                }
-            }
-        }
-        return $data;
-    }
+
     private function get_sms_users_info($user_ids)
     {
         $this->db->from($this->config->item('table_login_setup_user').' user');

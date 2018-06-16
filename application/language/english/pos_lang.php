@@ -282,7 +282,7 @@ $lang['LABEL_QUANTITY_KG_PACK']='Quantity (packet / Kg)';
 
 $lang['LABEL_CURRENT_STOCK'] = 'Current Stock (Pack/Kg)';
 $lang['LABEL_CURRENT_STOCK_KG']='Current Stock (KG)';
-$lang['LABEL_CURRENT_STOCK_PKT'] = 'Current Stock (pkt))';
+$lang['LABEL_CURRENT_STOCK_PKT'] = 'Current Stock (pkt)';
 $lang['LABEL_STARTING_STOCK'] = 'Starting Stock';
 $lang['LABEL_TOTAL_STOCK_IN'] = 'Total Stock In';
 $lang['LABEL_TOTAL_STOCK_OUT'] = 'Total Stock Out';
