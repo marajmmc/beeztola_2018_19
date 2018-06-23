@@ -155,16 +155,33 @@ class Report_sale_variety extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function get_preference_quantity()
+    private function get_preference_headers_quantity()
     {
-        $user = User_helper::get_user();
-        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="search_quantity"'),1);
         $data['crop_name']= 1;
         $data['crop_type_name']= 1;
         $data['variety_name']= 1;
         $data['pack_size']= 1;
-        $data['quantity_pkt']= 1;
-        $data['quantity_kg']= 1;
+        $data['quantity_total_pkt']= 1;
+        $data['quantity_total_kg']= 1;
+        $data['quantity_cancel_pkt']= 1;
+        $data['quantity_cancel_kg']= 1;
+        $data['quantity_actual_pkt']= 1;
+        $data['quantity_actual_kg']= 1;
+        $data['amount_total']= 1;
+        $data['amount_discount_variety']= 1;
+        $data['amount_discount_self']= 1;
+        $data['amount_discount_total']= 1;
+        $data['amount_payable_all']= 1;
+        $data['amount_payable_cancel']= 1;
+        $data['amount_payable_paid']= 1;
+        return $data;
+    }
+
+    private function get_preference_quantity()
+    {
+        $user = User_helper::get_user();
+        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="search_quantity"'),1);
+        $data=$this->get_preference_headers_quantity();
         if($result)
         {
             if($result['preferences']!=null)
@@ -230,11 +247,20 @@ class Report_sale_variety extends Root_Controller
         }
         $this->db->from($this->config->item('table_pos_sale_details').' details');
         $this->db->select('details.variety_id,details.pack_size_id,details.pack_size');
-        $this->db->select('SUM(details.quantity) quantity',false);
+
         $this->db->join($this->config->item('table_pos_sale').' sale','sale.id = details.sale_id','INNER');
-        $this->db->where('sale.status',$this->config->item('system_status_active'));
-        $this->db->where('sale.date_sale >=',$date_start);
-        $this->db->where('sale.date_sale <=',$date_end);
+
+        $this->db->select('SUM(CASE WHEN sale.date_sale>='.$date_start.' and sale.date_sale<='.$date_end.' then details.quantity ELSE 0 END) quantity_total',false);
+        $this->db->select('SUM(CASE WHEN sale.date_cancel>='.$date_start.' and sale.date_cancel<='.$date_end.' and sale.status="'.$this->config->item('system_status_inactive').'" then details.quantity ELSE 0 END) quantity_cancel',false);
+
+        $this->db->select('SUM(CASE WHEN sale.date_sale>='.$date_start.' and sale.date_sale<='.$date_end.' then details.amount_total ELSE 0 END) amount_total',false);
+        $this->db->select('SUM(CASE WHEN sale.date_sale>='.$date_start.' and sale.date_sale<='.$date_end.' then details.amount_discount_variety ELSE 0 END) amount_discount_variety',false);
+        $this->db->select('SUM(CASE WHEN sale.date_sale>='.$date_start.' and sale.date_sale<='.$date_end.' then (details.amount_payable_actual*sale.discount_self_percentage/100) ELSE 0 END) amount_discount_self',false);
+
+        $this->db->select('SUM(CASE WHEN sale.date_cancel>='.$date_start.' and sale.date_cancel<='.$date_end.' and sale.status="'.$this->config->item('system_status_inactive').'" then details.amount_total ELSE 0 END) amount_total_cancel',false);
+        $this->db->select('SUM(CASE WHEN sale.date_cancel>='.$date_start.' and sale.date_cancel<='.$date_end.' and sale.status="'.$this->config->item('system_status_inactive').'" then details.amount_discount_variety ELSE 0 END) amount_discount_variety_cancel',false);
+        $this->db->select('SUM(CASE WHEN sale.date_cancel>='.$date_start.' and sale.date_cancel<='.$date_end.' and sale.status="'.$this->config->item('system_status_inactive').'" then (details.amount_payable_actual*sale.discount_self_percentage/100) ELSE 0 END) amount_discount_self_cancel',false);
+
         $this->db->where('sale.outlet_id',$outlet_id);
         $this->db->where_in('details.variety_id',$variety_ids);
         if($pack_size_id>0)
@@ -302,7 +328,37 @@ class Report_sale_variety extends Root_Controller
                         $prev_type_name=$variety['crop_type_name'];
                         $first_row=false;
                     }
-                    $info['quantity_pkt']=$sale_details['quantity'];
+                    $result=$sale_details;
+                    $result['quantity_actual']=$result['quantity_total']-$result['quantity_cancel'];
+                    $result['amount_discount_total']=$result['amount_discount_variety']+$result['amount_discount_self'];
+                    $result['amount_payable_all']=$result['amount_total']-$result['amount_discount_total'];
+                    $result['amount_payable_cancel']=$result['amount_total_cancel']-$result['amount_discount_variety_cancel']-$result['amount_discount_self_cancel'];
+                    $result['amount_payable_paid']=$result['amount_payable_all']-$result['amount_payable_cancel'];
+                    foreach($info  as $key=>$r)
+                    {
+                        if(substr($key,-3)=='pkt')
+                        {
+                            $info[$key]=$result[substr($key, 0, -4)];
+                        }
+                        elseif(substr($key,-2)=='kg')
+                        {
+                            $info[$key]=$result[substr($key, 0, -3)]*$result['pack_size']/1000;
+                        }
+                        elseif(substr($key,0,6)=='amount')
+                        {
+                            $info[$key]=$result[$key];
+                        }
+                    }
+                    foreach($info  as $key=>$r)
+                    {
+                        if(!(($key=='crop_name')||($key=='crop_type_name')||($key=='variety_name')||($key=='pack_size')))
+                        {
+                            $type_total[$key]+=$info[$key];
+                            $crop_total[$key]+=$info[$key];
+                            $grand_total[$key]+=$info[$key];
+                        }
+                    }
+                    /*$info['quantity_pkt']=$sale_details['quantity'];
                     $info['quantity_kg']=$sale_details['quantity']*$sale_details['pack_size']/1000;
 
                     $type_total['quantity_pkt']+=$info['quantity_pkt'];
@@ -310,7 +366,7 @@ class Report_sale_variety extends Root_Controller
                     $crop_total['quantity_pkt']+=$info['quantity_pkt'];
                     $crop_total['quantity_kg']+=$info['quantity_kg'];
                     $grand_total['quantity_pkt']+=$info['quantity_pkt'];
-                    $grand_total['quantity_kg']+=$info['quantity_kg'];
+                    $grand_total['quantity_kg']+=$info['quantity_kg'];*/
                     $items[]=$this->get_row_quantity($info);
                 }
             }
@@ -325,43 +381,71 @@ class Report_sale_variety extends Root_Controller
     }
     private function initialize_row_quantity($crop_name,$crop_type_name,$variety_name,$pack_size)
     {
-        $row=array();
+        $row=$this->get_preference_headers_quantity();
+        foreach($row  as $key=>$r)
+        {
+            $row[$key]=0;
+        }
         $row['crop_name']=$crop_name;
         $row['crop_type_name']=$crop_type_name;
         $row['variety_name']=$variety_name;
         $row['pack_size']=$pack_size;
-        $row['quantity_pkt']=0;
-        $row['quantity_kg']=0;
         return $row;
     }
-    private function reset_row_quantity($row)
+    private function reset_row_quantity($info)
     {
-        $row['quantity_pkt']=0;
-        $row['quantity_kg']=0;
-        return $row;
+        foreach($info  as $key=>$r)
+        {
+            if(!(($key=='crop_name')||($key=='crop_type_name')||($key=='variety_name')||($key=='pack_size')))
+            {
+                $info[$key]=0;
+            }
+        }
+        return $info;
     }
     private function get_row_quantity($info)
     {
         $row=array();
-        $row['crop_name']=$info['crop_name'];
-        $row['crop_type_name']=$info['crop_type_name'];
-        $row['variety_name']=$info['variety_name'];
-        $row['pack_size']=$info['pack_size'];
-        if($info['quantity_pkt']==0)
+        foreach($info  as $key=>$r)
         {
-            $row['quantity_pkt']='';
-        }
-        else
-        {
-            $row['quantity_pkt']=$info['quantity_pkt'];
-        }
-        if($info['quantity_kg']==0)
-        {
-            $row['quantity_kg']='';
-        }
-        else
-        {
-            $row['quantity_kg']=number_format($info['quantity_kg'],3,'.','');
+            if(substr($key,-3)=='pkt')
+            {
+                if($info[$key]==0)
+                {
+                    $row[$key]='';
+                }
+                else
+                {
+                    $row[$key]=$info[$key];
+                }
+            }
+            elseif(substr($key,-2)=='kg')
+            {
+                if($info[$key]==0)
+                {
+                    $row[$key]='';
+                }
+                else
+                {
+                    $row[$key]=number_format($info[$key],3,'.','');
+                }
+            }
+            elseif(substr($key,0,6)=='amount')
+            {
+                if($info[$key]==0)
+                {
+                    $row[$key]='';
+                }
+                else
+                {
+                    $row[$key]=number_format($info[$key],2);
+                }
+            }
+            else
+            {
+                $row[$key]=$info[$key];
+            }
+
         }
         return $row;
     }
