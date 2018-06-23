@@ -212,6 +212,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).off('change','#variety_id');
         $(document).off('change','#pack_size_id');
 
+        $(document).off("change", "#outlet_id");
+        $(document).on("change","#outlet_id",function()
+        {
+            $("#system_report_container").html("");
+            $("#farmer_type_id").val("");
+            $("#farmer_id").val("");
+            var farmer_type_id=$('#farmer_type_id').val();
+            $('#farmer_id_container').hide();
+        });
         $(document).off("change", "#farmer_type_id");
         $(document).on("change","#farmer_type_id",function()
         {
