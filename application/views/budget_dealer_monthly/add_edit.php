@@ -15,6 +15,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
     <input type="hidden" name="item[year]" value="<?php echo $options['year']; ?>" />
     <input type="hidden" name="item[month]" value="<?php echo $options['month']; ?>" />
+    <input type="hidden" name="item[crop_id]" value="<?php echo $options['crop_id']; ?>" />
     <div id="jqx_inputs">
     </div>
 </form>
@@ -177,14 +178,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             else if(column.substr(0,16)=='quantity_budget_')
             {
                 element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-
-                if(value==0)
+                if(record['editable_'+column.substr(16)])
                 {
-                    element.html('<div class="jqxgrid_input"></div>');
+                    element.html('<div class="jqxgrid_input">'+value+'</div>');
                 }
                 else
                 {
-                    element.html('<div class="jqxgrid_input">'+value+'</div>');
+                    element.html(value);
                 }
             }
             else if(column=='current_stock')
@@ -213,7 +213,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_CURRENT_STOCK_PKT'); ?>', dataField: 'current_stock',width:'100',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},

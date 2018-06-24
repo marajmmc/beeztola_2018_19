@@ -246,7 +246,6 @@ class Budget_dealer_monthly extends Root_Controller
         $data['variety_name']= 1;
         $data['pack_size_id']= 1;
         $data['pack_size']= 1;
-        $data['current_stock']= 1;
         $data['amount_price_net']= 1;
         foreach($dealers as $dealer)
         {
@@ -314,7 +313,27 @@ class Budget_dealer_monthly extends Root_Controller
         $year=$this->input->post('year');
         $month=$this->input->post('month');
         $crop_id=$this->input->post('crop_id');
-        
+
+        $budget_monthly_id=0;
+        $result=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('outlet_id ='.$outlet_id,'year ='.$year,'month ='.$month),1);
+        if($result)
+        {
+            $budget_monthly_id=$result['id'];
+            //check status forwarded or not
+        }
+        $this->db->from($this->config->item('table_pos_budget_dealer_monthly_details').' details');
+        $this->db->select('details.*');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = details.variety_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->where('crop_type.crop_id',$crop_id);
+        $this->db->where('details.budget_monthly_id',$budget_monthly_id);
+        $this->db->where('details.status',$this->config->item('system_status_active'));
+        $results=$this->db->get()->result_array();
+        $details_old=array();
+        foreach($results as $result)
+        {
+            $details_old[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
+        }
 
         $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
         $this->db->select('farmer_outlet.farmer_id');
@@ -326,36 +345,6 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->where('farmer_outlet.outlet_id',$outlet_id);
         $dealers=$this->db->get()->result_array();
 
-        //$results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly_details'),'*',array('budget_monthly_id ='.$id));
-        /*$this->db->from($this->config->item('table_pos_budget_dealer_monthly').' budget_dealer_monthly');
-        $this->db->select('budget_dealer_monthly.*');
-        $this->db->join($this->config->item('table_pos_budget_dealer_monthly_details').' details','budget_dealer_monthly.id=details.budget_monthly_id','INNER');
-        $this->db->select('details.*, details.id details_id');
-        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = details.variety_id','INNER');
-        $this->db->select('v.id variety_id');
-        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
-        $this->db->select('crop_type.id crop_type_id');
-        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
-        $this->db->select('crop.id crop_id');
-        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = details.pack_size_id','INNER');
-        $this->db->select('pack.name pack_size');
-        $this->db->where('crop_type.crop_id',$crop_id);
-        $this->db->where('budget_dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
-        $this->db->where('budget_dealer_monthly.outlet_id',$outlet_id);
-        $this->db->where('budget_dealer_monthly.year',$year);
-        $this->db->where('budget_dealer_monthly.month',$month);
-        $results=$this->db->get()->result_array();
-
-        $variety_ids=array();
-        $budget_stocks=array();
-        foreach($results as $result)
-        {
-            $data[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
-            $budget_stocks[$result['variety_id']][$result['pack_size_id']]=$result;
-            $variety_ids[$result['variety_id']]=$result['variety_id'];
-        }
-*/
-        //$current_stocks=Stock_helper::get_variety_stock($outlet_id, $variety_ids);
 
         $this->db->from($this->config->item('table_login_setup_classification_variety_price').' variety_price');
         $this->db->select('variety_price.price_net amount_price_net');
@@ -369,50 +358,34 @@ class Budget_dealer_monthly extends Root_Controller
         $this->db->where('crop_type.crop_id',$crop_id);
         $this->db->where('v.status !=',$this->config->item('system_status_delete'));
         $this->db->where('pack.status !=',$this->config->item('system_status_delete'));
-        //$this->db->order_by('crop_type.ordering ASC');
         $this->db->order_by('crop_type.ordering','ASC');
         $this->db->order_by('crop_type.id','ASC');
         $this->db->order_by('v.ordering','ASC');
         $this->db->order_by('v.id','ASC');
         $this->db->order_by('pack.id');
         $results=$this->db->get()->result_array();
-        //echo $this->db->last_query();
         $items=array();
         foreach($results as $result)
         {
-            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$dealers);
-
-            $item['amount_price_net']=$result['amount_price_net'];
-
-            /*$item['current_stock']=0;
-            if(isset($budget_stocks[$result['variety_id']][$result['pack_size_id']]) && $budget_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'])
+            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$dealers);
+            if(isset($details_old[$result['variety_id']][$result['pack_size_id']]))
             {
-                $item['current_stock']=$budget_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'];
-            }
-            else
-            {
-                if(isset($current_stocks[$result['variety_id']][$result['pack_size_id']]) && $current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'])
+                foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
                 {
-                    $item['current_stock']=$current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'];
+                    $item['quantity_budget_'.$dealer_id]=$info['quantity_budget'];
+                    if((!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))&& ($info['quantity_budget']>0))
+                    {
+                        $item['editable_'.$dealer_id]=false;
+                    }
                 }
             }
-
-            foreach($dealers as $dealer)
-            {
-                if(isset($data[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]) && $data[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget'])
-                {
-                    $item['amount_budget_'.$dealer['farmer_id']]=$data[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget'];
-                }
-                else
-                {
-                    $item['amount_budget_'.$dealer['farmer_id']]='';
-                }
-            }*/
+            //check if data already exits
+            //check editable
             $items[]=$item;
         }
         $this->json_return($items);
     }
-    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$dealers)
+    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$dealers)
     {
         $row=$this->get_headers_add_edit($dealers);
         foreach($row  as $key=>$r)
@@ -438,6 +411,7 @@ class Budget_dealer_monthly extends Root_Controller
         $row['variety_id']=$variety_id;
         $row['pack_size']=$pack_size;
         $row['pack_size_id']=$pack_size_id;
+        $row['amount_price_net']=$amount_price_net;
         return $row;
     }
     private function system_save()
@@ -448,7 +422,7 @@ class Budget_dealer_monthly extends Root_Controller
         $item_head=$this->input->post('item');
         $items=$this->input->post('items');
 
-        if(!(isset($this->permissions['action1']) && ($this->permissions['action1']==1)) || !(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+        if(!((isset($this->permissions['action1']) && ($this->permissions['action1']==1)) || (isset($this->permissions['action2']) && ($this->permissions['action2']==1))))
         {
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
@@ -477,6 +451,35 @@ class Budget_dealer_monthly extends Root_Controller
             $data['user_created']=$user->user_id;
             $budget_monthly_id=Query_helper::add($this->config->item('table_pos_budget_dealer_monthly'),$data,false);
         }
+        $this->db->from($this->config->item('table_pos_budget_dealer_monthly_details').' details');
+        $this->db->select('details.*');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = details.variety_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->where('crop_type.crop_id',$item_head['crop_id']);
+        $this->db->where('details.budget_monthly_id',$budget_monthly_id);
+        $results=$this->db->get()->result_array();
+        $details_old=array();
+        $details_old_rows=array();
+        foreach($results as $result)
+        {
+            $details_old[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
+            $details_old_rows[$result['id']]=$result;
+        }
+
+        $this->db->from($this->config->item('table_pos_budget_dealer_monthly_total').' details');
+        $this->db->select('details.*');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = details.variety_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->where('crop_type.crop_id',$item_head['crop_id']);
+        $this->db->where('details.budget_monthly_id',$budget_monthly_id);
+        $results=$this->db->get()->result_array();
+        $total_old=array();
+        $total_old_rows=array();
+        foreach($results as $result)
+        {
+            $total_old[$result['variety_id']][$result['pack_size_id']]=$result;
+            $total_old_rows[$result['id']]=$result;
+        }
         foreach($items as $variety_id=>$packs_detail)
         {
             foreach($packs_detail as $pack_size_id=>$quantity_details)
@@ -501,18 +504,50 @@ class Budget_dealer_monthly extends Root_Controller
                     $data['quantity_budget']=$quantity;
 
                     $data_total['quantity_budget_total']+=$quantity;
-                    //status!=active,quantity !=same
-                    //update +revision
-                    //unset row
-                    //else insert new
-                    Query_helper::add($this->config->item('table_pos_budget_dealer_monthly_details'),$data,false);
+                    if(isset($details_old[$variety_id][$pack_size_id][$dealer_id]))
+                    {
+                        if(!(($quantity==$details_old[$variety_id][$pack_size_id][$dealer_id]['quantity_budget'])&&($details_old[$variety_id][$pack_size_id][$dealer_id]['status']==$this->config->item('system_status_active'))))
+                        {
+                            $data['status']=$this->config->item('system_status_active');
+                            $this->db->set('revision_count', 'revision_count+1', FALSE);
+                            Query_helper::update($this->config->item('table_pos_budget_dealer_monthly_details'),$data, array('id='.$details_old[$variety_id][$pack_size_id][$dealer_id]['id']), false);
+                        }
+                        unset($details_old_rows[$details_old[$variety_id][$pack_size_id][$dealer_id]['id']]);
+                    }
+                    else
+                    {
+                        Query_helper::add($this->config->item('table_pos_budget_dealer_monthly_details'),$data,false);
+                    }
+
                 }
-                //check data_total quantity!=same,status!=active
-                //update
-                //unset that row
                 $data_total['quantity_budget_finalize_total']=$data_total['quantity_budget_total'];
-                Query_helper::add($this->config->item('table_pos_budget_dealer_monthly_total'),$data_total,false);
+                if(isset($total_old[$variety_id][$pack_size_id]))
+                {
+                    if(!(($data_total['quantity_budget_total']==$total_old[$variety_id][$pack_size_id]['quantity_budget_total'])&&($total_old[$variety_id][$pack_size_id]['status']==$this->config->item('system_status_active'))))
+                    {
+                        $data_total['status']=$this->config->item('system_status_active');
+                        Query_helper::update($this->config->item('table_pos_budget_dealer_monthly_total'),$data_total, array('id='.$total_old[$variety_id][$pack_size_id]['id']), false);
+                    }
+                    unset($total_old_rows[$total_old[$variety_id][$pack_size_id]['id']]);
+                }
+                else
+                {
+                    Query_helper::add($this->config->item('table_pos_budget_dealer_monthly_total'),$data_total,false);
+                }
+
             }
+        }
+        foreach($details_old_rows as $result)
+        {
+            $data=array();
+            $data['status']=$this->config->item('system_status_delete');
+            Query_helper::update($this->config->item('table_pos_budget_dealer_monthly_details'),$data, array('id='.$result['id']), false);
+        }
+        foreach($total_old_rows as $result)
+        {
+            $data=array();
+            $data['status']=$this->config->item('system_status_delete');
+            Query_helper::update($this->config->item('table_pos_budget_dealer_monthly_total'),$data, array('id='.$result['id']), false);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === TRUE)
@@ -528,103 +563,6 @@ class Budget_dealer_monthly extends Root_Controller
             $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
             $this->json_return($ajax);
         }
-        //set status unused old items delete
-        //set status unused total items delete
-
-        //$results=Query_helper::get_info($this->config->item('table_pos_budget_dealer_monthly'),'*',array('outlet_id ='.$item_head['outlet_id'],'month ='.$item_head['month'],'crop_id ='.$item_head['crop_id']));
-        /*$this->db->from($this->config->item('table_pos_budget_dealer_monthly').' budget_dealer_monthly');
-        $this->db->select('budget_dealer_monthly.*');
-        $this->db->join($this->config->item('table_pos_budget_dealer_monthly_details').' details','budget_dealer_monthly.id=details.budget_monthly_id','INNER');
-        $this->db->select('details.*, details.id details_id');
-        $this->db->where('budget_dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
-        $this->db->where('budget_dealer_monthly.outlet_id',$item_head['outlet_id']);
-        $this->db->where('budget_dealer_monthly.year',$item_head['year']);
-        $this->db->where('budget_dealer_monthly.month',$item_head['month']);
-        //$this->db->where('budget_dealer_monthly.crop_id',$item_head['crop_id']);
-        $results=$this->db->get()->result_array();
-
-        $old_items=array();
-        foreach($results as $result)
-        {
-            $old_items[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
-        }*/
-
-        /*$this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
-        $this->db->select('farmer_outlet.farmer_id');
-        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
-        $this->db->select('farmer_farmer.name farmer_name');
-        $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
-        $this->db->where('farmer_farmer.farmer_type_id > ',1);
-        $this->db->where('farmer_outlet.revision',1);
-        $this->db->where('farmer_outlet.outlet_id',$item_head['outlet_id']);
-        $dealers=$this->db->get()->result_array();*/
-
-        /*$this->db->trans_start();  //DB Transaction Handle START
-
-
-        if(!$old_items)
-        {
-            $data=array();
-            $data['outlet_id']=$item_head['outlet_id'];
-            $data['year']=$item_head['year'];
-            $data['month']=$item_head['month'];
-            //$data['crop_id']=$item_head['crop_id'];
-            //$data['revision_count']=1;
-            $data['date_created']=$time;
-            $data['user_created']=$user->user_id;
-            $budget_monthly_id=Query_helper::add($this->config->item('table_pos_budget_dealer_monthly'),$data,false);
-        }
-
-        $this->db->from($this->config->item('table_login_setup_classification_variety_price').' variety_price');
-        $this->db->select('variety_price.id');
-        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = variety_price.variety_id','INNER');
-        $this->db->select('v.id variety_id');
-        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
-        $this->db->select('crop_type.id crop_type_id');
-        $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = variety_price.pack_size_id','INNER');
-        $this->db->select('pack.id pack_size_id');
-        $this->db->where('crop_type.crop_id',$item_head['crop_id']);
-        $this->db->order_by('crop_type.ordering ASC');
-        $this->db->order_by('v.ordering ASC');
-        $results=$this->db->get()->result_array();
-
-        foreach($results as $result)
-        {
-            foreach($dealers as $dealer)
-            {
-                if(isset($items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget']))
-                {
-                    if(isset($old_items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget']))
-                    {
-                        if($items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget']!=$old_items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget'])
-                        {
-                            $data=array();
-                            $data['variety_id']=$result['variety_id'];
-                            $data['pack_size_id']=$result['pack_size_id'];
-                            $data['dealer_id']=$dealer['farmer_id'];
-                            $data['amount_budget']=$items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget'];
-                            $data['current_stock']=$items[$result['variety_id']][$result['pack_size_id']]['current_stock'];
-                            $this->db->set('revision_count', 'revision_count+1', FALSE);
-                            Query_helper::update($this->config->item('table_pos_budget_dealer_monthly_details'),$data,array('id='.$old_items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['id']));
-                        }
-                    }
-                    else
-                    {
-                        $data=array();
-                        $data['budget_monthly_id']=$budget_monthly_id;
-                        $data['variety_id']=$result['variety_id'];
-                        $data['pack_size_id']=$result['pack_size_id'];
-                        $data['dealer_id']=$dealer['farmer_id'];
-                        $data['amount_budget']=$items[$result['variety_id']][$result['pack_size_id']][$dealer['farmer_id']]['amount_budget'];
-                        $data['current_stock']=$items[$result['variety_id']][$result['pack_size_id']]['current_stock'];
-                        $data['revision_count']=1;
-                        Query_helper::add($this->config->item('table_pos_budget_dealer_monthly_details'),$data);
-                    }
-                }
-            }
-        }
-
-        */
     }
     private function system_details($id)
     {
