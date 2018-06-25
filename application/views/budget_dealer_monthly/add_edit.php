@@ -69,19 +69,19 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php
                  foreach($system_preference_items as $key=>$item)
                  {
-                 if(($key=='crop_type_name')||($key=='variety_id')||($key=='variety_name')||($key=='pack_size_id')||($key=='pack_size'))
-                 {
-                 ?>
-                { name: '<?php echo $key ?>', type: 'string' },
-                <?php
+                     if(($key=='crop_type_name')||($key=='variety_id')||($key=='variety_name')||($key=='pack_size_id')||($key=='pack_size'))
+                     {
+                         ?>
+                        { name: '<?php echo $key ?>', type: 'string' },
+                        <?php
+                     }
+                     else
+                     {
+                        ?>
+                        { name: '<?php echo $key ?>', type: 'number' },
+                        <?php
+                    }
                  }
-                 else
-                 {
-                    ?>
-                { name: '<?php echo $key ?>', type: 'number' },
-                <?php
-                }
-             }
             ?>
             ],
             id: 'id',

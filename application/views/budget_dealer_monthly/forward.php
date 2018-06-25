@@ -14,7 +14,6 @@ $action_buttons[]=array(
     'data-form'=>'#save_form'
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
-
 ?>
 
 <form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward');?>" method="post">
@@ -31,16 +30,47 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <table class="table table-bordered table-responsive system_table_details_view">
                 <thead>
                 <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name'];?></label></th>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_YEAR');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo date("Y", mktime(0, 0, 0,1,1, $item['year_id']));;?></label></th>
+                    <th colspan="4" class="text-center bg-success">Crop Wise Information</th>
                 </tr>
                 <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo $item['crop_name'];?></label></th>
+                    <th width="2%"><?php echo $CI->lang->line('LABEL_SL_NO');?></th>
+                    <th><?php echo $CI->lang->line('LABEL_CROP_NAME');?></th>
+                    <th class="text-right">Total Budget</th>
+                    <th class="text-right">Total Net Price</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                $serial=0;
+                foreach($total_crops as $crop)
+                {
+                    ++$serial;
+                    ?>
+                    <tr>
+                        <td class="text-right"><?php echo $serial;?></td>
+                        <td><?php echo $crop['crop_name'];?></td>
+                        <td class="text-right"><?php echo System_helper::get_string_kg($crop['quantity_budget_total']);?></td>
+                        <td class="text-right"><?php echo System_helper::get_string_amount($crop['amount_price_net']);?></td>
+                    </tr>
+                <?php
+                }
+                ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-responsive system_table_details_view">
+                <thead>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name'];?></label></th>
+                    <th colspan="2">&nbsp;</th>
+                </tr>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_YEAR');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo date("Y", mktime(0, 0, 0,1,1, $item['year']));;?></label></th>
                     <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MONTH');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month_id'],1, 2000));;?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month'],1, 2000));;?></label></th>
                 </tr>
                 <tr>
                     <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CREATED_BY');?></label></th>
@@ -48,19 +78,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CREATED_TIME');?></label></th>
                     <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_created']);?></label></th>
                 </tr>
-                <?php
-                if($item['user_updated'])
-                {
-                    ?>
-                    <tr>
-                        <th class="widget-header header_caption"><label class="control-label pull-right">Last <?php echo $CI->lang->line('LABEL_UPDATED_BY');?></label></th>
-                        <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_updated']]['name'];?></label></th>
-                        <th class="widget-header header_caption"><label class="control-label pull-right">Last <?php echo $CI->lang->line('LABEL_DATE_UPDATED_TIME');?></label></th>
-                        <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated']);?></label></th>
-                    </tr>
-                <?php
-                }
-                ?>
                 <tr>
                     <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS_FORWARD');?></label></th>
                     <th class=" header_value"><label class="control-label"><?php echo $item['status_forward'];?></label></th>
@@ -70,6 +87,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </table>
         </div>
         <div class="clearfix"></div>
+        <div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
+            <div class="col-xs-4"></div>
+            <div class="col-sm-4 col-xs-8 text-center">
+                <strong>Note:</strong> Budget quantity in packet.
+            </div>
+        </div>
         <div class="row show-grid">
             <div class="row widget">
                 <div class="col-xs-12" id="system_jqx_container"></div>
@@ -118,9 +141,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 <?php
 $options=array(
     'outlet_id'=>$item['outlet_id'],
-    'year_id'=>$item['year_id'],
-    'month_id'=>$item['month_id'],
-    'crop_id'=>$item['crop_id']
+    'year'=>$item['year'],
+    'month'=>$item['month']
 );
 ?>
 <script type="text/javascript">
@@ -134,24 +156,23 @@ $options=array(
         {
             dataType: "json",
             dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'crop_id', type: 'string' },
-                { name: 'crop_name', type: 'string' },
-                { name: 'crop_type_name', type: 'string' },
-                { name: 'variety_id', type: 'string' },
-                { name: 'variety_name', type: 'string' },
-                { name: 'pack_size_id', type: 'string' },
-                { name: 'pack_size', type: 'string' },
-                { name: 'current_stock', type: 'string' },
-                { name: 'price_net', type: 'string' },
                 <?php
-                foreach($dealers as $dealer)
-                {
-                ?>
-                { name: 'amount_budget_<?php echo $dealer['farmer_id']?>', type: 'string' },
+                 foreach($system_preference_items as $key=>$item)
+                 {
+                     if(($key=='crop_name')||($key=='crop_type_name')||($key=='variety_id')||($key=='variety_name')||($key=='pack_size_id')||($key=='pack_size'))
+                     {
+                         ?>
+                { name: '<?php echo $key ?>', type: 'string' },
                 <?php
-                }
+             }
+             else
+             {
                 ?>
+                { name: '<?php echo $key ?>', type: 'number' },
+                <?php
+            }
+         }
+    ?>
             ],
             id: 'id',
             url: url,
@@ -160,59 +181,106 @@ $options=array(
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var header_render=function (text, align)
+        {
+            var words = text.split(" ");
+            var label=words[0];
+            var count=words[0].length;
+            for (i = 1; i < words.length; i++)
+            {
+                if((count+words[i].length)>10)
+                {
+                    label=label+'</br>'+words[i];
+                    count=words[i].length;
+                }
+                else
+                {
+                    label=label+' '+words[i];
+                    count=count+words[i].length;
+                }
+
+            }
+            return '<div style="margin: 5px;">'+label+'</div>';
+        };
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            var total_budget=0;
             var price_net=parseFloat(record['price_net']);
 
-            if(column=='total_budget')
+            if(column=='quantity_total_budget')
             {
+                var total_quantity=0;
                 <?php
                 foreach($dealers as $dealer)
                 {
                 ?>
-                if(!isNaN(parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>'])))
+                if(!isNaN(parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>'])))
                 {
-                    total_budget+=parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>']);
+                    total_quantity+=parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>']);
                 }
                 <?php
                 }
                 ?>
-                if(total_budget==0)
+                if(total_quantity==0)
                 {
                     element.html('');
-                    //element.css({'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
                 else
                 {
-                    element.html(total_budget);
-                    //element.css({'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html(total_quantity);
                 }
             }
-            if(column=='total_price')
+            else if(column=='amount_price_total')
             {
+                var total_quantity=0;
                 <?php
                 foreach($dealers as $dealer)
                 {
                 ?>
-                if(!isNaN(parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>'])))
+                if(!isNaN(parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>'])))
                 {
-                    total_budget+=parseFloat(record['<?php echo 'amount_budget_'.$dealer['farmer_id'];?>']);
+                    total_quantity+=parseFloat(record['<?php echo 'quantity_budget_'.$dealer['farmer_id'];?>']);
                 }
                 <?php
                 }
                 ?>
-
-                if(total_budget==0)
+                if((total_quantity==0)||(record['amount_price_net']==0))
                 {
-                    element.html('0');
-                    //element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html('');
                 }
                 else
                 {
-                    element.html(number_format(total_budget*price_net,2));
-                    //element.css({ 'background-color': '#00FF00','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    element.html(number_format(total_quantity*record['amount_price_net'],2));
+                }
+            }
+            else if(column.substr(0,6)=='amount')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(number_format(value,2));
+                }
+            }
+            else if(column.substr(0,16)=='quantity_budget_')
+            {
+                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                if(record['editable_'+column.substr(16)])
+                {
+                    element.html('<div class="jqxgrid_input">'+value+'</div>');
+                }
+                else
+                {
+                    element.html(value);
+                }
+            }
+            else if(column=='current_stock')
+            {
+                if(value==0)
+                {
+                    element.html('');
                 }
             }
             return element[0].outerHTML;
@@ -228,23 +296,22 @@ $options=array(
                 enablebrowserselection: true,
                 altrows: true,
                 rowsheight: 35,
-                editable:true,
+                columnsheight: 70,
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_NAME'); ?>', dataField: 'crop_name',pinned:true,width:'100',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',pinned:true,width:'100',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',pinned:true,width:'150',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',pinned:true,width:'50',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_CURRENT_STOCK'); ?>', dataField: 'current_stock',width:'100',pinned:true,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PRICE_NET'); ?>', dataField: 'price_net',width:'200',editable:false, hidden: 1},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL'); ?> Budget', dataField: 'total_budget',width:'100',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'total_price',width:'130',pinned:true,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
                     $serial=0;
                     foreach($dealers as $dealer)
                     {
                     ++$serial;
                     ?>
-                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>', dataField: 'amount_budget_<?php echo $dealer['farmer_id']?>',width:'100',cellsalign: 'right',editable:false},
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_<?php echo $dealer['farmer_id']?>',width:'100',cellsalign: 'right',editable:false},
                     <?php
                     }
                     ?>
