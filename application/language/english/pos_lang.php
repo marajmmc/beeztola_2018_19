@@ -115,13 +115,10 @@ $lang['LABEL_STATUS_EXPENSE']='Expense Status';
 $lang['LABEL_STATUS_RELEASE']='Release Status';
 $lang['LABEL_STATUS_RECEIVED']='Received Status';
 $lang['LABEL_STATUS_CLOSED']='Closed Status';
-$lang['LABEL_STATUS_LC_PENDING']='Pending';
-$lang['LABEL_STATUS_LC_COMPLETE']='Completed';
-$lang['LABEL_STATUS_OPEN_FORWARD']='Forward Status';
-$lang['LABEL_STATUS_OPEN']='LC Status';
 $lang['LABEL_STATUS_FORWARD']='Forward Status';
 $lang['LABEL_STATUS_REQUEST']='Request Status';
 $lang['LABEL_STATUS_DELIVERY']='Delivery Status';
+$lang['LABEL_STATUS_FINALIZE']='Finalize Status';
 
 // Common information related
 // ID or Code
@@ -245,6 +242,21 @@ $lang['LABEL_REMARKS_CHALLAN']='Remarks for Challan';
 $lang['LABEL_REMARKS_DELIVERY']='Remarks for Delivery';
 $lang['LABEL_REMARKS_RECEIVE']='Remarks for Receive';
 $lang['LABEL_REMARKS_FORWARD']='Remarks for Forward';
+
+/* Status */
+$lang['LABEL_STATUS']='Status';
+$lang['LABEL_STATUS_EXPENSE']='Expense Status';
+$lang['LABEL_STATUS_RELEASE']='Release Status';
+$lang['LABEL_STATUS_RECEIVED']='Received Status';
+$lang['LABEL_STATUS_CLOSED']='Closed Status';
+$lang['LABEL_STATUS_LC_PENDING']='Pending';
+$lang['LABEL_STATUS_LC_COMPLETE']='Completed';
+$lang['LABEL_STATUS_OPEN_FORWARD']='Forward Status';
+$lang['LABEL_STATUS_OPEN']='LC Status';
+$lang['LABEL_STATUS_REQUEST']='Request Status';
+$lang['LABEL_STATUS_APPROVE']='Approve Status';
+$lang['LABEL_STATUS_DELIVERY']='Delivery Status';
+$lang['LABEL_STATUS_RECEIVE']='Received Status';
 
 // Unit
 $lang['LABEL_PACK'] = 'Pkt';
@@ -437,3 +449,6 @@ $lang['LABEL_STATUS_RECEIVE_APPROVE']='Receive Approve Status';
 $lang['LABEL_STATUS_SYSTEM_DELIVERY_RECEIVE']='Manual Product Receive';
 // Transfer Outlet to HQ
 $lang['LABEL_RETURN_ITEMS']='Return Items (Variety Information)';
+// Dealer Monthly Budget
+$lang['LABEL_TOTAL_QUANTITY_BUDGET']='Total Budget Quantity';
+$lang['LABEL_TOTAL_AMOUNT_PRICE_NET']='Total Net Price';

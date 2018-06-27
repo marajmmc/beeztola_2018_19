@@ -58,6 +58,20 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </tbody>
             </table>
         </div>
+
+        <div class="clearfix"></div>
+        <div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
+            <div class="col-xs-4"></div>
+            <div class="col-sm-4 col-xs-8 text-center">
+                <strong>Note:</strong> Budget quantity in packet.
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="row widget">
+                <div class="col-xs-12" id="system_jqx_container"></div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
         <div class="col-md-12">
             <table class="table table-bordered table-responsive system_table_details_view">
                 <thead>
@@ -87,17 +101,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </table>
         </div>
         <div class="clearfix"></div>
-        <div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
-            <div class="col-xs-4"></div>
-            <div class="col-sm-4 col-xs-8 text-center">
-                <strong>Note:</strong> Budget quantity in packet.
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="row widget">
-                <div class="col-xs-12" id="system_jqx_container"></div>
-            </div>
-        </div>
         <div class="widget-header">
             <div class="title">
                 Forward Confirmation
@@ -223,7 +226,8 @@ $options=array(
                 ?>
                 if(total_quantity==0)
                 {
-                    element.html('');
+                    //element.html('');
+                    element.html('<div class="bg-danger">&nbsp;</div>');
                 }
                 else
                 {
@@ -246,7 +250,8 @@ $options=array(
                 ?>
                 if((total_quantity==0)||(record['amount_price_net']==0))
                 {
-                    element.html('');
+                    //element.html('');
+                    element.html('<div class="bg-danger">&nbsp;</div>');
                 }
                 else
                 {
@@ -257,7 +262,8 @@ $options=array(
             {
                 if(value==0)
                 {
-                    element.html('');
+                    //element.html('');
+                    element.html('<div class="bg-danger">&nbsp;</div>');
                 }
                 else
                 {
@@ -266,15 +272,15 @@ $options=array(
             }
             else if(column.substr(0,16)=='quantity_budget_')
             {
-                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-                if(record['editable_'+column.substr(16)])
-                {
-                    element.html('<div class="jqxgrid_input">'+value+'</div>');
-                }
-                else
-                {
-                    element.html(value);
-                }
+                if(value==0)
+                 {
+                 element.html('<div class="bg-danger">'+value+'</div>');
+                 }
+                 else
+                 {
+                 element.html(value);
+                 }
+
             }
             else if(column=='current_stock')
             {
@@ -311,7 +317,7 @@ $options=array(
                     {
                     ++$serial;
                     ?>
-                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_<?php echo $dealer['farmer_id']?>',width:'100',cellsalign: 'right',editable:false},
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_<?php echo $dealer['farmer_id']?>',width:'100',cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
                     <?php
                     }
                     ?>

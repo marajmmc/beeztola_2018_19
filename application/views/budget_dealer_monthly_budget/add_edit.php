@@ -54,8 +54,28 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
             if(sure)
             {
-                $("#save_form_jqx").submit();
+                //$("#save_form_jqx").submit();
                 //return false;
+                var form=$("#save_form_jqx");
+                $.ajax({
+                    url:form.attr("action"),
+                    type: 'POST',
+                    datatype: "JSON",
+                    data:form.serialize(),
+                    success: function (data, status)
+                    {
+                        if(data.status_save=='<?php echo $this->lang->line("MSG_SAVED_SUCCESS")?>')
+                        {
+                            $("#crop_id").val("");
+                            $("#system_report_container").html("");
+                        }
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+
+                    }
+                });
             }
 
         });
@@ -177,7 +197,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
             else if(column.substr(0,16)=='quantity_budget_')
             {
-                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                if(value==0)
+                {
+                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px','backgroundColor':'#f2dede'});
+                }
+                else
+                {
+                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
                 if(record['editable_'+column.substr(16)])
                 {
                     element.html('<div class="jqxgrid_input">'+value+'</div>');
