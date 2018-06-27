@@ -228,6 +228,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 width: '100%',
                 height: '350px',
+                filterable: true,
+                sortable: true,
+                showfilterrow: true,
                 source: dataAdapter,
                 columnsresize: true,
                 columnsreorder: true,
@@ -237,9 +240,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsheight: 70,
                 editable:true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
