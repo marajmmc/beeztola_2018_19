@@ -55,21 +55,19 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
-                $year_budget = date('Y', strtotime('+1 month'));
-                $year_next=date('Y', strtotime('+1 year'));
-
+            $year_budget = date('Y', strtotime('+1 month'));
+            $year_next=date('Y', strtotime('+1 year'));
             ?>
-                <select id="year" class="form-control" name="item[year]" >
-                    <?php
-                    for($i=2018;$i<=$year_next;$i++)
-                    {
-                        ?>
-                        <option value="<?php echo $i;?>" <?php if($i==$year_budget){echo "selected='selected'";}?>><?php echo date("Y",mktime(0,0,0,1,1,$i))?></option>
-                    <?php
-                    }
+            <select id="year" class="form-control" name="item[year]" >
+                <?php
+                for($i=2018;$i<=$year_next;$i++)
+                {
                     ?>
-                </select>
-
+                    <option value="<?php echo $i;?>" <?php if($i==$year_budget){echo "selected='selected'";}?>><?php echo date("Y",mktime(0,0,0,1,1,$i))?></option>
+                <?php
+                }
+                ?>
+            </select>
         </div>
     </div>
     <div class="row show-grid">
@@ -78,20 +76,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
-
             $month_budget = date('n', strtotime('+1 month'));
-                ?>
-                <select id="month" class="form-control" name="item[month]" >
-                    <?php
-                    for($i=1;$i<13;$i++)
-                    {
-                        ?>
-                        <option value="<?php echo $i;?>" <?php if($i==$month_budget){echo "selected='selected'";}?>><?php echo date("F", mktime(0, 0, 0,  $i,1, 2000));?></option>
-                    <?php
-                    }
+            ?>
+            <select id="month" class="form-control" name="item[month]" >
+                <?php
+                for($i=1;$i<13;$i++)
+                {
                     ?>
-                </select>
-
+                    <option value="<?php echo $i;?>" <?php if($i==$month_budget){echo "selected='selected'";}?>><?php echo date("F", mktime(0, 0, 0,  $i,1, 2000));?></option>
+                <?php
+                }
+                ?>
+            </select>
         </div>
     </div>
     <div style="" class="row show-grid" id="crop_id_container">

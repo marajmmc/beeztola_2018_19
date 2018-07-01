@@ -16,7 +16,7 @@ $action_buttons[]=array(
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
 
-<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward');?>" method="post">
+<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_approve_rollback');?>" method="post">
     <input type="hidden" id="id" name="id" value="<?php echo $item['id']; ?>" />
     <input type="hidden" id="system_save_new_status" name="system_save_new_status" value="0" />
     <div class="row widget">
@@ -30,17 +30,22 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <table class="table table-bordered table-responsive system_table_details_view">
                 <thead>
                 <tr>
-                    <th colspan="5" class="text-center bg-success">Crop Wise Information</th>
+                    <th colspan="8" class="text-center bg-success">Crop Wise Information</th>
                 </tr>
                 <tr>
                     <th rowspan="2" width="2%"><?php echo $CI->lang->line('LABEL_SL_NO');?></th>
                     <th rowspan="2"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></th>
-                    <th colspan="3" class="text-center">Total Budget</th>
+                    <th colspan="3" class="text-center bg-danger">Total Budget</th>
+                    <th colspan="3" class="text-center bg-warning">Total Target</th>
                 </tr>
                 <tr>
-                    <th class="text-right"><?php echo $CI->lang->line('LABEL_PACK');?></th>
-                    <th class="text-right"><?php echo $CI->lang->line('LABEL_KG');?></th>
-                    <th class="text-right">Net Price</th>
+                    <th class="text-right bg-danger"><?php echo $CI->lang->line('LABEL_PACK');?></th>
+                    <th class="text-right bg-danger"><?php echo $CI->lang->line('LABEL_KG');?></th>
+                    <th class="text-right bg-danger">Net Price</th>
+
+                    <th class="text-right bg-warning"><?php echo $CI->lang->line('LABEL_PACK');?></th>
+                    <th class="text-right bg-warning"><?php echo $CI->lang->line('LABEL_KG');?></th>
+                    <th class="text-right bg-warning">Net Price</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -52,6 +57,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 $quantity_budget_total_total=0;
                 $quantity_budget_total_total_kg=0;
                 $amount_budget_price_net_total=0;
+
+                $quantity_target_total=0;
+                $quantity_target_total_kg=0;
+                $amount_target_price_net=0;
+                $quantity_target_total_total=0;
+                $quantity_target_total_total_kg=0;
+                $amount_target_price_net_total=0;
+
+
                 foreach($total_crops as $crop)
                 {
                     ++$serial;
@@ -61,6 +75,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     $quantity_budget_total_total+=$quantity_budget_total;
                     $quantity_budget_total_total_kg+=$quantity_budget_total_kg;
                     $amount_budget_price_net_total+=$amount_budget_price_net;
+
+                    $quantity_target_total=$crop['quantity_target_total'];
+                    $quantity_target_total_kg=$crop['quantity_target_total_kg'];
+                    $amount_target_price_net=$crop['amount_target_price_net'];
+                    $quantity_target_total_total+=$quantity_target_total;
+                    $quantity_target_total_total_kg+=$quantity_target_total_kg;
+                    $amount_target_price_net_total+=$amount_target_price_net;
                     ?>
                     <tr>
                         <td class="text-right"><?php echo $serial;?></td>
@@ -68,6 +89,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <td class="text-right"><?php echo System_helper::get_string_quantity($quantity_budget_total);?></td>
                         <td class="text-right"><?php echo System_helper::get_string_kg($quantity_budget_total_kg);?></td>
                         <td class="text-right"><?php echo System_helper::get_string_amount($amount_budget_price_net);?></td>
+                        <td class="text-right"><?php echo System_helper::get_string_quantity($quantity_target_total);?></td>
+                        <td class="text-right"><?php echo System_helper::get_string_kg($quantity_target_total_kg);?></td>
+                        <td class="text-right"><?php echo System_helper::get_string_amount($amount_target_price_net);?></td>
                     </tr>
                 <?php
                 }
@@ -79,6 +103,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <th class="text-right"><?php echo System_helper::get_string_quantity($quantity_budget_total_total);?></th>
                     <th class="text-right"><?php echo System_helper::get_string_kg($quantity_budget_total_total_kg);?></th>
                     <th class="text-right"><?php echo System_helper::get_string_amount($amount_budget_price_net_total);?></th>
+                    <th class="text-right"><?php echo System_helper::get_string_quantity($quantity_target_total_total);?></th>
+                    <th class="text-right"><?php echo System_helper::get_string_kg($quantity_target_total_total_kg);?></th>
+                    <th class="text-right"><?php echo System_helper::get_string_amount($amount_target_price_net_total);?></th>
                 </tr>
                 </tfoot>
             </table>
@@ -122,33 +149,45 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <th class=" header_value"><label class="control-label"><?php echo $item['status_forward'];?></label></th>
                     <th colspan="2">&nbsp;</th>
                 </tr>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FORWARDED_BY');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_forwarded']]['name'];?></label></th>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_FORWARDED_TIME');?></label></th>
+                    <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_forwarded']);?></label></th>
+                </tr>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $item['remarks_forward'];?></label></th>
+                    <th colspan="2">&nbsp;</th>
+                </tr>
                 </thead>
             </table>
         </div>
         <div class="clearfix"></div>
         <div class="widget-header">
             <div class="title">
-                Forward Confirmation
+                Approve or Rollback Confirmation
             </div>
             <div class="clearfix"></div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FORWARD');?> <span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Approve/Rollback <span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select id="status_forward" class="form-control" name="item[status_forward]">
+                <select id="status_budget_targeted" class="form-control" name="item[status_budget_targeted]">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
-                    <option value="<?php echo $this->config->item('system_status_forwarded')?>"><?php echo $this->config->item('system_status_forwarded')?></option>
+                    <option value="<?php echo $this->config->item('system_status_approved')?>"><?php echo $this->config->item('system_status_approved')?></option>
+                    <option value="<?php echo $this->config->item('system_status_rollback')?>"><?php echo $this->config->item('system_status_rollback')?></option>
                 </select>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?></label>
+                <label class="control-label pull-right">Approve/Rollback <?php echo $CI->lang->line('LABEL_REMARKS');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <textarea name="item[remarks_forward]" id="remarks_forward" class="form-control"><?php echo $item['remarks_forward'];?></textarea>
+                <textarea name="item[remarks_forward_rollback]" id="remarks_forward" class="form-control"><?php echo $item['remarks_forward_rollback'];?></textarea>
             </div>
         </div>
         <div class="row show-grid">
@@ -157,7 +196,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button pull-right">
-                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Forward to Dealer Monthly Budget?">Save</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Approve/Rollback to Dealer Monthly Target?">Save</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">
@@ -168,9 +207,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 </form>
 <?php
 $options=array(
-    'outlet_id'=>$item['outlet_id'],
-    'year'=>$item['year'],
-    'month'=>$item['month']
+    'id'=>$item['id']
 );
 ?>
 <script type="text/javascript">
@@ -281,7 +318,7 @@ $options=array(
                     element.html(get_string_amount(total_quantity*record['amount_price_net']));
                 }
             }
-            else if(column.substr(0,6)=='amount')
+            else if(column=='quantity_budget_target_total')
             {
                 if(value==0)
                 {
@@ -289,27 +326,22 @@ $options=array(
                 }
                 else
                 {
-                    element.html(get_string_amount(value));
+                    element.html(get_string_quantity(value));
                 }
             }
-            else if(column.substr(0,16)=='quantity_budget_')
+            else if(column=='amount_price_total_target')
             {
-                if(value==0)
-                 {
-                     element.html('');
-                 }
-                 else
-                 {
-                    element.html(value);
-                 }
-
-            }
-            else if(column=='current_stock')
-            {
-                if(value==0)
+                var total_quantity_target=0;
+                total_quantity_target=record['quantity_budget_target_total'];
+                if((total_quantity_target==0)||(record['amount_price_net']==0))
                 {
                     element.html('');
                 }
+                else
+                {
+                    element.html(get_string_amount(total_quantity_target*record['amount_price_net']));
+                }
+
             }
             return element[0].outerHTML;
         };
@@ -336,6 +368,8 @@ $options=array(
                 { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                 { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                 { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                { text: 'Total Targeted Quantity', dataField: 'quantity_budget_target_total',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                { text: 'Target <?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total_target',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                 <?php
                 $serial=0;
                 foreach($dealers as $dealer)

@@ -181,7 +181,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 else
                 {
-                    element.html(number_format(total_quantity*record['amount_price_net'],2));
+                    element.html(get_string_amount(total_quantity*record['amount_price_net']));
                 }
             }
             else if(column.substr(0,6)=='amount')
@@ -192,14 +192,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 else
                 {
-                    element.html(number_format(value,2));
+                    element.html(get_string_amount(value));
                 }
             }
             else if(column.substr(0,16)=='quantity_budget_')
             {
                 if(value==0)
                 {
-                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px','backgroundColor':'#f2dede'});
+                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
                 else
                 {
@@ -243,16 +243,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',filterable: false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',filterable: false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',filterable: false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
                     $serial=0;
                     foreach($dealers as $dealer)
                     {
                     ++$serial;
                     ?>
-                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render,datafield: 'quantity_budget_<?php echo $dealer['farmer_id'];?>', width: 100,cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render,datafield: 'quantity_budget_<?php echo $dealer['farmer_id'];?>', width: 100,filterable: false,cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
                         cellbeginedit: function (row)
                         {
                             var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected

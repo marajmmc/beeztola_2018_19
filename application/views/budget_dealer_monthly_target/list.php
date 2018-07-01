@@ -9,12 +9,14 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'href'=>site_url($CI->controller_url.'/index/list_all')
     );
 }
-if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
+if((isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
 {
     $action_buttons[]=array
     (
-        'label'=>$CI->lang->line('ACTION_NEW').' & '.$CI->lang->line('ACTION_EDIT'),
-        'href'=>site_url($CI->controller_url.'/index/search')
+        'type'=>'button',
+        'label'=>'Target Edit',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/edit_target')
     );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
@@ -59,9 +61,9 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
     $action_buttons[]=array
     (
         'type'=>'button',
-        'label'=>'Forward',
+        'label'=>'Approve & Rollback',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/forward')
+        'data-action-link'=>site_url($CI->controller_url.'/index/approve_rollback')
     );
 }
 $action_buttons[]=array

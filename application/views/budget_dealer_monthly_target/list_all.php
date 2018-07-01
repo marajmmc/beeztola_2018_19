@@ -5,16 +5,8 @@ $action_buttons=array();
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
     $action_buttons[]=array(
-        'label'=>'All List',
-        'href'=>site_url($CI->controller_url.'/index/list_all')
-    );
-}
-if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
-{
-    $action_buttons[]=array
-    (
-        'label'=>$CI->lang->line('ACTION_NEW').' & '.$CI->lang->line('ACTION_EDIT'),
-        'href'=>site_url($CI->controller_url.'/index/search')
+        'label'=>'Pending List',
+        'href'=>site_url($CI->controller_url)
     );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
@@ -54,20 +46,10 @@ if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
         'href'=>site_url($CI->controller_url.'/index/set_preference')
     );
 }
-if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>'Forward',
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/forward')
-    );
-}
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_REFRESH"),
-    'href'=>site_url($CI->controller_url.'/index/list')
+    'href'=>site_url($CI->controller_url.'/index/list_all')
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
@@ -93,7 +75,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     $(document).ready(function ()
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_all');?>";
 
         // prepare the data
         var source =
@@ -133,12 +115,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columnsreorder: true,
                 enablebrowserselection: true,
                 columns:
-                [
-                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width:'50', cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>',dataField: 'outlet_name',width:'200',filterType:'list',hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_YEAR'); ?>', dataField: 'year',width:'80',filtertype: 'list', hidden: <?php echo $system_preference_items['year']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_MONTH'); ?>', dataField: 'month', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['month']?0:1;?>}
-                ]
+                    [
+                        { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width:'50', cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>',dataField: 'outlet_name',width:'200',filterType:'list',hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_YEAR'); ?>', dataField: 'year',width:'80',filtertype: 'list', hidden: <?php echo $system_preference_items['year']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_MONTH'); ?>', dataField: 'month', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['month']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_BUDGET'); ?>', dataField: 'total_quantity_budget', width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['total_quantity_budget']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_AMOUNT_PRICE_NET'); ?>', dataField: 'total_amount_price_net', width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['total_amount_price_net']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_STATUS_FORWARD'); ?>', dataField: 'status_forward', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['status_forward']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_STATUS_FINALIZE'); ?>', dataField: 'status_finalize', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['status_finalize']?0:1;?>}
+                    ]
             });
     });
 </script>
