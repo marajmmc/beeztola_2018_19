@@ -30,7 +30,7 @@ class Report_sale_invoice extends Root_Controller
         }
         $this->lang->load('report_sale');
     }
-    public function index($action="search")
+    public function index($action="search",$id=0)
     {
         if($action=="search")
         {
@@ -43,6 +43,10 @@ class Report_sale_invoice extends Root_Controller
         elseif($action=="get_items")
         {
             $this->system_get_items();
+        }
+        elseif($action=="details_invoice")
+        {
+            $this->system_details_invoice($id);
         }
         elseif($action=="set_preference")
         {
@@ -132,6 +136,7 @@ class Report_sale_invoice extends Root_Controller
         $data['amount_payable']= 1;
         $data['amount_payable_actual']= 1;
         $data['amount_actual']= 1;
+        $data['button_details']= 1;
         if($result)
         {
             if($result['preferences']!=null)
@@ -248,6 +253,95 @@ class Report_sale_invoice extends Root_Controller
         $items[]=$grand_total;
 
         $this->json_return($items);
+    }
+    private function system_details_invoice($id)
+    {
+        if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_sale').' sale');
+            $this->db->select('sale.*');
+            $this->db->select('cus.name outlet_name,cus.name_short outlet_short_name');
+            $this->db->select('f.name farmer_name,f.mobile_no,f.nid,f.address');
+            $this->db->select('ft.name type_name');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
+            $this->db->where('sale.id',$item_id);
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Details',$item_id,'Trying to access Invalid Sale id');
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+                die();
+            }
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('Details',$item_id,'Trying to access other Outlets data');
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+                die();
+            }
+            $this->db->from($this->config->item('table_pos_sale_details').' sd');
+            $this->db->select('sd.*');
+
+            $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = sd.variety_id','INNER');
+            $this->db->select('v.name variety_name');
+            $this->db->join($this->config->item('table_login_setup_classification_crop_types').' type','type.id = v.crop_type_id','INNER');
+            $this->db->select('type.name crop_type_name,type.id crop_type_id');
+            $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
+            $this->db->select('crop.name crop_name,crop.id crop_id');
+            $this->db->where('sd.sale_id',$item_id);
+
+            $data['items']=$this->db->get()->result_array();
+            $data['has_variety_discount']=false;
+            foreach($data['items'] as $row)
+            {
+                if($row['amount_discount_variety']>0)
+                {
+                    $data['has_variety_discount']=true;
+                    break;
+                }
+            }
+
+            $user_ids=array();
+            $user_ids[$data['item']['user_created']]=$data['item']['user_created'];
+            if($data['item']['user_cancel_approved']>0)
+            {
+                $user_ids[$data['item']['user_cancel_approved']]=$data['item']['user_cancel_approved'];
+            }
+            if($data['item']['user_manual_approved']>0)
+            {
+                $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
+            }
+
+            $data['users']=System_helper::get_users_info($user_ids);
+            $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($item_id).')';
+
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#popup_content","html"=>$this->load->view($this->controller_url."/details_invoice",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
     }
     private function system_set_preference()
     {

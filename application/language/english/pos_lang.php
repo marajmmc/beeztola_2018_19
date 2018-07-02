@@ -52,6 +52,7 @@ $lang['ACTION_ASSIGN_GROUP_ROLE'] = 'Assign Group Role';
 $lang['ACTION_ASSIGN_USER_GROUP'] = 'Assign User Group';
 $lang['ACTION_SET_PACKING_COST'] = 'Set Packing Cost';
 $lang['ACTION_REPORT_VIEW'] = 'Report View';
+$lang['LABEL_BUTTON_DETAILS'] = 'Details';
 
 /*System Action Massage*/
 $lang['SELECT_ONE_ITEM'] = 'Select an item';

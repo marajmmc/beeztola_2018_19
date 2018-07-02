@@ -82,5 +82,27 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".date_large").datepicker({dateFormat : display_date_format,changeMonth: true,changeYear: true,yearRange: "c-2:c+2"});
+        $(document).off("click", ".pop_up");
+        $(document).on("click", ".pop_up", function(event)
+        {
+            $('#popup_content').html('');
+            var left=((($(window).width() - 550) / 2) +$(window).scrollLeft());
+            var top=((($(window).height() - 550) / 2) +$(window).scrollTop());
+            $("#popup_window").jqxWindow({position: { x: left, y: top  }});
+            $.ajax(
+                {
+                    url: $(this).attr('data-action-link'),
+                    type: 'POST',
+                    datatype: "JSON",
+                    success: function (data, status)
+                    {
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+                    }
+                });
+            $("#popup_window").jqxWindow('open');
+        });
     });
 </script>
