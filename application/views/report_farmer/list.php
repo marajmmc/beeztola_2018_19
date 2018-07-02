@@ -89,6 +89,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'id', type: 'int' },
                 { name: 'barcode', type: 'string' },
                 { name: 'name', type: 'string' },
+                { name: 'date_created_time', type: 'string' },
                 { name: 'mobile_no', type: 'string' },
                 { name: 'farmer_type_name', type: 'string' },
                 { name: 'status_card_require', type: 'string' },
@@ -145,7 +146,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <?php if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)){?>
                     { text: '<?php echo $CI->lang->line('LABEL_BARCODE'); ?>', dataField: 'barcode',width:'100',hidden: <?php echo $system_preference_items['barcode']?0:1;?>,cellsAlign:'right'},
                     <?php } ?>
-                    { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name',width:'300',hidden: <?php echo $system_preference_items['name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name',width:'200',hidden: <?php echo $system_preference_items['name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DATE_CREATED_TIME'); ?>', dataField: 'date_created_time', width:200, hidden: <?php echo $system_preference_items['date_created_time']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no',width:'110',hidden: <?php echo $system_preference_items['mobile_no']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME'); ?>', dataField: 'farmer_type_name',filtertype: 'list',width:'110',hidden: <?php echo $system_preference_items['farmer_type_name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_STATUS_CARD_REQUIRE'); ?>', dataField: 'status_card_require',width:'100',hidden: <?php echo $system_preference_items['status_card_require']?0:1;?>,filtertype: 'list'},

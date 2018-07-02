@@ -81,6 +81,7 @@ class Report_farmer extends Root_Controller
         $data['sl_no']= 1;
         $data['barcode']= 1;
         $data['name']= 1;
+        $data['date_created_time']= 1;
         $data['mobile_no']= 1;
         $data['farmer_type_name']= 1;
         $data['status_card_require']= 1;
@@ -222,6 +223,7 @@ class Report_farmer extends Root_Controller
         foreach($items as &$item)
         {
             $item['barcode']=Barcode_helper::get_barcode_farmer($item['id']);
+            $item['date_created_time']=System_helper::display_date_time($item['date_created']);
             if($item['time_card_off_end']>$time)
             {
                 $item['status_card_require']=$this->config->item('system_status_no');

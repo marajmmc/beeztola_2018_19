@@ -123,6 +123,7 @@ class Setup_farmer_farmer extends Root_Controller
         foreach($items as &$item)
         {
             $item['barcode']=Barcode_helper::get_barcode_farmer($item['id']);
+            $item['date_created_time']=System_helper::display_date_time($item['date_created']);
             if($item['time_card_off_end']>$time)
             {
                 //echo 'here '.$item['id'];
@@ -526,10 +527,11 @@ class Setup_farmer_farmer extends Root_Controller
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
         $data['barcode']= 1;
         $data['name']= 1;
+        $data['date_created_time']= 1;
         $data['farmer_type_name']= 1;
         $data['status_card_require']= 1;
-        $data['outlet_name']= 1;
-        $data['total_outlet']= 1;
+        //$data['outlet_name']= 1;
+        //$data['total_outlet']= 1;
         $data['mobile_no']= 1;
         $data['nid']= 1;
         $data['address']= 1;
