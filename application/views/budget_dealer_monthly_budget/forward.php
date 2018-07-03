@@ -30,6 +30,48 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <table class="table table-bordered table-responsive system_table_details_view">
                 <thead>
                 <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name'];?></label></th>
+                    <th colspan="2">&nbsp;</th>
+                </tr>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_YEAR');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo date("Y", mktime(0, 0, 0,1,1, $item['year']));;?></label></th>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MONTH');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month'],1, 2000));;?></label></th>
+                </tr>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CREATED_BY');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_created']]['name'];?></label></th>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CREATED_TIME');?></label></th>
+                    <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_created']);?></label></th>
+                </tr>
+                <tr>
+                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS_FORWARD');?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $item['status_forward'];?></label></th>
+                    <th colspan="2">&nbsp;</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="clearfix"></div>
+        <div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
+            <div class="col-xs-4"></div>
+            <div class="col-sm-4 col-xs-8 text-center">
+                <strong>Note:</strong> Budget quantity in packet.
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="row widget">
+                <div class="col-xs-12" id="system_jqx_container"></div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-responsive system_table_details_view">
+                <thead>
+                <tr>
                     <th colspan="5" class="text-center bg-success">Crop Wise Information</th>
                 </tr>
                 <tr>
@@ -81,48 +123,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <th class="text-right"><?php echo System_helper::get_string_amount($amount_budget_price_net_total);?></th>
                 </tr>
                 </tfoot>
-            </table>
-        </div>
-
-        <div class="clearfix"></div>
-        <div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
-            <div class="col-xs-4"></div>
-            <div class="col-sm-4 col-xs-8 text-center">
-                <strong>Note:</strong> Budget quantity in packet.
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="row widget">
-                <div class="col-xs-12" id="system_jqx_container"></div>
-            </div>
-        </div>
-        <div class="clearfix"></div>
-        <div class="col-md-12">
-            <table class="table table-bordered table-responsive system_table_details_view">
-                <thead>
-                <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name'];?></label></th>
-                    <th colspan="2">&nbsp;</th>
-                </tr>
-                <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_YEAR');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo date("Y", mktime(0, 0, 0,1,1, $item['year']));;?></label></th>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MONTH');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month'],1, 2000));;?></label></th>
-                </tr>
-                <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CREATED_BY');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_created']]['name'];?></label></th>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CREATED_TIME');?></label></th>
-                    <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_created']);?></label></th>
-                </tr>
-                <tr>
-                    <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS_FORWARD');?></label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo $item['status_forward'];?></label></th>
-                    <th colspan="2">&nbsp;</th>
-                </tr>
-                </thead>
             </table>
         </div>
         <div class="clearfix"></div>

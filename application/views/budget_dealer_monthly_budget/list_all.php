@@ -51,6 +51,11 @@ $action_buttons[]=array
     'label'=>$CI->lang->line("ACTION_REFRESH"),
     'href'=>site_url($CI->controller_url.'/index/list_all')
 );
+$action_buttons[]=array(
+    'type'=>'button',
+    'label'=>$CI->lang->line("ACTION_LOAD_MORE"),
+    'id'=>'button_jqx_load_more'
+);
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
 <div class="row widget">
@@ -97,6 +102,98 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
+        {
+            var element = $(defaultHtml);
+            if(column=='total_quantity_budget')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_quantity(value));
+                }
+            }
+            else if(column=='total_quantity_budget_kg')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_kg(value));
+                }
+            }
+            else if(column=='total_amount_price_net')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_amount(value));
+                }
+            }
+            else if(column=='total_quantity_target')
+            {
+                if(record['status_budget_target']=='<?php echo $this->config->item('system_status_approved')?>')
+                {
+                    if(value==0)
+                    {
+                        element.html('');
+                    }
+                    else
+                    {
+                        element.html(get_string_quantity(value));
+                    }
+                }
+                else
+                {
+                    element.html('');
+                }
+            }
+            else if(column=='total_quantity_target_kg')
+            {
+                if(record['status_budget_target']=='<?php echo $this->config->item('system_status_approved')?>')
+                {
+                    if(value==0)
+                    {
+                        element.html('');
+                    }
+                    else
+                    {
+                        element.html(get_string_kg(value));
+                    }
+                }
+                else
+                {
+                    element.html('');
+                }
+            }
+            else if(column=='total_amount_target_price_net')
+            {
+                if(record['status_budget_target']=='<?php echo $this->config->item('system_status_approved')?>')
+                {
+                    if(value==0)
+                    {
+                        element.html('');
+                    }
+                    else
+                    {
+                        element.html(get_string_amount(value));
+                    }
+                }
+                else
+                {
+                    element.html('');
+                }
+            }
+            return element[0].outerHTML;
+        };
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
             {
@@ -120,10 +217,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>',dataField: 'outlet_name',width:'200',filterType:'list',hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_YEAR'); ?>', dataField: 'year',width:'80',filtertype: 'list', hidden: <?php echo $system_preference_items['year']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_MONTH'); ?>', dataField: 'month', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['month']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_BUDGET'); ?>', dataField: 'total_quantity_budget', width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['total_quantity_budget']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_AMOUNT_PRICE_NET'); ?>', dataField: 'total_amount_price_net', width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['total_amount_price_net']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_BUDGET'); ?>', dataField: 'total_quantity_budget', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_quantity_budget']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_BUDGET_KG'); ?>', dataField: 'total_quantity_budget_kg', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_quantity_budget_kg']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_AMOUNT_PRICE_NET'); ?>', dataField: 'total_amount_price_net', width:'200', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_amount_price_net']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_TARGET'); ?>', dataField: 'total_quantity_target', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_quantity_target']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_TARGET_KG'); ?>', dataField: 'total_quantity_target_kg', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_quantity_target_kg']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_TOTAL_AMOUNT_TARGET_PRICE_NET'); ?>', dataField: 'total_amount_target_price_net', width:'200', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_amount_target_price_net']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_STATUS_FORWARD'); ?>', dataField: 'status_forward', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['status_forward']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_STATUS_FINALIZE'); ?>', dataField: 'status_finalize', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['status_finalize']?0:1;?>}
+                        { text: '<?php echo $CI->lang->line('LABEL_STATUS_BUDGET_TARGET'); ?>', dataField: 'status_budget_target', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['status_budget_target']?0:1;?>}
                     ]
             });
     });

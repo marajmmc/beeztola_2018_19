@@ -63,6 +63,10 @@ class Budget_dealer_monthly_target extends Root_Controller
         {
             $this->system_save_approve_rollback();
         }
+        elseif($action=="details")
+        {
+            $this->system_details($id);
+        }
         elseif($action=="get_variety")
         {
             $this->system_get_variety();
@@ -86,12 +90,16 @@ class Budget_dealer_monthly_target extends Root_Controller
         $data['outlet_name']= 1;
         $data['year']= 1;
         $data['month']= 1;
+        $data['total_quantity_budget']= 1;
+        $data['total_quantity_budget_kg']= 1;
+        $data['total_amount_price_net']= 1;
+        $data['total_quantity_target']= 1;
+        $data['total_quantity_target_kg']= 1;
+        $data['total_amount_target_price_net']= 1;
         if($method=='list_all')
         {
-            $data['total_quantity_budget']= 1;
-            $data['total_amount_price_net']= 1;
-            $data['status_forward']= 1;
-            $data['status_target']= 1;
+            //$data['status_forward']= 1;
+            $data['status_budget_target']= 1;
         }
         return $data;
     }
@@ -145,10 +153,21 @@ class Budget_dealer_monthly_target extends Root_Controller
         $this->db->select('dealer_monthly.*');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=dealer_monthly.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
+        $this->db->join($this->config->item('table_pos_budget_dealer_monthly_total').' dealer_monthly_total','dealer_monthly_total.budget_monthly_id=dealer_monthly.id','INNER');
+
+        $this->db->select('SUM(dealer_monthly_total.quantity_budget_total) total_quantity_budget');
+        $this->db->select('SUM((dealer_monthly_total.quantity_budget_total*dealer_monthly_total.pack_size)/1000) total_quantity_budget_kg');
+        $this->db->select('SUM(dealer_monthly_total.amount_price_net*dealer_monthly_total.quantity_budget_total) total_amount_price_net');
+
+        $this->db->select('SUM(dealer_monthly_total.quantity_budget_target_total) total_quantity_target');
+        $this->db->select('SUM((dealer_monthly_total.quantity_budget_target_total*dealer_monthly_total.pack_size)/1000) total_quantity_target_kg');
+        $this->db->select('SUM(dealer_monthly_total.amount_price_net*dealer_monthly_total.quantity_budget_target_total) total_amount_target_price_net');
+
         $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
         $this->db->where('dealer_monthly.status_forward',$this->config->item('system_status_forwarded'));
-        $this->db->where('dealer_monthly.status_budget_targeted',$this->config->item('system_status_pending'));
+        $this->db->where('dealer_monthly.status_budget_target',$this->config->item('system_status_pending'));
         $this->db->where_in('dealer_monthly.outlet_id',$this->user_outlet_ids);
+        $this->db->group_by('dealer_monthly.id');
         $this->db->order_by('dealer_monthly.id', 'DESC');
 
         $items=$this->db->get()->result_array();
@@ -185,23 +204,45 @@ class Budget_dealer_monthly_target extends Root_Controller
     }
     private function system_get_items_all()
     {
+        $current_records = $this->input->post('total_records');
+        if(!$current_records)
+        {
+            $current_records=0;
+        }
+        $pagesize = $this->input->post('pagesize');
+        if(!$pagesize)
+        {
+            $pagesize=100;
+        }
+        else
+        {
+            $pagesize=$pagesize*2;
+        }
         $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' dealer_monthly');
         $this->db->select('dealer_monthly.*');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=dealer_monthly.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
         $this->db->join($this->config->item('table_pos_budget_dealer_monthly_total').' dealer_monthly_total','dealer_monthly_total.budget_monthly_id=dealer_monthly.id','INNER');
-        $this->db->select('SUM(dealer_monthly_total.quantity_budget_total) total_quantity_budget, SUM(dealer_monthly_total.amount_price_net) total_amount_price_net');
+
+        $this->db->select('SUM(dealer_monthly_total.quantity_budget_total) total_quantity_budget');
+        $this->db->select('SUM((dealer_monthly_total.quantity_budget_total*dealer_monthly_total.pack_size)/1000) total_quantity_budget_kg');
+        $this->db->select('SUM(dealer_monthly_total.amount_price_net*dealer_monthly_total.quantity_budget_total) total_amount_price_net');
+
+        $this->db->select('SUM(dealer_monthly_total.quantity_budget_target_total) total_quantity_target');
+        $this->db->select('SUM((dealer_monthly_total.quantity_budget_target_total*dealer_monthly_total.pack_size)/1000) total_quantity_target_kg');
+        $this->db->select('SUM(dealer_monthly_total.amount_price_net*dealer_monthly_total.quantity_budget_target_total) total_amount_target_price_net');
+
         $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
+        $this->db->where('dealer_monthly.status_forward',$this->config->item('system_status_forwarded'));
         $this->db->where_in('dealer_monthly.outlet_id',$this->user_outlet_ids);
         $this->db->group_by('dealer_monthly.id');
         $this->db->order_by('dealer_monthly.id', 'DESC');
+        $this->db->limit($pagesize,$current_records);
 
         $items=$this->db->get()->result_array();
 
         foreach($items as &$item)
         {
-            $item['total_amount_price_net']=System_helper::get_string_amount($item['total_amount_price_net']);
-            $item['status_target']=$item['status_budget_targeted'];
             $item['month']=date("F", mktime(0, 0, 0,  $item['month'],1, 2000));
         }
         $this->json_return($items);
@@ -234,19 +275,26 @@ class Budget_dealer_monthly_target extends Root_Controller
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('edit_target',$item_id,'Outlet not assign.');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
             if($data['item']['status_forward']!=$this->config->item('system_status_forwarded'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') is not forwarded.';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_budget_targeted']==$this->config->item('system_status_approved'))
+            if($data['item']['status_budget_target']==$this->config->item('system_status_approved'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget target already approved';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_budget_targeted']==$this->config->item('system_status_rejected'))
+            if($data['item']['status_budget_target']==$this->config->item('system_status_rejected'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget target already rejected';
@@ -326,19 +374,26 @@ class Budget_dealer_monthly_target extends Root_Controller
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
+            if(!in_array($result['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('save_target',$id,'Outlet not assign.');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
             if($result['item']['status_forward']!=$this->config->item('system_status_forwarded'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $result['item']['month'],1, $result['item']['year'])).') is not forwarded.';
                 $this->json_return($ajax);
             }
-            if($result['item']['status_budget_targeted']==$this->config->item('system_status_approved'))
+            if($result['item']['status_budget_target']==$this->config->item('system_status_approved'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget target already approved';
                 $this->json_return($ajax);
             }
-            if($result['item']['status_budget_targeted']==$this->config->item('system_status_rejected'))
+            if($result['item']['status_budget_target']==$this->config->item('system_status_rejected'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget target already rejected';
@@ -400,8 +455,8 @@ class Budget_dealer_monthly_target extends Root_Controller
         }
 
         $data=array();
-        $data['date_targeted']=$time;
-        $data['user_targeted']=$user->user_id;
+        $data['date_updated_target']=$time;
+        $data['user_updated_target']=$user->user_id;
         Query_helper::update($this->config->item('table_pos_budget_dealer_monthly'),$data, array('id='.$id), false);
 
         $this->db->trans_complete();
@@ -416,6 +471,104 @@ class Budget_dealer_monthly_target extends Root_Controller
             $ajax['status']=false;
             $ajax['status_save']=$this->lang->line("MSG_SAVED_FAIL");
             $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_details($id)
+    {
+        if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_budget_dealer_monthly').' dealer_monthly');
+            $this->db->select('dealer_monthly.*');
+            $this->db->join($this->config->item('table_pos_setup_user_outlet').' user_outlet','user_outlet.customer_id=dealer_monthly.outlet_id AND user_outlet.revision=1','INNER');
+            $this->db->join($this->config->item('table_login_csetup_customer').' outlet','outlet.id=user_outlet.customer_id','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.id=outlet.id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('outlet_info.name outlet_name');
+            $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
+            $this->db->where('dealer_monthly.id',$item_id);
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('details',$item_id,'Details Non Exists');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('details',$item_id,'Outlet not assign.');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_forward']!=$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') is not forwarded.';
+                $this->json_return($ajax);
+            }
+            $user_ids=array();
+            $user_ids[$data['item']['user_created']]=$data['item']['user_created'];
+            $user_ids[$data['item']['user_forwarded']]=$data['item']['user_forwarded'];
+            $user_ids[$data['item']['user_updated_target']]=$data['item']['user_updated_target'];
+            $user_ids[$data['item']['user_approved_target']]=$data['item']['user_approved_target'];
+            $user_ids[$data['item']['user_forwarded_rollback']]=$data['item']['user_forwarded_rollback'];
+            $data['users']=System_helper::get_users_info($user_ids);
+
+            $this->db->from($this->config->item('table_pos_budget_dealer_monthly_total').' details');
+
+            $this->db->select('SUM(details.quantity_budget_total) quantity_budget_total');
+            $this->db->select('SUM((details.quantity_budget_total*details.pack_size)/1000) quantity_budget_total_kg');
+            $this->db->select('SUM(details.amount_price_net*details.quantity_budget_total) amount_budget_price_net');
+
+            $this->db->select('SUM(details.quantity_budget_target_total) quantity_target_total');
+            $this->db->select('SUM((details.quantity_budget_target_total*details.pack_size)/1000) quantity_target_total_kg');
+            $this->db->select('SUM(details.amount_price_net*details.quantity_budget_target_total) amount_target_price_net');
+
+            $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = details.variety_id','INNER');
+            $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+            $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = crop_type.crop_id','INNER');
+            $this->db->select('crop.id crop_id, crop.name crop_name');
+            $this->db->where('details.budget_monthly_id',$item_id);
+            $this->db->group_by('crop.id');
+            $data['total_crops']=$this->db->get()->result_array();
+
+            $this->db->from($this->config->item('table_pos_budget_dealer_monthly_details').' details');
+            $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=details.dealer_id','INNER');
+            $this->db->select('farmer_outlet.farmer_id');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+            $this->db->select('farmer_farmer.name farmer_name');
+            $this->db->where('farmer_farmer.farmer_type_id > ',1);
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where('details.budget_monthly_id',$data['item']['id']);
+            $this->db->where('details.status',$this->config->item('system_status_active'));
+            $this->db->group_by('details.dealer_id');
+            $data['dealers']=$this->db->get()->result_array();
+
+            $data['system_preference_items']=$this->get_headers($data['dealers']);
+
+            $data['title']='Monthly Dealer Budget Forward';
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
     }
@@ -447,19 +600,26 @@ class Budget_dealer_monthly_target extends Root_Controller
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('approve_rollback',$item_id,'Outlet not assign.');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
             if($data['item']['status_forward']!=$this->config->item('system_status_forwarded'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') is not forwarded.';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_budget_targeted']==$this->config->item('system_status_approved'))
+            if($data['item']['status_budget_target']==$this->config->item('system_status_approved'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget target already approved';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_budget_targeted']==$this->config->item('system_status_rejected'))
+            if($data['item']['status_budget_target']==$this->config->item('system_status_rejected'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Budget target already rejected';
@@ -534,25 +694,25 @@ class Budget_dealer_monthly_target extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-            if($item_head['status_budget_targeted']!=$this->config->item('system_status_approved') && $item_head['status_budget_targeted']!=$this->config->item('system_status_rollback'))
+            if($item_head['status_budget_target']!=$this->config->item('system_status_approved') && $item_head['status_budget_target']!=$this->config->item('system_status_rollback'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Approve/Rollback field is required.';
                 $this->json_return($ajax);
             }
 
-            /*if($item_head['status_budget_targeted']!=$this->config->item('system_status_rollback'))
+            /*if($item_head['status_budget_target']!=$this->config->item('system_status_rollback'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Approve/Rollback field is required.';
                 $this->json_return($ajax);
             }*/
-            if($item_head['status_budget_targeted']==$this->config->item('system_status_rollback'))
+            if($item_head['status_budget_target']==$this->config->item('system_status_rollback'))
             {
-                if(!$item_head['remarks_forward_rollback'])
+                if(!$item_head['remarks_budget_target'])
                 {
                     $ajax['status']=false;
-                    $ajax['system_message']='Approve/Rollback Remarks field is required.';
+                    $ajax['system_message']='Rollback Remarks field is required.';
                     $this->json_return($ajax);
                 }
             }
@@ -561,6 +721,13 @@ class Budget_dealer_monthly_target extends Root_Controller
             if(!$data['item'])
             {
                 System_helper::invalid_try('save_approve_rollback',$id,'Save Approve Rollback Non Exists');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('save_approve_rollback',$id,'Outlet not assign.');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
@@ -581,16 +748,25 @@ class Budget_dealer_monthly_target extends Root_Controller
 
         $this->db->trans_start();
 
-
-        $item_head['date_forward_rollbacked']=$time;
-        $item_head['user_forward_rollbacked']=$user->user_id;
-        if($item_head['status_budget_targeted']==$this->config->item('system_status_rollback'))
+        $data=array();
+        if($item_head['status_budget_target']==$this->config->item('system_status_rollback'))
         {
-            $item_head['status_forward']=$this->config->item('system_status_pending');
-            $item_head['status_budget_targeted']=$this->config->item('system_status_pending');
+            $data['remarks_forward_rollback']=$item_head['remarks_budget_target'];
+            $data['date_forwarded_rollback']=$time;
+            $data['user_forwarded_rollback']=$user->user_id;
+            $data['status_forward']=$this->config->item('system_status_pending');
+            $data['status_budget_target']=$this->config->item('system_status_pending');
             $this->db->set('revision_forward_rollback_count', 'revision_forward_rollback_count+1', FALSE);
         }
-        Query_helper::update($this->config->item('table_pos_budget_dealer_monthly'),$item_head,array('id='.$id));
+        else
+        {
+            $data['date_approved_target']=$time;
+            $data['user_approved_target']=$user->user_id;
+            $data['status_budget_target']=$item_head['status_budget_target'];
+            $data['remarks_budget_target']=$item_head['remarks_budget_target'];
+        }
+
+        Query_helper::update($this->config->item('table_pos_budget_dealer_monthly'),$data,array('id='.$id));
 
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)

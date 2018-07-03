@@ -122,7 +122,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </tr>
             <tr>
                 <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?></label></th>
-                <th class=" header_value"><label class="control-label"><?php echo $item['remarks_forward'];?></label></th>
+                <th class=" header_value"><label class="control-label"><?php echo nl2br($item['remarks_forward']);?></label></th>
                 <th colspan="2">&nbsp;</th>
             </tr>
             </thead>
