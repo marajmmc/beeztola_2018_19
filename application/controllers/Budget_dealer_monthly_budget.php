@@ -280,6 +280,8 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $data['pack_size_id']= 1;
         $data['pack_size']= 1;
         $data['amount_price_net']= 1;
+        $data['current_stock_pkt']= 1;
+        $data['current_stock_kg']= 1;
         foreach($dealers as $dealer)
         {
             $data['quantity_budget_'.$dealer['farmer_id']]= 1;
@@ -383,7 +385,6 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $this->db->where('farmer_outlet.outlet_id',$outlet_id);
         $dealers=$this->db->get()->result_array();
 
-
         $this->db->from($this->config->item('table_login_setup_classification_variety_price').' variety_price');
         $this->db->select('variety_price.price_net amount_price_net');
         $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = variety_price.variety_id','INNER');
@@ -402,10 +403,19 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $this->db->order_by('v.id','ASC');
         $this->db->order_by('pack.id');
         $results=$this->db->get()->result_array();
+
+        $variety_ids=array();
+        foreach($results as $result)
+        {
+            $variety_ids[$result['variety_id']]=$result['variety_id'];
+        }
+        $current_stocks=Stock_helper::get_variety_stock($outlet_id, $variety_ids);
+
         $items=array();
         foreach($results as $result)
         {
-            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$dealers);
+            $variety_stock=isset($current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'])?$current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock']:0;
+            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$variety_stock,$dealers);
             if(isset($details_old[$result['variety_id']][$result['pack_size_id']]))
             {
                 foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
@@ -423,7 +433,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$dealers)
+    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$variety_stock,$dealers)
     {
         $row=$this->get_headers_add_edit($dealers);
         foreach($row  as $key=>$r)
@@ -449,6 +459,8 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $row['variety_id']=$variety_id;
         $row['pack_size']=$pack_size;
         $row['pack_size_id']=$pack_size_id;
+        $row['current_stock_pkt']=$variety_stock;
+        $row['current_stock_kg']=(($variety_stock*$pack_size)/1000);
         $row['amount_price_net']=$amount_price_net;
         return $row;
     }
