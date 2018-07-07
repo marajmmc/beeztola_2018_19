@@ -404,18 +404,10 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $this->db->order_by('pack.id');
         $results=$this->db->get()->result_array();
 
-        $variety_ids=array();
-        foreach($results as $result)
-        {
-            $variety_ids[$result['variety_id']]=$result['variety_id'];
-        }
-        $current_stocks=Stock_helper::get_variety_stock($outlet_id, $variety_ids);
-
         $items=array();
         foreach($results as $result)
         {
-            $variety_stock=isset($current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'])?$current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock']:0;
-            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$variety_stock,$dealers);
+            $item=$this->initialize_row_add_edit($result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$dealers);
             if(isset($details_old[$result['variety_id']][$result['pack_size_id']]))
             {
                 foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
@@ -433,7 +425,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$variety_stock,$dealers)
+    private function initialize_row_add_edit($crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$dealers)
     {
         $row=$this->get_headers_add_edit($dealers);
         foreach($row  as $key=>$r)
@@ -459,8 +451,6 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $row['variety_id']=$variety_id;
         $row['pack_size']=$pack_size;
         $row['pack_size_id']=$pack_size_id;
-        $row['current_stock_pkt']=$variety_stock;
-        $row['current_stock_kg']=(($variety_stock*$pack_size)/1000);
         $row['amount_price_net']=$amount_price_net;
         return $row;
     }
@@ -887,7 +877,10 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $data['pack_size_id']= 1;
         $data['pack_size']= 1;
         $data['amount_price_net']= 1;
+        $data['quantity_budget_total']= 1;
+        $data['amount_price_total']= 1;
         $data['quantity_budget_target_total']= 1;
+        $data['amount_price_total_target']= 1;
         foreach($dealers as $dealer)
         {
             $data['quantity_budget_'.$dealer['farmer_id']]= 1;
@@ -934,7 +927,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $items=array();
         foreach($results as $result)
         {
-            $item=$this->initialize_row($result['crop_name'],$result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$result['quantity_budget_target_total']);
+            $item=$this->initialize_row($result['crop_name'],$result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$result['quantity_budget_total'],$result['quantity_budget_target_total']);
             if(isset($details_old[$result['variety_id']][$result['pack_size_id']]))
             {
                 foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
@@ -946,7 +939,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function initialize_row($crop_name,$crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$quantity_budget_target_total)
+    private function initialize_row($crop_name,$crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$quantity_budget_total,$quantity_budget_target_total)
     {
         $row['crop_name']=$crop_name;
         $row['crop_type_name']=$crop_type_name;
@@ -955,7 +948,10 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $row['pack_size']=$pack_size;
         $row['pack_size_id']=$pack_size_id;
         $row['amount_price_net']=$amount_price_net;
+        $row['quantity_budget_total']=$quantity_budget_total;
+        $row['amount_price_total']=($quantity_budget_total*$amount_price_net);
         $row['quantity_budget_target_total']=$quantity_budget_target_total;
+        $row['amount_price_total_target']=($quantity_budget_target_total*$amount_price_net);
         return $row;
     }
 }

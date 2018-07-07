@@ -10,19 +10,19 @@ $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_BACK").' to All list',
     'href'=>site_url($CI->controller_url.'/index/list_all')
 );
-if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
+if(isset($CI->permissions['action5']) && ($CI->permissions['action5']==1))
 {
     $action_buttons[]=array(
         'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_PRINT"),
-        'onClick'=>"window.print()"
+        'label'=>$CI->lang->line("ACTION_DOWNLOAD"),
+        'class'=>'button_action_download',
+        'data-title'=>"Download"
     );
 }
-$action_buttons[]=array(
-    'type'=>'button',
-    'label'=>$CI->lang->line("ACTION_CLEAR"),
-    'id'=>'button_action_clear',
-    'data-form'=>'#save_form'
+$action_buttons[]=array
+(
+    'label'=>$CI->lang->line("ACTION_REFRESH"),
+    'href'=>site_url($CI->controller_url.'/index/details/'.$item['id'])
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 $status_budget_target=$item['status_budget_target'];
@@ -303,7 +303,7 @@ $options=array(
             var element = $(defaultHtml);
             var price_net=parseFloat(record['price_net']);
 
-            if(column=='quantity_total_budget')
+            if(column=='quantity_budget_total')
             {
                 var total_quantity=0;
                 <?php
@@ -396,15 +396,15 @@ $options=array(
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?>', dataField: 'pack_size',width:'50', filtertype:'list',pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: 'Total Budgeted Quantity', dataField: 'quantity_total_budget',width:'80',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     { text: 'Current Net Price', dataField: 'amount_price_net',width:'80',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Budgeted Total Quantity', dataField: 'quantity_budget_total',width:'80',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Budgeted <?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
                     if($status_budget_target==$system_status_approved)
                     {
                     ?>
-                    { text: 'Total Targeted Quantity', dataField: 'quantity_budget_target_total',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
-                    { text: 'Target <?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total_target',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Targeted Total Quantity', dataField: 'quantity_budget_target_total',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
+                    { text: 'Targeted <?php echo $CI->lang->line('LABEL_TOTAL_PRICE'); ?>', dataField: 'amount_price_total_target',width:'130',filterable:false,pinned:true,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',editable:false},
                     <?php
                     }
                     ?>

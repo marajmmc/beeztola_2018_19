@@ -790,7 +790,10 @@ class Budget_dealer_monthly_target extends Root_Controller
         $data['pack_size_id']= 1;
         $data['pack_size']= 1;
         $data['amount_price_net']= 1;
+        $data['quantity_budget_total']= 1;
+        $data['amount_price_total']= 1;
         $data['quantity_budget_target_total']= 1;
+        $data['amount_price_total_target']= 1;
         foreach($dealers as $dealer)
         {
             $data['quantity_budget_'.$dealer['farmer_id']]= 1;
@@ -800,17 +803,23 @@ class Budget_dealer_monthly_target extends Root_Controller
     private function system_get_variety()
     {
         $budget_monthly_id=$this->input->post('id');
+        $outlet_id=$this->input->post('outlet_id');
 
         $this->db->from($this->config->item('table_pos_budget_dealer_monthly_details').' details');
         $this->db->select('details.*');
         $this->db->where('details.budget_monthly_id',$budget_monthly_id);
         $this->db->where('details.status',$this->config->item('system_status_active'));
         $results=$this->db->get()->result_array();
+
+        $variety_ids=array();
         $details_old=array();
         foreach($results as $result)
         {
             $details_old[$result['variety_id']][$result['pack_size_id']][$result['dealer_id']]=$result;
+            $variety_ids[$result['variety_id']]=$result['variety_id'];
         }
+
+        $current_stocks=Stock_helper::get_variety_stock($outlet_id, $variety_ids);
 
         $this->db->from($this->config->item('table_pos_budget_dealer_monthly_total').' details');
         $this->db->select('details.*');
@@ -827,7 +836,8 @@ class Budget_dealer_monthly_target extends Root_Controller
         $items=array();
         foreach($results as $result)
         {
-            $item=$this->initialize_row($result['crop_name'],$result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$result['quantity_budget_target_total']);
+            $variety_stock=isset($current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock'])?$current_stocks[$result['variety_id']][$result['pack_size_id']]['current_stock']:0;
+            $item=$this->initialize_row($result['crop_name'],$result['crop_type_name'],$result['variety_name'],$result['variety_id'],$result['pack_size'],$result['pack_size_id'],$result['amount_price_net'],$result['quantity_budget_total'],$result['quantity_budget_target_total'],$variety_stock);
             if(isset($details_old[$result['variety_id']][$result['pack_size_id']]))
             {
                 foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
@@ -839,7 +849,7 @@ class Budget_dealer_monthly_target extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function initialize_row($crop_name,$crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$quantity_budget_target_total)
+    private function initialize_row($crop_name,$crop_type_name,$variety_name,$variety_id,$pack_size,$pack_size_id,$amount_price_net,$quantity_budget_total,$quantity_budget_target_total,$variety_stock)
     {
         $row['crop_name']=$crop_name;
         $row['crop_type_name']=$crop_type_name;
@@ -848,7 +858,12 @@ class Budget_dealer_monthly_target extends Root_Controller
         $row['pack_size']=$pack_size;
         $row['pack_size_id']=$pack_size_id;
         $row['amount_price_net']=$amount_price_net;
+        $row['quantity_budget_total']=$quantity_budget_total;
+        $row['amount_price_total']=($quantity_budget_total*$amount_price_net);
         $row['quantity_budget_target_total']=$quantity_budget_target_total;
+        $row['amount_price_total_target']=($quantity_budget_target_total*$amount_price_net);
+        $row['current_stock_pkt']=$variety_stock;
+        $row['current_stock_kg']=(($variety_stock*$pack_size)/1000);
         return $row;
     }
 

@@ -8,5 +8,4 @@ class Test extends CI_Controller
         echo System_helper::get_time('09-SEP-2017 03:14:49 PM');
 
     }
-
 }
