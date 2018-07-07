@@ -453,7 +453,7 @@ $lang['LABEL_RETURN_ITEMS']='Return Items (Variety Information)';
 // Dealer Monthly Budget
 $lang['LABEL_TOTAL_QUANTITY_BUDGET']='Total B.Qty (Pkt)';
 $lang['LABEL_TOTAL_QUANTITY_BUDGET_KG']='Total B.Qty (kg)';
-$lang['LABEL_TOTAL_AMOUNT_PRICE_NET']='Total Net Price';
+$lang['LABEL_TOTAL_AMOUNT_PRICE_NET']='Budget Total Net Price';
 $lang['LABEL_TOTAL_QUANTITY_TARGET']='Total T.Qty (Pkt)';
 $lang['LABEL_TOTAL_QUANTITY_TARGET_KG']='Total T.Qty (kg)';
 $lang['LABEL_TOTAL_AMOUNT_TARGET_PRICE_NET']='Target Total Net Price';

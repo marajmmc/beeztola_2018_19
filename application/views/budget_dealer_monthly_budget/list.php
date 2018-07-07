@@ -178,7 +178,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_MONTH'); ?>', dataField: 'month', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['month']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_BUDGET'); ?>', dataField: 'total_quantity_budget', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_quantity_budget']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_TOTAL_QUANTITY_BUDGET_KG'); ?>', dataField: 'total_quantity_budget_kg', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_quantity_budget_kg']?0:1;?>},
-                    { text: 'Budget <?php echo $CI->lang->line('LABEL_TOTAL_AMOUNT_PRICE_NET'); ?>', dataField: 'total_amount_price_net', width:'200', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_amount_price_net']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_TOTAL_AMOUNT_PRICE_NET'); ?>', dataField: 'total_amount_price_net', width:'200', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['total_amount_price_net']?0:1;?>}
                 ]
             });
     });
