@@ -167,6 +167,21 @@ class Transfer_wo_receive extends Root_Controller
     }
     private function system_get_items_all()
     {
+        $current_records = $this->input->post('total_records');
+        if(!$current_records)
+        {
+            $current_records=0;
+        }
+        $pagesize = $this->input->post('pagesize');
+        if(!$pagesize)
+        {
+            $pagesize=100;
+        }
+        else
+        {
+            $pagesize=$pagesize*2;
+        }
+
         $user=User_helper::get_user();
         $this->db->from($this->config->item('table_sms_transfer_wo').' transfer_wo');
         $this->db->select(
@@ -199,6 +214,7 @@ class Transfer_wo_receive extends Root_Controller
         $this->db->where('transfer_wo.status_delivery',$this->config->item('system_status_delivered'));
         $this->db->where('transfer_wo.outlet_id IN (select user_outlet.customer_id from '.$this->config->item('table_pos_setup_user_outlet').' user_outlet'.' where user_outlet.user_id='.$user->user_id.' AND revision=1)');
         $this->db->order_by('transfer_wo.id','DESC');
+        $this->db->limit($pagesize,$current_records);
         $results=$this->db->get()->result_array();
         $items=array();
         foreach($results as $result)
@@ -1174,7 +1190,6 @@ class Transfer_wo_receive extends Root_Controller
         $data['status_receive_forward']= 1;
         $data['status_receive_approve']= 1;
         $data['status_system_delivery_receive']= 1;
-        $data['status']= 1;
         if($result)
         {
             if($result['preferences']!=null)
