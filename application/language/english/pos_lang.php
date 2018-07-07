@@ -456,5 +456,5 @@ $lang['LABEL_TOTAL_QUANTITY_BUDGET_KG']='Total B.Qty (kg)';
 $lang['LABEL_TOTAL_AMOUNT_PRICE_NET']='Total Net Price';
 $lang['LABEL_TOTAL_QUANTITY_TARGET']='Total T.Qty (Pkt)';
 $lang['LABEL_TOTAL_QUANTITY_TARGET_KG']='Total T.Qty (kg)';
-$lang['LABEL_TOTAL_AMOUNT_TARGET_PRICE_NET']='Total Target Net Price';
+$lang['LABEL_TOTAL_AMOUNT_TARGET_PRICE_NET']='Target Total Net Price';
 $lang['LABEL_STATUS_BUDGET_TARGET']='Target Status';
