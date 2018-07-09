@@ -412,13 +412,22 @@ class Budget_dealer_monthly_budget extends Root_Controller
             {
                 foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
                 {
-                    $item['quantity_budget_'.$dealer_id]=$info['quantity_budget'];
+                    if($info['quantity_budget']>0)
+                    {
+                        $item['quantity_budget_'.$dealer_id]=$info['quantity_budget'];
+                    }
+                    else
+                    {
+                        $item['quantity_budget_'.$dealer_id]='';
+                    }
+
                     if((!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))&& ($info['quantity_budget']>0))
                     {
                         $item['editable_'.$dealer_id]=false;
                     }
                 }
             }
+
             //check if data already exits
             //check editable
             $items[]=$item;
@@ -443,7 +452,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
             }
             else
             {
-                $row[$key]= 0;
+                $row[$key]='';
             }
         }
         $row['crop_type_name']=$crop_type_name;
@@ -542,6 +551,10 @@ class Budget_dealer_monthly_budget extends Root_Controller
                 $data_total['quantity_budget_target_total']=0;
                 foreach($quantity_details['quantity_budget'] as $dealer_id=>$quantity)
                 {
+                    if(!($quantity>0))
+                    {
+                        $quantity=0;
+                    }
                     $data=array();
                     $data['budget_monthly_id']=$budget_monthly_id;
                     $data['variety_id']=$variety_id;
