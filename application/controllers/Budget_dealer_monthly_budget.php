@@ -28,6 +28,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
         }
+        $this->lang->load('budget_dealer');
     }
     public function index($action="list", $id=0)
     {
@@ -167,7 +168,8 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $this->db->select('SUM((dealer_monthly_total.quantity_budget_total*dealer_monthly_total.pack_size)/1000) total_quantity_budget_kg');
         $this->db->select('SUM(dealer_monthly_total.amount_price_net*dealer_monthly_total.quantity_budget_total) total_amount_price_net');
 
-        $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
+        $this->db->where('dealer_monthly.status != ',$this->config->item('system_status_delete'));
+        $this->db->where('dealer_monthly_total.status',$this->config->item('system_status_active'));
         $this->db->where('dealer_monthly.status_forward',$this->config->item('system_status_pending'));
         $this->db->where_in('dealer_monthly.outlet_id',$this->user_outlet_ids);
         //$this->db->group_by('dealer_monthly.outlet_id,dealer_monthly.month,dealer_monthly.year');
@@ -235,8 +237,8 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $this->db->select('SUM(dealer_monthly_total.quantity_budget_target_total) total_quantity_target');
         $this->db->select('SUM((dealer_monthly_total.quantity_budget_target_total*dealer_monthly_total.pack_size)/1000) total_quantity_target_kg');
         $this->db->select('SUM(dealer_monthly_total.amount_price_net*dealer_monthly_total.quantity_budget_target_total) total_amount_target_price_net');
-
-        $this->db->where('dealer_monthly.status !="'.$this->config->item('system_status_delete').'"');
+        $this->db->where('dealer_monthly.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('dealer_monthly_total.status',$this->config->item('system_status_active'));
         $this->db->where_in('dealer_monthly.outlet_id',$this->user_outlet_ids);
         $this->db->group_by('dealer_monthly.id');
         $this->db->order_by('dealer_monthly.id', 'DESC');
@@ -395,8 +397,8 @@ class Budget_dealer_monthly_budget extends Root_Controller
         $this->db->join($this->config->item('table_login_setup_classification_pack_size').' pack','pack.id = variety_price.pack_size_id','INNER');
         $this->db->select('pack.name pack_size,pack.id pack_size_id');
         $this->db->where('crop_type.crop_id',$crop_id);
-        $this->db->where('v.status !=',$this->config->item('system_status_delete'));
-        $this->db->where('pack.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('v.status',$this->config->item('system_status_active'));
+        $this->db->where('pack.status',$this->config->item('system_status_active'));
         $this->db->order_by('crop_type.ordering','ASC');
         $this->db->order_by('crop_type.id','ASC');
         $this->db->order_by('v.ordering','ASC');
@@ -683,6 +685,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = crop_type.crop_id','INNER');
             $this->db->select('crop.id crop_id, crop.name crop_name');
             $this->db->where('details.budget_monthly_id',$item_id);
+            $this->db->where('details.status',$this->config->item('system_status_active'));
             $this->db->group_by('crop.id');
             $data['total_crops']=$this->db->get()->result_array();
 
@@ -778,6 +781,7 @@ class Budget_dealer_monthly_budget extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = crop_type.crop_id','INNER');
             $this->db->select('crop.id crop_id, crop.name crop_name');
             $this->db->where('details.budget_monthly_id',$item_id);
+            $this->db->where('details.status',$this->config->item('system_status_active'));
             $this->db->group_by('crop.id');
             $data['total_crops']=$this->db->get()->result_array();
 
