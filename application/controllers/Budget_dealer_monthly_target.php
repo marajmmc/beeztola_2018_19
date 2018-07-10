@@ -848,7 +848,15 @@ class Budget_dealer_monthly_target extends Root_Controller
             {
                 foreach($details_old[$result['variety_id']][$result['pack_size_id']] as $dealer_id=>$info)
                 {
-                    $item['quantity_budget_'.$dealer_id]=$info['quantity_budget'];
+                    if($info['quantity_budget']>0)
+                    {
+                        $item['quantity_budget_'.$dealer_id]=$info['quantity_budget'];
+                    }
+                    else
+                    {
+                        $item['quantity_budget_'.$dealer_id]='';
+                    }
+                    //$item['quantity_budget_'.$dealer_id]=$info['quantity_budget'];
                 }
             }
             $items[]=$item;
@@ -866,7 +874,7 @@ class Budget_dealer_monthly_target extends Root_Controller
         $row['amount_price_net']=$amount_price_net;
         $row['quantity_budget_total']=$quantity_budget_total;
         $row['amount_price_total']=($quantity_budget_total*$amount_price_net);
-        $row['quantity_budget_target_total']=$quantity_budget_target_total;
+        $row['quantity_budget_target_total']=$quantity_budget_target_total?$quantity_budget_target_total:'';
         $row['amount_price_total_target']=($quantity_budget_target_total*$amount_price_net);
         $row['current_stock_pkt']=$variety_stock;
         $row['current_stock_kg']=(($variety_stock*$pack_size)/1000);
