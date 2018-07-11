@@ -132,4 +132,9 @@ class Barcode_helper
     {
         return 'TR'.str_pad($increment_id,6,0,STR_PAD_LEFT);
     }
+    /* Outlet to Outlet Transfer */
+    public static function get_barcode_transfer_outlet_to_outlet($increment_id)
+    {
+        return 'TO'.str_pad($increment_id,6,0,STR_PAD_LEFT);
+    }
 }
