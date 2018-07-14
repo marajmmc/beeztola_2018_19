@@ -849,7 +849,7 @@ class Transfer_ow_return_delivery extends Root_Controller
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('edit',$item_id,'Edit Non Exists');
+                System_helper::invalid_try('delivery',$item_id,'Delivery Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);

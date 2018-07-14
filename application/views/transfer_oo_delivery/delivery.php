@@ -53,8 +53,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     </tr>
                     <tr>
                         <th colspan="2">&nbsp;</th>
-                        <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label></th>
-                        <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name'];?></label></th>
+                        <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME_SOURCE');?></label></th>
+                        <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name_source'];?></label></th>
+                    </tr>
+                    <tr>
+                        <th colspan="2">&nbsp;</th>
+                        <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME_DESTINATION');?></label></th>
+                        <th class=" header_value"><label class="control-label"><?php echo $item['outlet_name_destination'];?></label></th>
                     </tr>
                     </thead>
                 </table>
@@ -162,9 +167,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         $stock_quantity_new_kg=($stock_current_kg-$quantity_approve_kg);
                         $stock_quantity_total_new+=$stock_quantity_new;
                         $stock_quantity_total_new_kg+=$stock_quantity_new_kg;
-
+                        if($quantity_approve>$stock_current)
+                        {
+                            $class_bg_warning='bg-danger';
+                        }
+                        else
+                        {
+                            $class_bg_warning='';
+                        }
                         ?>
-                        <tr id="item_rows_<?php echo $index+1;?>">
+                        <tr id="item_rows_<?php echo $index+1;?>" class="<?php echo $class_bg_warning;?>">
                             <td>
                                 <label><?php echo $value['crop_name']; ?></label>
                             </td>
@@ -278,7 +290,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button pull-right">
-                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Outlet to HQ transfer delivery done?">Save</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You want Showroom to showroom transfer delivery?">Save</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">
