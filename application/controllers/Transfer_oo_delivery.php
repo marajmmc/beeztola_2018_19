@@ -97,6 +97,7 @@ class Transfer_oo_delivery extends Root_Controller
         $data['outlet_name_source']= 1;
         $data['outlet_name_destination']= 1;
         $data['date_request']= 1;
+        $data['quantity_total_request']= 1;
         $data['quantity_total_approve']= 1;
         if($method=='list_all')
         {
