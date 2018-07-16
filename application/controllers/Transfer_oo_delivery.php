@@ -14,8 +14,10 @@ class Transfer_oo_delivery extends Root_Controller
         $this->message="";
         $this->permissions=User_helper::get_permission(get_class());
         $this->controller_url=strtolower(get_class());
+
         $this->user_outlet_ids=array();
         $this->user_outlets=User_helper::get_assigned_outlets();
+
         if(sizeof($this->user_outlets)>0)
         {
             foreach($this->user_outlets as $row)
