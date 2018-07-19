@@ -91,7 +91,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <th colspan="21" class="text-center success"><?php echo $CI->lang->line('LABEL_RETURN_ITEMS');?></th>
+                        <th colspan="21" class="text-center success"><?php echo $CI->lang->line('LABEL_ORDER_ITEMS');?></th>
                     </tr>
                     <tr>
                         <th rowspan="2" style="width: 200px;"><?php echo $CI->lang->line('LABEL_CROP_NAME'); ?></th>
@@ -99,8 +99,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <th rowspan="2" style="width: 150px;"><?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?></th>
                         <th rowspan="2" class="text-right" style="width: 150px;"><?php echo $CI->lang->line('LABEL_PACK_SIZE'); ?></th>
                         <th colspan="2" class="text-center" style="width: 300px;"><?php echo $CI->lang->line('LABEL_CURRENT_STOCK'); ?></th>
-                        <th colspan="2" class="text-center" style="width: 300px;">Approve Return Quantity</th>
-                        <th colspan="2" class="text-center" style="width: 150px;">Available Stock<?php //echo $CI->lang->line('LABEL_CURRENT_STOCK'); ?></th>
+                        <th colspan="2" class="text-center" style="width: 300px;">Delivery Quantity</th>
+                        <th colspan="2" class="text-center" style="width: 150px;">New Stock</th>
                     </tr>
                     <tr>
                         <th style="width: 150px;" class="text-right"><?php echo $CI->lang->line('LABEL_PACK');?></th>
