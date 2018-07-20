@@ -166,16 +166,20 @@ class Report_stock_variety_summary_analysis extends Root_Controller
             $varieties[$result['variety_id']][$result['pack_size_id']]['pack_size']=$result['pack_size'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_pkt']=$result['in_wo'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_kg']=($result['in_wo']*$result['pack_size'])/1000;
-            $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_pkt']=$result['in_wo'];
-            $varieties[$result['variety_id']][$result['pack_size_id']]['in_wo_kg']=($result['in_wo']*$result['pack_size'])/1000;
             $varieties[$result['variety_id']][$result['pack_size_id']]['out_ow_pkt']=$result['out_ow'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['out_ow_kg']=($result['out_ow']*$result['pack_size'])/1000;
+
+            $varieties[$result['variety_id']][$result['pack_size_id']]['in_oo_pkt']=$result['in_oo'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['in_oo_kg']=($result['in_oo']*$result['pack_size'])/1000;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['out_oo_pkt']=$result['out_oo'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['out_oo_kg']=($result['out_oo']*$result['pack_size'])/1000;
+
             $varieties[$result['variety_id']][$result['pack_size_id']]['out_sale_pkt']=$result['out_sale'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['out_sale_kg']=($result['out_sale']*$result['pack_size'])/1000;
             $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt']=$result['current_stock'];
             $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg']=($result['current_stock']*$result['pack_size'])/1000;
-            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt_cal']=$result['in_wo']-$result['out_ow']-$result['out_sale'];
-            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg_cal']=(($result['in_wo']-$result['out_ow']-$result['out_sale'])*$result['pack_size'])/1000;;
+            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_pkt_cal']=$result['in_wo']+$result['in_oo']-$result['out_ow']-$result['out_oo']-$result['out_sale'];
+            $varieties[$result['variety_id']][$result['pack_size_id']]['current_stock_kg_cal']=(($result['in_wo']+$result['in_oo']-$result['out_ow']-$result['out_oo']-$result['out_sale'])*$result['pack_size'])/1000;;
 
         }
         $type_total=array();
@@ -195,6 +199,10 @@ class Report_stock_variety_summary_analysis extends Root_Controller
         $grand_total['in_wo_kg']=$crop_total['in_wo_kg']=$type_total['in_wo_kg']=0;
         $grand_total['out_ow_pkt']=$crop_total['out_ow_pkt']=$type_total['out_ow_pkt']=0;
         $grand_total['out_ow_kg']=$crop_total['out_ow_kg']=$type_total['out_ow_kg']=0;
+        $grand_total['in_oo_pkt']=$crop_total['in_oo_pkt']=$type_total['in_oo_pkt']=0;
+        $grand_total['in_oo_kg']=$crop_total['in_oo_kg']=$type_total['in_oo_kg']=0;
+        $grand_total['out_oo_pkt']=$crop_total['out_oo_pkt']=$type_total['out_oo_pkt']=0;
+        $grand_total['out_oo_kg']=$crop_total['out_oo_kg']=$type_total['out_oo_kg']=0;
         $grand_total['out_sale_pkt']=$crop_total['out_sale_pkt']=$type_total['out_sale_pkt']=0;
         $grand_total['out_sale_kg']=$crop_total['out_sale_kg']=$type_total['out_sale_kg']=0;
         $grand_total['current_stock_pkt']=$crop_total['current_stock_pkt']=$type_total['current_stock_pkt']=0;
@@ -255,6 +263,22 @@ class Report_stock_variety_summary_analysis extends Root_Controller
                 $crop_total['out_ow_pkt']+=$pack['out_ow_pkt'];
                 $grand_total['out_ow_kg']+=$pack['out_ow_kg'];
                 $grand_total['out_ow_pkt']+=$pack['out_ow_pkt'];
+
+
+                $type_total['in_oo_kg']+=$pack['in_oo_kg'];
+                $type_total['in_oo_pkt']+=$pack['in_oo_pkt'];
+                $crop_total['in_oo_kg']+=$pack['in_oo_kg'];
+                $crop_total['in_oo_pkt']+=$pack['in_oo_pkt'];
+                $grand_total['in_oo_kg']+=$pack['in_oo_kg'];
+                $grand_total['in_oo_pkt']+=$pack['in_oo_pkt'];
+
+                $type_total['out_oo_kg']+=$pack['out_oo_kg'];
+                $type_total['out_oo_pkt']+=$pack['out_oo_pkt'];
+                $crop_total['out_oo_kg']+=$pack['out_oo_kg'];
+                $crop_total['out_oo_pkt']+=$pack['out_oo_pkt'];
+                $grand_total['out_oo_kg']+=$pack['out_oo_kg'];
+                $grand_total['out_oo_pkt']+=$pack['out_oo_pkt'];
+
 
                 $type_total['out_sale_kg']+=$pack['out_sale_kg'];
                 $type_total['out_sale_pkt']+=$pack['out_sale_pkt'];
@@ -323,6 +347,38 @@ class Report_stock_variety_summary_analysis extends Root_Controller
         else
         {
             $row['out_ow_kg']=number_format($info['out_ow_kg'],3,'.','');
+        }
+        if($info['in_oo_pkt']==0)
+        {
+            $row['in_oo_pkt']='';
+        }
+        else
+        {
+            $row['in_oo_pkt']=$info['in_oo_pkt'];
+        }
+        if($info['in_oo_kg']==0)
+        {
+            $row['in_oo_kg']='';
+        }
+        else
+        {
+            $row['in_oo_kg']=number_format($info['in_oo_kg'],3,'.','');
+        }
+        if($info['out_oo_pkt']==0)
+        {
+            $row['out_oo_pkt']='';
+        }
+        else
+        {
+            $row['out_oo_pkt']=$info['out_oo_pkt'];
+        }
+        if($info['out_oo_kg']==0)
+        {
+            $row['out_oo_kg']='';
+        }
+        else
+        {
+            $row['out_oo_kg']=number_format($info['out_oo_kg'],3,'.','');
         }
         if($info['out_sale_pkt']==0)
         {
@@ -405,6 +461,10 @@ class Report_stock_variety_summary_analysis extends Root_Controller
         $data['in_wo_kg']= 1;
         $data['out_ow_pkt']= 1;
         $data['out_ow_kg']= 1;
+        $data['in_oo_pkt']= 1;
+        $data['in_oo_kg']= 1;
+        $data['out_oo_pkt']= 1;
+        $data['out_oo_kg']= 1;
         $data['out_sale_pkt']= 1;
         $data['out_sale_kg']= 1;
         $data['current_stock_pkt']= 1;

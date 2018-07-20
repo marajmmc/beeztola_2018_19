@@ -6,6 +6,10 @@ $lang['LABEL_IN_WO_PKT']='From HQ(pkt)';
 $lang['LABEL_IN_WO_KG']='From HQ(kg)';
 $lang['LABEL_OUT_OW_PKT']='To HQ(pkt)';
 $lang['LABEL_OUT_OW_KG']='To HQ(kg)';
+$lang['LABEL_IN_OO_PKT']='From Show(pkt)';
+$lang['LABEL_IN_OO_KG']='From Show(kg)';
+$lang['LABEL_OUT_OO_PKT']='To Show(pkt)';
+$lang['LABEL_OUT_OO_KG']='To Show(kg)';
 
 $lang['LABEL_OUT_SALE_PKT']='Sales(pkt)';
 $lang['LABEL_OUT_SALE_KG']='Sales(kg)';
