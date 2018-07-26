@@ -129,6 +129,7 @@ class Expense_outlet_daily extends Root_Controller
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->order_by('item.id','DESC');
+        // checking pos_expense_outlet_monthly table date start & date end -> status not forwarded. (checking start date & end where status forward=pending)
         $results=$this->db->get()->result_array();
         $items=array();
         foreach($results as $result)
