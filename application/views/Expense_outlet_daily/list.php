@@ -126,10 +126,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 enablebrowserselection: true,
                 columns:
                 [
-                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', hidden: <?php echo $system_preference_items['id']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DATE_EXPENSE'); ?>', dataField: 'date_expense', hidden: <?php echo $system_preference_items['date_expense']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM'); ?>', dataField: 'expense_item', hidden: <?php echo $system_preference_items['expense_item']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_EXPENSE'); ?>', dataField: 'amount_expense', hidden: <?php echo $system_preference_items['amount_expense']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width: '50px', hidden: <?php echo $system_preference_items['id']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name', width: '200px', hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DATE_EXPENSE'); ?>', dataField: 'date_expense', width: '100px', hidden: <?php echo $system_preference_items['date_expense']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM'); ?>', dataField: 'expense_item', width: '300px', hidden: <?php echo $system_preference_items['expense_item']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_EXPENSE'); ?>', dataField: 'amount_expense', width: '100px', hidden: <?php echo $system_preference_items['amount_expense']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_REMARKS'); ?>', dataField: 'remarks', hidden: <?php echo $system_preference_items['remarks']?0:1;?>}
                 ]
             });

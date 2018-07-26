@@ -5,12 +5,30 @@ class Expense_outlet_daily extends Root_Controller
     public $message;
     public $permissions;
     public $controller_url;
+    public $user_outlets;
+    public $user_outlet_ids;
     public function __construct()
     {
         parent::__construct();
         $this->message="";
         $this->permissions=User_helper::get_permission(get_class());
         $this->controller_url=strtolower(get_class());
+
+        $this->user_outlet_ids=array();
+        $this->user_outlets=User_helper::get_assigned_outlets();
+        if(sizeof($this->user_outlets)>0)
+        {
+            foreach($this->user_outlets as $row)
+            {
+                $this->user_outlet_ids[]=$row['customer_id'];
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
+            $this->json_return($ajax);
+        }
     }
     public function index($action="list",$id=0)
     {
@@ -50,6 +68,7 @@ class Expense_outlet_daily extends Root_Controller
     private function get_preference_headers($method)
     {
         $data['id']= 1;
+        $data['outlet_name']= 1;
         $data['date_expense']= 1;
         $data['expense_item']= 1;
         $data['amount_expense']= 1;
@@ -105,13 +124,17 @@ class Expense_outlet_daily extends Root_Controller
         $this->db->select('item.*');
         $this->db->join($this->config->item('table_login_setup_expense_item_outlet').' items','items.id=item.expense_id','INNER');
         $this->db->select('items.name');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('outlet_info.name outlet_name');
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+        $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->order_by('item.id','DESC');
         $results=$this->db->get()->result_array();
         $items=array();
         foreach($results as $result)
         {
             $item['id']=$result['id'];
+            $item['outlet_name']=$result['outlet_name'];
             $item['date_expense']=System_helper::display_date($result['date_expense']);
             $item['expense_item']=$result['name'];
             $item['amount_expense']=$result['amount'];
@@ -127,6 +150,7 @@ class Expense_outlet_daily extends Root_Controller
 
             $data['title']="Create New Daily Outlet Expense";
             $data['item']['id']=0;
+            $data['item']['outlet_id']='';
             $data['item']['date_expense']=time();
             $data['item']['expense_name']='';
             $data['item']['expense_id']='';
@@ -173,6 +197,13 @@ class Expense_outlet_daily extends Root_Controller
                 $ajax['system_message']='Invalid Item.';
                 $this->json_return($ajax);
             }
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('Edit',$item_id,'outlet id '.$data['item']['outlet_id'].' not assigned');
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+            }
             $data['expense_items']=Query_helper::get_info($this->config->item('table_login_setup_expense_item_outlet'), array('id', 'name'),array(),0,0,array('ordering ASC'));
             $data['title']='Edit Daily Outlet Expense';
             $ajax['status']=true;
@@ -212,6 +243,13 @@ class Expense_outlet_daily extends Root_Controller
                 System_helper::invalid_try('Update Non Exists',$id);
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Item.';
+                $this->json_return($ajax);
+            }
+            if(!in_array($result['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('Save',$id,'outlet id '.$result['item']['outlet_id'].' not assigned');
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
         }
