@@ -33,7 +33,8 @@ $config['table_pos_budget_dealer_monthly'] = 'arm_beeztola_2018_19.pos_budget_de
 $config['table_pos_budget_dealer_monthly_details'] = 'arm_beeztola_2018_19.pos_budget_dealer_monthly_details';
 $config['table_pos_budget_dealer_monthly_total'] = 'arm_beeztola_2018_19.pos_budget_dealer_monthly_total';
 
-
+//Expense
+$config['table_pos_expense_outlet_daily'] = 'arm_beeztola_2018_19.pos_expense_outlet_daily';
 
 
 

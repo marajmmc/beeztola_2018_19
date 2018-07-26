@@ -204,6 +204,7 @@ $lang['LABEL_DATE_REQUEST']='Date for Request';
 $lang['LABEL_DATE_APPROVE']='Date for Approve';
 $lang['LABEL_DATE_DELIVERY']='Date for Delivery';
 $lang['LABEL_DATE_CHALLAN']='Date for Challan';
+$lang['LABEL_DATE_EXPENSE']='Date for Expense';
 
 //months array
 $lang['LABEL_MONTH'] = 'Month';
@@ -452,3 +453,6 @@ $lang['LABEL_STATUS_RECEIVE_APPROVE']='Indirect Receive Approve Status';
 $lang['LABEL_STATUS_SYSTEM_DELIVERY_RECEIVE']='Direct Receive';
 // Transfer Outlet to HQ
 $lang['LABEL_RETURN_ITEMS']='Return Items (Variety Information)';
+// Expense
+$lang['LABEL_EXPENSE_ITEM']='Expense Items';
+$lang['LABEL_AMOUNT_EXPENSE']='Expense Amount';

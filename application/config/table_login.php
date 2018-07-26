@@ -74,3 +74,5 @@ $config['table_login_setup_direct_cost_items'] = 'arm_login_2018_19.login_setup_
 
 // System configuration items
 $config['table_login_setup_system_configures'] = 'arm_login_2018_19.login_setup_system_configures';
+// Outlet Expanse item
+$config['table_login_setup_expense_item_outlet'] = 'arm_login_2018_19.login_setup_expense_item_outlet';
