@@ -205,6 +205,14 @@ class Expense_outlet_daily extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
+            $monthly_check=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly'),array('*'),array('date_start <='.$data['item']['date_expense'],' date_end >= '.$data['item']['date_expense'],'status_forward_check="'.$this->config->item('system_status_forwarded').'"'),1,0,array('id ASC'));
+            if($monthly_check)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='You can not be updated expense. This expense already forwarded for this month.';
+                $this->json_return($ajax);
+            }
+
             $data['expense_items']=Query_helper::get_info($this->config->item('table_login_setup_expense_item_outlet'), array('id', 'name'),array(),0,0,array('ordering ASC'));
             $data['title']='Edit Daily Outlet Expense';
             $ajax['status']=true;
@@ -270,8 +278,6 @@ class Expense_outlet_daily extends Root_Controller
             $this->json_return($ajax);
         }
 
-        $this->db->trans_start();  //DB Transaction Handle START
-
         if((isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
             $item['date_expense']=System_helper::get_time($item['date_expense']);
@@ -281,6 +287,15 @@ class Expense_outlet_daily extends Root_Controller
             $item['date_expense']=$time;
         }
 
+        $monthly_check=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly'),array('*'),array('date_start <='.$item['date_expense'],' date_end >= '.$item['date_expense'],'status_forward_check="'.$this->config->item('system_status_forwarded').'"'),1,0,array('id ASC'));
+        if($monthly_check)
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='You can not be use expense date. This expense date already forwarded for this month.';
+            $this->json_return($ajax);
+        }
+
+        $this->db->trans_start();  //DB Transaction Handle START
         if($id>0)
         {
             $item['date_updated']=$time;
@@ -323,6 +338,7 @@ class Expense_outlet_daily extends Root_Controller
         {
             $this->form_validation->set_rules('item[date_expense]',$this->lang->line('LABEL_DATE_EXPENSE'),'required');
         }
+        $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET'),'required');
         $this->form_validation->set_rules('item[expense_id]',$this->lang->line('LABEL_EXPENSE_ITEM'),'required');
         $this->form_validation->set_rules('item[amount]',$this->lang->line('LABEL_AMOUNT_EXPENSE'),'required');
         if($this->form_validation->run() == FALSE)
