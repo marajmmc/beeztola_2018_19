@@ -118,29 +118,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            if(column=='total_quantity_budget')
-            {
-                if(value==0)
-                {
-                    element.html('');
-                }
-                else
-                {
-                    element.html(get_string_quantity(value));
-                }
-            }
-            else if(column=='total_quantity_budget_kg')
-            {
-                if(value==0)
-                {
-                    element.html('');
-                }
-                else
-                {
-                    element.html(get_string_kg(value));
-                }
-            }
-            else if(column=='total_amount_price_net')
+            if(column=='amount_request' || column=='amount_check')
             {
                 if(value==0)
                 {

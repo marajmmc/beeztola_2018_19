@@ -106,19 +106,19 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).on("change","#outlet_id",function()
         {
             $("#system_report_container").html("");
-            $("#crop_id").val("");
+            add_edit();
         });
         $(document).off("change", "#year");
         $(document).on("change","#year",function()
         {
             $("#system_report_container").html("");
-            $("#crop_id").val("");
+            add_edit();
         });
         $(document).off("change", "#month");
         $(document).on("change","#month",function()
         {
             $("#system_report_container").html("");
-            $("#crop_id").val("");
+            add_edit();
         });
 
         add_edit();
