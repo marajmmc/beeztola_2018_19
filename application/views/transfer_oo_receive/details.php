@@ -312,19 +312,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <th class="warning header_value"><label class="control-label"><?php echo $item['status_receive'];?></label></th>
                         <th colspan="21">&nbsp;</th>
                     </tr>
-                    <?php
-                    if($item['user_updated_receive_forward'])
-                    {
-                        ?>
-                        <tr>
-                            <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_RECEIVED_BY');?></label></th>
-                            <th class=" header_value"><label class="control-label"><?php echo $item['full_name_receive_forward'];?></label></th>
-                            <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_RECEIVED_TIME');?></label></th>
-                            <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_receive_forward']);?></label></th>
-                        </tr>
-                    <?php
-                    }
-                    ?>
+                    <tr>
+                        <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_RECEIVED_BY');?></label></th>
+                        <th class=" header_value"><label class="control-label"><?php echo $item['full_name_receive'];?></label></th>
+                        <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_RECEIVED_TIME');?></label></th>
+                        <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_receive']);?></label></th>
+                    </tr>
                     <?php
                     if($item['remarks_receive_approve'])
                     {

@@ -550,8 +550,10 @@ class Transfer_oo_receive extends Root_Controller
             $data['status_receive_approve']=$this->config->item('system_status_pending');
             $data['status_system_delivery_receive']=$this->config->item('system_status_no');
             $data['remarks_receive_forward']=$item_head['remarks_receive_forward'];
+
             $data['date_updated_receive_forward']=$time;
             $data['user_updated_receive_forward']=$user->user_id;
+
             $this->db->set('revision_count_receive', 'revision_count_receive+1', FALSE);
             Query_helper::update($this->config->item('table_sms_transfer_oo'),$data, array('id='.$id), false);
             foreach($items as $item)
@@ -575,10 +577,16 @@ class Transfer_oo_receive extends Root_Controller
             $data['status_receive_approve']=$this->config->item('system_status_approved');
             $data['status_system_delivery_receive']=$this->config->item('system_status_yes');
             $data['remarks_receive_forward']=$item_head['remarks_receive_forward'];
+
+            $data['date_updated_receive']=$time;
+            $data['user_updated_receive']=$user->user_id;
+
             $data['date_updated_receive_forward']=$time;
             $data['user_updated_receive_forward']=$user->user_id;
+
             $data['date_updated_receive_approve']=$time;
             $data['user_updated_receive_approve']=$user->user_id;
+
             Query_helper::update($this->config->item('table_sms_transfer_oo'),$data, array('id='.$id));
             foreach($items as $item)
             {
@@ -878,8 +886,12 @@ class Transfer_oo_receive extends Root_Controller
             }
             $this->db->from($this->config->item('table_sms_transfer_oo').' transfer_oo');
             $this->db->select('transfer_oo.*');
-            $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=transfer_oo.user_updated_receive_forward','LEFT');
-            $this->db->select('pos_setup_user_info.name full_name_receive_forward');
+
+            $this->db->join($this->config->item('table_pos_setup_user_info').' pos_user_receive','pos_user_receive.user_id=transfer_oo.user_updated_receive','LEFT');
+            $this->db->select('pos_user_receive.name full_name_receive');
+            $this->db->join($this->config->item('table_pos_setup_user_info').' pos_user_receive_forward','pos_user_receive_forward.user_id=transfer_oo.user_updated_receive_forward','LEFT');
+            $this->db->select('pos_user_receive_forward.name full_name_receive_forward');
+
             $this->db->join($this->config->item('table_sms_transfer_oo_courier_details').' wo_courier_details','wo_courier_details.transfer_oo_id=transfer_oo.id','LEFT');
             $this->db->select('
                                 wo_courier_details.date_delivery courier_date_delivery,
