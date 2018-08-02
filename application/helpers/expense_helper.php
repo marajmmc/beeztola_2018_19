@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Expense_helper
 {
-    public static function get_between_date_by_month($month='', $year='')
+    public static function get_between_date_by_month($month, $year)
     {
         if($month && $year)
         {
