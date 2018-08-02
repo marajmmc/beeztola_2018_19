@@ -29,6 +29,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $this->json_return($ajax);
         }
         $this->lang->load('expense_outlet');
+        $this->load->helper('expense_helper');
     }
     public function index($action="list", $id=0)
     {
