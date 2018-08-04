@@ -275,6 +275,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $outlet_id=$this->input->post('outlet_id');
             $year=$this->input->post('year');
             $month=$this->input->post('month');
+            $date=Expense_helper::get_between_date_by_month($month, $year);
             if(!$outlet_id || !$year || !$month)
             {
                 $ajax['status']=false;
@@ -302,6 +303,24 @@ class Expense_outlet_monthly_check extends Root_Controller
                 $this->json_return($ajax);
             }
 
+            $this->db->from($this->config->item('table_pos_expense_outlet_daily').' item');
+            $this->db->select('item.*');
+            $this->db->join($this->config->item('table_login_setup_expense_item_outlet').' items','items.id=item.expense_id','INNER');
+            $this->db->select('items.name');
+            $this->db->where('item.status',$this->config->item('system_status_active'));
+            $this->db->where('item.outlet_id',$outlet_id);
+            $this->db->where('item.date_expense >=',System_helper::get_time($date['date_start']));
+            $this->db->where('item.date_expense <=',System_helper::get_time($date['date_end']));
+            $this->db->order_by('item.date_expense','ASC');
+            $results=$this->db->get()->result_array();
+            $daily_expenses=array();
+            foreach($results as $result)
+            {
+                $expense_date=System_helper::display_date($result['date_expense']);
+                $daily_expenses[$expense_date][]=$result;
+            }
+            $data['daily_expenses']=$daily_expenses;
+
             $data['system_preference_items']=$this->get_headers_add_edit();
 
             $data['title']="Monthly Expense Check";
@@ -325,8 +344,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         $outlet_id=$this->input->post('outlet_id');
         $year=$this->input->post('year');
         $month=$this->input->post('month');
-        $date_start='01-'.$month.'-'.$year;
-        $date_end=date("t-m-Y", strtotime($date_start));
+        $date=Expense_helper::get_between_date_by_month($month, $year);
 
 
         $results=Query_helper::get_info($this->config->item('table_login_setup_expense_item_outlet'),'*',array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering'));
@@ -334,7 +352,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         foreach($results as $result)
         {
             $expense_items[$result['id']]['expense_item_id']=$result['id'];
-            $expense_items[$result['id']]['expense_item_name']=$result['name'];
+            $expense_items[$result['id']]['expense_item_name']=$result['name'].' ('.$result['status'].')';
             $expense_items[$result['id']]['amount_request']='';
             $expense_items[$result['id']]['amount_check']='';
         }
@@ -346,8 +364,8 @@ class Expense_outlet_monthly_check extends Root_Controller
             $outlet_monthly_id=$result['id'];
         }
 
-        $date_end=System_helper::get_time($date_end)+3600*24-1;
-        $date_start=System_helper::get_time($date_start);
+        $date_end=System_helper::get_time($date['date_end']);
+        $date_start=System_helper::get_time($date['date_start']);
         $results=Query_helper::get_info($this->config->item('table_pos_expense_outlet_daily'),'*',array('date_expense >='.$date_start,' date_expense <= '.$date_end, 'outlet_id ='.$outlet_id,'status !="'.$this->config->item('system_status_delete').'"'));
         foreach($results as $result)
         {
@@ -417,7 +435,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         if($result && ($result['status_forward_check']==$this->config->item('system_status_forwarded')))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $month,1, $year)).') already Forwarded';
+            $ajax['system_message']='Expense already Forwarded';
             $this->json_return($ajax);
         }
         if($result && ($result['status_approve']==$this->config->item('system_status_approved')))
@@ -429,7 +447,7 @@ class Expense_outlet_monthly_check extends Root_Controller
 
 
         $this->db->trans_start();
-
+        $date=Expense_helper::get_between_date_by_month($month, $year);
         $amount_total_request=0;
         $amount_total_check=0;
         foreach($items as $item)
@@ -442,15 +460,21 @@ class Expense_outlet_monthly_check extends Root_Controller
         if($result)
         {
             $outlet_monthly_id=$result['id'];
+            if($result['amount_request']!=$amount_total_request || $result['amount_check']!=$amount_total_check)
+            {
+                $data['amount_request']=$amount_total_request;
+                $data['amount_check']=$amount_total_check;
+                $data['date_updated_check']=$time;
+                $data['user_updated_check']=$user->user_id;
+                $outlet_monthly_id=Query_helper::update($this->config->item('table_pos_expense_outlet_monthly'),$data,array('id='.$outlet_monthly_id),false);
+            }
         }
         else
         {
 
             $data=$item_head;
-            $date_start='01-'.$month.'-'.$year;
-            $date_end=date("t-m-Y", strtotime($date_start));
-            $data['date_start']=System_helper::get_time($date_start);
-            $data['date_end']=System_helper::get_time($date_end)+3600*24-1;
+            $data['date_start']=System_helper::get_time($date['date_start']);
+            $data['date_end']=System_helper::get_time($date['date_end']);
             $data['year']=$year;
             $data['month']=$month;
             $data['amount_request']=$amount_total_request;
@@ -501,11 +525,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         $this->db->trans_complete();
         if ($this->db->trans_status() === TRUE)
         {
-            /*$ajax['status']=true;
-            //$ajax['status_save']=$this->lang->line("MSG_SAVED_SUCCESS");
-            $ajax['system_message']=$this->lang->line("MSG_SAVED_SUCCESS");
-            //$ajax['system_content'][]=array("id"=>"#system_report_container","html"=>'');
-            $this->json_return($ajax);*/
+            $ajax['status']=false;
             $this->system_list();
         }
         else

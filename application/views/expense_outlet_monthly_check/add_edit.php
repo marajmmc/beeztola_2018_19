@@ -18,13 +18,77 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <div id="jqx_inputs">
     </div>
 </form>
-<div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
-    <!--<div class="col-xs-4"></div>
-    <div class="col-sm-4 col-xs-8 text-center">
-        <strong>Note:</strong> Budget input will be in packet.
-    </div>-->
-</div>
+
 <div class="row widget">
+    <div class="widget-header">
+        <div class="title">
+            <?php echo $title; ?>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse_main" href="#">+ Daily Expense Histories</a></label>
+            </h4>
+        </div>
+        <div id="collapse_main" class="panel-collapse collapse">
+            <br/>
+            <?php
+            foreach($daily_expenses as $expense_date=>$expense)
+            {
+                ?>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse_<?php echo $expense_date?>" href="#">+ <?php echo $expense_date?></a></label>
+                        </h4>
+                    </div>
+                    <div id="collapse_<?php echo $expense_date?>" class="panel-collapse collapse">
+                        <table class="table table-bordered table-responsive system_table_details_view">
+                            <thead>
+                            <tr class="bg-success">
+                                <th width="5px">Serial</th>
+                                <th>Expense Item</th>
+                                <th width="200px" class="text-right">Amount</th>
+                                <th>Remarks</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $serial=1;
+                            $amount_total_daily=0;
+                            foreach($expense as $detail)
+                            {
+                                $amount_total_daily+=$detail['amount'];
+                                ?>
+                                <tr>
+                                    <td><?php echo $serial;?></td>
+                                    <td><?php echo $detail['name'];?></td>
+                                    <td class="text-right"><?php echo System_helper::get_string_amount($detail['amount']);?></td>
+                                    <td><?php echo $detail['remarks'];?></td>
+                                </tr>
+                            <?php
+                                $serial++;
+                            }
+                            ?>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th class="text-right" colspan="2">Total:</th>
+                                <th class="text-right"><?php echo System_helper::get_string_amount($amount_total_daily);?></th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+    <div class="clearfix"></div>
     <div class="col-xs-12" id="system_jqx_container"></div>
 </div>
 <script type="text/javascript">
