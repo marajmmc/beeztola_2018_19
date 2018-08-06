@@ -29,7 +29,20 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <div class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">
-                <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse_main" href="#">+ Daily Expense Histories</a></label>
+                <?php
+                if($daily_expenses)
+                {
+                    ?>
+                    <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse_main" href="#">+ Daily Expense Histories</a></label>
+                <?php
+                }
+                else
+                {
+                    ?>
+                    <label class=""><a class="text-danger" href="#">No Daily Expense</a></label>
+                <?php
+                }
+                ?>
             </h4>
         </div>
         <div id="collapse_main" class="panel-collapse collapse">

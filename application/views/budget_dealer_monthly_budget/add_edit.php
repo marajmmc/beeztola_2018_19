@@ -137,7 +137,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
             var price_net=parseFloat(record['price_net']);
 
-            if(column=='quantity_ budget_total')
+            if(column=='quantity_budget_total')
             {
                 var total_quantity=0;
                 <?php

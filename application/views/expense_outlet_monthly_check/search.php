@@ -55,12 +55,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="col-sm-4 col-xs-8">
             <?php
-            $year_budget = date('Y', strtotime('+1 month'));
+            $year_budget = date('Y', strtotime('-1 month'));
             $year_next=date('Y', strtotime('+1 year'));
             ?>
             <select id="year" class="form-control" name="item[year]" >
                 <?php
-                for($i=2018;$i<=$year_next;$i++)
+                for($i=$year_budget;$i<=$year_next;$i++)
                 {
                     ?>
                     <option value="<?php echo $i;?>" <?php if($i==$year_budget){echo "selected='selected'";}?>><?php echo date("Y",mktime(0,0,0,1,1,$i))?></option>
