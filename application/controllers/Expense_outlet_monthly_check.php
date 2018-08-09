@@ -309,8 +309,8 @@ class Expense_outlet_monthly_check extends Root_Controller
             $this->db->select('items.name');
             $this->db->where('item.status',$this->config->item('system_status_active'));
             $this->db->where('item.outlet_id',$outlet_id);
-            $this->db->where('item.date_expense >=',System_helper::get_time($date['date_start']));
-            $this->db->where('item.date_expense <=',System_helper::get_time($date['date_end']));
+            $this->db->where('item.date_expense >=',$date['date_start']);
+            $this->db->where('item.date_expense <=',$date['date_end']);
             $this->db->order_by('item.date_expense','ASC');
             $results=$this->db->get()->result_array();
             $daily_expenses=array();
