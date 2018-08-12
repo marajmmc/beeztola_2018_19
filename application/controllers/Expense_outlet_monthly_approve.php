@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Expense_outlet_monthly_check extends Root_Controller
+class Expense_outlet_monthly_approve extends Root_Controller
 {
     public $message;
     public $permissions;
@@ -49,17 +49,13 @@ class Expense_outlet_monthly_check extends Root_Controller
         {
             $this->system_get_items_all();
         }
-        elseif($action=="search")
+        elseif($action=="edit")
         {
-            $this->system_search();
+            $this->system_edit($id);
         }
-        elseif($action=="add_edit")
+        elseif($action=="get_items_edit")
         {
-            $this->system_add_edit();
-        }
-        elseif($action=="get_items_add_edit")
-        {
-            $this->system_get_items_add_edit();
+            $this->system_get_items_edit();
         }
         elseif($action=="set_preference")
         {
@@ -69,13 +65,13 @@ class Expense_outlet_monthly_check extends Root_Controller
         {
             $this->system_save();
         }
-        elseif($action=="forward")
+        elseif($action=="approve")
         {
-            $this->system_forward($id);
+            $this->system_approve($id);
         }
-        elseif($action=="save_forward")
+        elseif($action=="save_approve")
         {
-            $this->system_save_forward();
+            $this->system_save_approve();
         }
         elseif($action=="details")
         {
@@ -98,10 +94,9 @@ class Expense_outlet_monthly_check extends Root_Controller
         $data['month']= 1;
         $data['amount_request']= 1;
         $data['amount_check']= 1;
+        $data['amount_approve']= 1;
         if($method=='list_all')
         {
-            $data['amount_approve']= 1;
-            $data['status_forward']= 1;
             $data['status_approve']= 1;
         }
         return $data;
@@ -133,7 +128,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
-            $data['title']="Outlet Monthly Expense Check Pending List";
+            $data['title']="Outlet Monthly Expense Approve Pending List";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
             if($this->message)
@@ -157,7 +152,8 @@ class Expense_outlet_monthly_check extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
-        $this->db->where('item.status_forward_check',$this->config->item('system_status_pending'));
+        $this->db->where('item.status_forward_check',$this->config->item('system_status_forwarded'));
+        $this->db->where('item.status_approve',$this->config->item('system_status_pending'));
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->order_by('item.id','DESC');
         $items=$this->db->get()->result_array();
@@ -174,7 +170,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $data['system_preference_items']= System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
-            $data['title']="Outlet Monthly Expense Check  All List";
+            $data['title']="Outlet Monthly Expense Approve  All List";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list_all",$data,true));
             if($this->message)
@@ -212,6 +208,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+        $this->db->where('item.status_forward_check',$this->config->item('system_status_forwarded'));
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->order_by('item.id','DESC');
         $this->db->limit($pagesize,$current_records);
@@ -222,77 +219,68 @@ class Expense_outlet_monthly_check extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function system_search()
-    {
-        if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
-        {
-            $data['title']="Outlet Monthly Expense Check Add";
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
-            $ajax['status']=true;
-            if($this->message)
-            {
-                $ajax['system_message']=$this->message;
-            }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/search');
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
-    private function get_headers_add_edit()
+    private function get_headers_edit()
     {
         $data['expense_item_id']= 1;
         $data['expense_item_name']= 1;
         $data['amount_request']= 1;
         $data['amount_check']= 1;
+        $data['amount_approve']= 1;
         return $data;
     }
-    private function system_add_edit()
+    private function system_edit($id)
     {
-        if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
+        if(isset($this->permissions['action2'])&&($this->permissions['action2']==1))
         {
-            $data['options']=$this->input->post();
-            $outlet_id=$this->input->post('outlet_id');
-            $year=$this->input->post('year');
-            $month=$this->input->post('month');
-            $date=Expense_helper::get_between_date_by_month($month, $year);
-            if(!$outlet_id || !$year || !$month)
+            if($id>0)
             {
-                $ajax['status']=false;
-                $ajax['system_message']='Invalid input. Following required field. Ex: Star mark (*)';
-                $this->json_return($ajax);
+                $item_id=$id;
             }
-            if(!in_array($outlet_id,$this->user_outlet_ids))
+            else
             {
-                System_helper::invalid_try('add_edit',$outlet_id,'Outlet not assign. (outlet id)');
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_expense_outlet_monthly').' item');
+            $this->db->select('item.*');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('outlet_info.name outlet_name');
+            $this->db->where('item.id',$item_id);
+            $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+            $data['item']=$this->db->get()->row_array();
+
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('edit',$id,'Edit Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
-            $result=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly'),'*',array('outlet_id ='.$outlet_id,'year ='.$year,'month ='.$month, 'status !="'.$this->config->item('system_status_delete').'"'),1);
-            if($result && ($result['status_forward_check']==$this->config->item('system_status_forwarded')))
+            if($data['item'] && ($data['item']['status_forward_check']!=$this->config->item('system_status_forwarded')))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $month,1, $year)).') already Forwarded';
+                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') not forwarded';
                 $this->json_return($ajax);
             }
-            if($result && ($result['status_approve']==$this->config->item('system_status_approved')))
+            if($data['item'] && ($data['item']['status_approve']==$this->config->item('system_status_approved')))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Expense already Approved';
                 $this->json_return($ajax);
             }
-
+            if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+            {
+                System_helper::invalid_try('forward',$data['item']['outlet_id'],'Outlet not assign. (outlet id)');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            $date=Expense_helper::get_between_date_by_month($data['item']['month'], $data['item']['year']);
             $this->db->from($this->config->item('table_pos_expense_outlet_daily').' item');
             $this->db->select('item.*');
             $this->db->join($this->config->item('table_login_setup_expense_item_outlet').' items','items.id=item.expense_id','INNER');
             $this->db->select('items.name');
             $this->db->where('item.status',$this->config->item('system_status_active'));
-            $this->db->where('item.outlet_id',$outlet_id);
+            $this->db->where('item.outlet_id',$data['item']['outlet_id']);
             $this->db->where('item.date_expense >=',$date['date_start']);
             $this->db->where('item.date_expense <=',$date['date_end']);
             $this->db->order_by('item.date_expense','ASC');
@@ -304,16 +292,16 @@ class Expense_outlet_monthly_check extends Root_Controller
                 $daily_expenses[$expense_date][]=$result;
             }
             $data['daily_expenses']=$daily_expenses;
+            $data['system_preference_items']=$this->get_headers_edit();
 
-            $data['system_preference_items']=$this->get_headers_add_edit();
-
-            $data['title']="Monthly Expense Check";
+            $data['title']="Monthly Expense Approve";
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit/'.$item_id);
             $this->json_return($ajax);
         }
         else
@@ -323,7 +311,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_get_items_add_edit()
+    private function system_get_items_edit()
     {
         $outlet_id=$this->input->post('outlet_id');
         $year=$this->input->post('year');
@@ -339,6 +327,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $expense_items[$result['id']]['expense_item_name']=$result['name'].' ('.$result['status'].')';
             $expense_items[$result['id']]['amount_request']='';
             $expense_items[$result['id']]['amount_check']='';
+            $expense_items[$result['id']]['amount_approve']='';
         }
 
         $outlet_monthly_id=0;
@@ -355,6 +344,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         {
             $expense_items[$result['expense_id']]['amount_request']+=$result['amount'];
             $expense_items[$result['expense_id']]['amount_check']+=$result['amount'];
+            $expense_items[$result['expense_id']]['amount_approve']+=$result['amount'];
         }
 
         $this->db->from($this->config->item('table_pos_expense_outlet_monthly_details').' details');
@@ -366,6 +356,7 @@ class Expense_outlet_monthly_check extends Root_Controller
         foreach($results as $result)
         {
             $expense_items[$result['expense_id']]['amount_check']=$result['amount_check'];
+            $expense_items[$result['expense_id']]['amount_approve']=$result['amount_approve']?$result['amount_approve']:$result['amount_check'];
         }
 
         $items=array();
@@ -375,6 +366,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $item['expense_item_name']=$result['expense_item_name'];
             $item['amount_request']=$result['amount_request'];
             $item['amount_check']=$result['amount_check'];
+            $item['amount_approve']=$result['amount_approve'];
             $items[]=$item;
         }
 
@@ -382,94 +374,73 @@ class Expense_outlet_monthly_check extends Root_Controller
     }
     private function system_save()
     {
+        $id = $this->input->post("id");
         $user = User_helper::get_user();
         $time=time();
-
-        $item_head=$this->input->post('item');
         $items=$this->input->post('items');
 
-        $outlet_id=$item_head['outlet_id'];
-        $year=$item_head['year'];
-        $month=$item_head['month'];
-
-        if(!((isset($this->permissions['action1']) && ($this->permissions['action1']==1)) || (isset($this->permissions['action2']) && ($this->permissions['action2']==1))))
+        if(!($id>0))
         {
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
-        if(!$outlet_id || !$year || !$month)
+        if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Invalid input. Following required field. Ex: Star mark (*)';
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
 
-        if(!in_array($outlet_id,$this->user_outlet_ids))
+        $this->db->from($this->config->item('table_pos_expense_outlet_monthly').' item');
+        $this->db->select('item.*');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('outlet_info.name outlet_name');
+        $this->db->where('item.id',$id);
+        $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+        $data['item']=$this->db->get()->row_array();
+
+        if(!$data['item'])
         {
-            System_helper::invalid_try('save',$item_head['outlet_id'],'Outlet not assign. (outlet id)');
+            System_helper::invalid_try('edit',$id,'Edit Non Exists');
             $ajax['status']=false;
             $ajax['system_message']='Invalid Try.';
             $this->json_return($ajax);
         }
-
-        $result=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly'),'*',array('outlet_id ='.$outlet_id,'year ='.$year,'month ='.$month, 'status !="'.$this->config->item('system_status_delete').'"'),1);
-
-        if($result && ($result['status_forward_check']==$this->config->item('system_status_forwarded')))
+        if($data['item'] && ($data['item']['status_forward_check']!=$this->config->item('system_status_forwarded')))
         {
             $ajax['status']=false;
-            $ajax['system_message']='Expense already Forwarded';
+            $ajax['system_message']='Expense Not Forwarded';
             $this->json_return($ajax);
         }
-        if($result && ($result['status_approve']==$this->config->item('system_status_approved')))
+        if($data['item'] && ($data['item']['status_approve']==$this->config->item('system_status_approved')))
         {
             $ajax['status']=false;
             $ajax['system_message']='Expense already Approved';
             $this->json_return($ajax);
         }
-
+        if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
+        {
+            System_helper::invalid_try('forward',$data['item']['outlet_id'],'Outlet not assign. (outlet id)');
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Try.';
+            $this->json_return($ajax);
+        }
 
         $this->db->trans_start();
-        $date=Expense_helper::get_between_date_by_month($month, $year);
-        $amount_total_request=0;
-        $amount_total_check=0;
+        $amount_total_approve=0;
         foreach($items as $item)
         {
-            $amount_total_request+=$item['amount_request'];
-            $amount_total_check+=$item['amount_check'];
+            $amount_total_approve+=$item['amount_approve'];
         }
 
-        $result=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly'),'*',array('outlet_id ='.$outlet_id,'year ='.$year,'month ='.$month),1);
-        if($result)
-        {
-            $outlet_monthly_id=$result['id'];
-            if($result['amount_request']!=$amount_total_request || $result['amount_check']!=$amount_total_check)
-            {
-                $data['date_start']=$date['date_start'];
-                $data['date_end']=$date['date_end'];
-                $data['amount_request']=$amount_total_request;
-                $data['amount_check']=$amount_total_check;
-                $data['date_updated_check']=$time;
-                $data['user_updated_check']=$user->user_id;
-                Query_helper::update($this->config->item('table_pos_expense_outlet_monthly'),$data,array('id='.$outlet_monthly_id),false);
-            }
-        }
-        else
-        {
+        $data=array();
+        $data['amount_approve']=$amount_total_approve;
+        $data['date_update_approved']=$time;
+        $data['user_update_approved']=$user->user_id;
+        Query_helper::update($this->config->item('table_pos_expense_outlet_monthly'),$data,array('id='.$id),false);
 
-            $data=$item_head;
-            $data['date_start']=$date['date_start'];
-            $data['date_end']=$date['date_end'];
-            $data['year']=$year;
-            $data['month']=$month;
-            $data['amount_request']=$amount_total_request;
-            $data['amount_check']=$amount_total_check;
-            $data['date_updated_check']=$time;
-            $data['user_updated_check']=$user->user_id;
-            $outlet_monthly_id=Query_helper::add($this->config->item('table_pos_expense_outlet_monthly'),$data,false);
-        }
-
-        $results=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly_details'),'*',array('outlet_monthly_id ='.$outlet_monthly_id));
+        $results=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly_details'),'*',array('outlet_monthly_id ='.$id));
         $details_old=array();
         $details_old_rows=array();
         foreach($results as $result)
@@ -477,17 +448,14 @@ class Expense_outlet_monthly_check extends Root_Controller
             $details_old[$result['expense_id']]=$result;
             $details_old_rows[$result['id']]=$result;
         }
+
         foreach($items as $expense_id=>$detail)
         {
             $data=array();
-            $data['outlet_monthly_id']=$outlet_monthly_id;
-            $data['expense_id']=$expense_id;
-            $data['amount_request']=$detail['amount_request'];
-            $data['amount_check']=$detail['amount_check'];
-
+            $data['amount_approve']=$detail['amount_approve'];
             if(isset($details_old[$expense_id]))
             {
-                if(!(($data['amount_check']==$details_old[$expense_id]['amount_check'])&&($details_old[$expense_id]['status']==$this->config->item('system_status_active'))))
+                if(!(($detail['amount_approve']==$details_old[$expense_id]['amount_approve'])&&($details_old[$expense_id]['status']==$this->config->item('system_status_active'))))
                 {
                     $data['status']=$this->config->item('system_status_active');
                     Query_helper::update($this->config->item('table_pos_expense_outlet_monthly_details'),$data, array('id='.$details_old[$expense_id]['id']), false);
@@ -515,7 +483,6 @@ class Expense_outlet_monthly_check extends Root_Controller
         else
         {
             $ajax['status']=false;
-            //$ajax['status_save']=$this->lang->line("MSG_SAVED_FAIL");
             $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
             $this->json_return($ajax);
         }
@@ -616,7 +583,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_forward($id)
+    private function system_approve($id)
     {
         if(isset($this->permissions['action7'])&&($this->permissions['action7']==1))
         {
@@ -638,15 +605,15 @@ class Expense_outlet_monthly_check extends Root_Controller
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('forward',$id,'Forward Non Exists');
+                System_helper::invalid_try('approve',$id,'Approve Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
-            if($data['item'] && ($data['item']['status_forward_check']==$this->config->item('system_status_forwarded')))
+            if($data['item'] && ($data['item']['status_forward_check']!=$this->config->item('system_status_forwarded')))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') already Forwarded';
+                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') not forwarded';
                 $this->json_return($ajax);
             }
             if($data['item'] && ($data['item']['status_approve']==$this->config->item('system_status_approved')))
@@ -682,16 +649,16 @@ class Expense_outlet_monthly_check extends Root_Controller
             }
             $data['daily_expenses']=$daily_expenses;
 
-            $data['system_preference_items']=$this->get_headers_add_edit();
+            $data['system_preference_items']=$this->get_headers_edit();
 
-            $data['title']="Monthly Expense Check Forward";
+            $data['title']="Monthly Expense Approved";
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/forward",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/approve",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/forward/'.$item_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/approve/'.$item_id);
             $this->json_return($ajax);
         }
         else
@@ -701,7 +668,7 @@ class Expense_outlet_monthly_check extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_save_forward()
+    private function system_save_approve()
     {
         $id = $this->input->post("id");
         $user = User_helper::get_user();
@@ -715,17 +682,25 @@ class Expense_outlet_monthly_check extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-            if($item_head['status_forward_check']!=$this->config->item('system_status_forwarded'))
+            if($item_head['status_approve']!=$this->config->item('system_status_approved') && $item_head['status_approve']!=$this->config->item('system_status_rollback'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Forward field is required.';
+                $ajax['system_message']='Approved/Rollback field is required.';
                 $this->json_return($ajax);
             }
-
+            if($item_head['status_approve']==$this->config->item('system_status_rollback'))
+            {
+                if(!$item_head['remarks_approve'])
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Remarks for Approved/Rollback field is required.';
+                    $this->json_return($ajax);
+                }
+            }
             $data['item']=Query_helper::get_info($this->config->item('table_pos_expense_outlet_monthly'),'*',array('id ='.$id, 'status !="'.$this->config->item('system_status_delete').'"'),1);
             if(!$data['item'])
             {
-                System_helper::invalid_try('save_forward',$id,'Save Forward Non Exists');
+                System_helper::invalid_try('save_approve',$id,'Save Approve Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
@@ -737,10 +712,16 @@ class Expense_outlet_monthly_check extends Root_Controller
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
-            if($data['item']['status_forward_check']==$this->config->item('system_status_forwarded'))
+            if($data['item']['status_forward_check']!=$this->config->item('system_status_forwarded'))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') already Forwarded';
+                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') Not Forwarded';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_approve']==$this->config->item('system_status_approved'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Expense for ('.date("F-Y", mktime(0, 0, 0,  $data['item']['month'],1, $data['item']['year'])).') Already Approved';
                 $this->json_return($ajax);
             }
         }
@@ -753,9 +734,22 @@ class Expense_outlet_monthly_check extends Root_Controller
 
         $this->db->trans_start();
 
-        $item_head['date_forward_checked']=$time;
-        $item_head['user_forward_checked']=$user->user_id;
-        Query_helper::update($this->config->item('table_pos_expense_outlet_monthly'),$item_head,array('id='.$id));
+        if($item_head['status_approve']==$this->config->item('system_status_rollback'))
+        {
+            $item_head['status_forward_check']=$this->config->item('system_status_pending');
+            $item_head['status_approve']=$this->config->item('system_status_pending');
+            $item_head['remarks_approve_rollback']=$item_head['remarks_approve'];
+            $item_head['date_rollbacked']=$time;
+            $item_head['user_rollbacked']=$user->user_id;
+            Query_helper::update($this->config->item('table_pos_expense_outlet_monthly'),$item_head,array('id='.$id));
+        }
+        else
+        {
+            $item_head['remarks_approve']=$item_head['remarks_approve'];
+            $item_head['date_approved']=$time;
+            $item_head['user_approved']=$user->user_id;
+            Query_helper::update($this->config->item('table_pos_expense_outlet_monthly'),$item_head,array('id='.$id));
+        }
 
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)

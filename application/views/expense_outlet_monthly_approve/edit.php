@@ -1,5 +1,10 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 $CI = & get_instance();
+$action_buttons[]=array
+(
+    'label'=>$CI->lang->line("ACTION_BACK"),
+    'href'=>site_url($CI->controller_url)
+);
 if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
 {
     $action_buttons[]=array(
@@ -12,10 +17,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 ?>
 <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
-    <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
-    <input type="hidden" name="item[year]" value="<?php echo $options['year']; ?>" />
-    <input type="hidden" name="item[month]" value="<?php echo $options['month']; ?>" />
+    <input type="hidden" name="id" value="<?php echo $item['id']; ?>" />
     <div id="jqx_inputs">
+
     </div>
 </form>
 
@@ -26,6 +30,46 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="clearfix"></div>
     </div>
+    <div class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?> </label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo $item['outlet_name'] ?></label>
+        </div>
+    </div>
+    <div class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_YEAR');?> </label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo $item['year'] ?></label>
+        </div>
+    </div>
+    <div class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MONTH');?> </label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month'],1, 2000)); ?></label>
+        </div>
+    </div>
+    <div class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?> </label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo nl2br($item['remarks_check']);?></label>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div id="system_report_container">
+
+</div>
+<div class="row widget">
     <div class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">
@@ -61,7 +105,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <table class="table table-bordered table-responsive system_table_details_view">
                             <thead>
                             <tr class="bg-success">
-                                <th width="5px">Serial</th>
+                                <th width="5px">SL#</th>
                                 <th>Expense Item</th>
                                 <th width="200px" class="text-right">Amount</th>
                                 <th>Remarks</th>
@@ -81,7 +125,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                                     <td class="text-right"><?php echo System_helper::get_string_amount($detail['amount']);?></td>
                                     <td><?php echo $detail['remarks'];?></td>
                                 </tr>
-                            <?php
+                                <?php
                                 $serial++;
                             }
                             ?>
@@ -104,6 +148,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <div class="clearfix"></div>
     <div class="col-xs-12" id="system_jqx_container"></div>
 </div>
+<?php
+$options=array
+(
+    'outlet_id'=>$item['outlet_id'],
+    'month'=>$item['month'],
+    'year'=>$item['year']
+);
+?>
 <script type="text/javascript">
     $(document).ready(function ()
     {
@@ -116,8 +168,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var data=$('#system_jqx_container').jqxGrid('getrows');
             for(var i=0;i<data.length;i++)
             {
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['expense_item_id']+'][amount_request]" value="'+data[i]['amount_request']+'">');
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['expense_item_id']+'][amount_check]" value="'+data[i]['amount_check']+'">');
+                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['expense_item_id']+'][amount_approve]" value="'+data[i]['amount_approve']+'">');
             }
             var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
             if(sure)
@@ -127,7 +178,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
         });
 
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_add_edit/');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_edit/');?>";
         // prepare the data
         var source =
         {
@@ -175,6 +226,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
             if(column=='amount_check')
             {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_amount(value));
+                }
+            }
+            if(column=='amount_approve')
+            {
                 element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 if(value==0)
                 {
@@ -204,7 +266,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM_NAME'); ?>', dataField: 'expense_item_name',width:'250', pinned:true,cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request',width:'150', cellsAlign:'right',pinned:true,cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>',datafield: 'amount_check', width: 150, cellsAlign:'right',cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',pinned:true,cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_APPROVE'); ?>',datafield: 'amount_approve', width: 150, cellsAlign:'right',cellsalign: 'right',cellsrenderer: cellsrenderer,columntype: 'custom',
                         cellbeginedit: function (row)
                         {
                             var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);//only last selected

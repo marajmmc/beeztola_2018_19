@@ -16,7 +16,7 @@ $action_buttons[]=array(
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
 
-<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward');?>" method="post">
+<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_approve');?>" method="post">
     <input type="hidden" id="id" name="id" value="<?php echo $item['id']; ?>" />
     <input type="hidden" id="system_save_new_status" name="system_save_new_status" value="0" />
 
@@ -51,6 +51,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label"><?php echo date("F", mktime(0, 0, 0,  $item['month'],1, 2000)); ?></label>
             </div>
         </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?> </label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label class="control-label"><?php echo nl2br($item['remarks_check']);?></label>
+            </div>
+        </div>
     </div>
 
     <div class="clearfix"></div>
@@ -59,6 +67,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
     </div>
     <div class="row widget">
+        <div class="widget-header">
+            <div class="title">
+                <?php echo $title; ?>
+            </div>
+            <div class="clearfix"></div>
+        </div>
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
@@ -139,27 +153,28 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         <div class="clearfix"></div>
         <div class="widget-header">
             <div class="title">
-                Forward Confirmation
+                Approved Confirmation
             </div>
             <div class="clearfix"></div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FORWARD');?> <span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_APPROVED');?> <span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select id="status_forward_check" class="form-control" name="item[status_forward_check]">
+                <select id="status_approve" class="form-control" name="item[status_approve]">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
-                    <option value="<?php echo $this->config->item('system_status_forwarded')?>"><?php echo $this->config->item('system_status_forwarded')?></option>
+                    <option value="<?php echo $this->config->item('system_status_approved')?>"><?php echo $this->config->item('system_status_approved')?></option>
+                    <option value="<?php echo $this->config->item('system_status_rollback')?>"><?php echo $this->config->item('system_status_rollback')?></option>
                 </select>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?></label>
+                <label class="control-label pull-right">Remarks for Approve/Rollback <span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <textarea name="item[remarks_check]" id="remarks_check" class="form-control"><?php echo $item['remarks_check'];?></textarea>
+                <textarea name="item[remarks_approve]" id="remarks_approve" class="form-control"><?php echo $item['remarks_approve'];?></textarea>
             </div>
         </div>
         <div class="row show-grid">
@@ -168,7 +183,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button pull-right">
-                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You want showroom expense check forwarded?">Save</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You want showroom expense approved/rollback?">Save</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">
@@ -190,7 +205,7 @@ $options=array
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
 
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_add_edit/');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_edit/');?>";
         // prepare the data
         var source =
         {
@@ -225,7 +240,7 @@ $options=array
         {
             var element = $(defaultHtml);
 
-            if(column=='amount_request')
+            if(column=='amount_request' || column=='amount_check' || column=='amount_approve')
             {
                 if(value==0)
                 {
@@ -236,18 +251,6 @@ $options=array
                     element.html(get_string_amount(value));
                 }
             }
-            if(column=='amount_check')
-            {
-                if(value==0)
-                {
-                    element.html('');
-                }
-                else
-                {
-                    element.html(get_string_amount(value));
-                }
-            }
-
             return element[0].outerHTML;
         };
         // create jqxgrid.
@@ -269,7 +272,8 @@ $options=array
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM_NAME'); ?>', dataField: 'expense_item_name',width:'250',cellsrenderer: cellsrenderer,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false}
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_APPROVE'); ?>', dataField: 'amount_approve',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false}
                 ]
             });
     });
