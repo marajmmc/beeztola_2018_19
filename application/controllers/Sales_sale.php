@@ -164,6 +164,7 @@ class Sales_sale extends Root_Controller
         $code=$this->input->post("code");
         $code_type=Barcode_helper::get_farmer_code_type($code);
         $farmer_id=Barcode_helper::get_id_farmer($code);
+        $code_scan_type=$this->input->post("code_scan_type");
         if($farmer_id>0)
         {
 
@@ -204,7 +205,7 @@ class Sales_sale extends Root_Controller
                         $this->json_return($ajax);
                     }
                 }
-                $this->system_load_sale_from($farmer_id,$outlet_id);
+                $this->system_load_sale_from($farmer_id,$outlet_id,$code_scan_type);
 
             }
         }
@@ -304,7 +305,7 @@ class Sales_sale extends Root_Controller
         }
         return true;
     }
-    private function system_load_sale_from($farmer_id,$outlet_id)
+    private function system_load_sale_from($farmer_id,$outlet_id,$code_scan_type='TYPE')
     {
         $data=array();
         $data['title']="New Sale";
@@ -327,6 +328,7 @@ class Sales_sale extends Root_Controller
         $data['item']['farmer_type_name']=$result['farmer_type_name'];
         $data['item']['discount_self_percentage']=$result['discount_self_percentage'];
         $data['item']['discount_message']='';
+        $data['item']['code_scan_type']=$code_scan_type;
 
         $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type_outlet_discount'),'*',array('farmer_type_id ='.$data['item']['farmer_type_id'],'expire_time >'.time(),'outlet_id ='.$outlet_id),1);
         if($result)
@@ -521,6 +523,7 @@ class Sales_sale extends Root_Controller
         $item_head['discount_self_percentage']=$item['discount_self_percentage'];
         $item_head['amount_total']=0;
         $item_head['amount_discount_variety']=0;
+        $item_head['code_scan_type']=$item['code_scan_type'];;
         foreach($items as $variety_id=>$packs)
         {
             foreach($packs as $pack_size_id=>$pack)
@@ -590,6 +593,7 @@ class Sales_sale extends Root_Controller
         $item_head['status']=$this->config->item('system_status_active');
         $item_head['date_created']=$time;
         $item_head['user_created']=$user->user_id;
+
         //getting current stock,price,discount of outlet finished
         $this->db->trans_start();  //DB Transaction Handle START
         $sale_id=Query_helper::add($this->config->item('table_pos_sale'),$item_head);

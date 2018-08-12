@@ -116,7 +116,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
 </div>
 <script type="text/javascript">
-    function search_farmer()
+    function search_farmer(code_scan_type)
     {
         var outlet_id=$('#outlet_id').val();
         var code=$('#code').val();
@@ -126,7 +126,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 url:'<?php echo site_url($CI->controller_url.'/index/search_farmer') ?>',
                 type: 'POST',
                 datatype: "JSON",
-                data:{outlet_id:outlet_id,code:code},
+                data:{outlet_id:outlet_id,code:code,code_scan_type:code_scan_type},
                 success: function (data, status)
                 {
                     if(data['farmer_new']!==undefined && data['farmer_new']==true)
@@ -157,19 +157,54 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     }
     jQuery(document).ready(function()
     {
+        var first_char_time=0;
+        var last_char_time=0;
+
         $(document).off("click", "#button_action_farmer_search");
         $(document).on("click","#button_action_farmer_search",function()
         {
-            search_farmer();
+            var code_scan_type='TYPE';
+            if(first_char_time==0)
+            {
+                code_scan_type='COPY';
+            }
+            else if((last_char_time-first_char_time)<150)
+            {
+                code_scan_type='SCAN';
+            }
+            search_farmer(code_scan_type);
 
         });
         $(document).off("keypress", "#code");
         $(document).on("keypress","#code",function(event)
         {
+            var code=$('#code').val();
+            if(code.length==1)
+            {
+                last_char_time=first_char_time=Date.now();
+            }
+            else if(code.length>1)
+            {
+                last_char_time=Date.now();
+            }
+            else
+            {
+                first_char_time=last_char_time=0;
+            }
             $('#container_farmer_new').hide();
+
             if(event.which == 13)
             {
-                search_farmer();
+                var code_scan_type='TYPE';
+                if(first_char_time==0)
+                {
+                    code_scan_type='COPY';
+                }
+                else if((last_char_time-first_char_time)<150)
+                {
+                    code_scan_type='SCAN';
+                }
+                search_farmer(code_scan_type);
             }
 
 

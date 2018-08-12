@@ -18,6 +18,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $item['outlet_id']; ?>" />
     <input type="hidden" name="item[farmer_id]" value="<?php echo $item['farmer_id']; ?>" />
     <input type="hidden" name="item[discount_self_percentage]" id="discount_self_percentage" value="<?php echo $item['discount_self_percentage'];?>">
+    <input type="hidden" name="item[code_scan_type]" id="code_scan_type" value="<?php echo $item['code_scan_type'];?>">
     <div class="row widget">
         <div class="widget-header">
             <div class="title">
