@@ -61,10 +61,6 @@ class Expense_outlet_monthly_check extends Root_Controller
         {
             $this->system_get_items_add_edit();
         }
-        elseif($action=="set_preference")
-        {
-            $this->system_set_preference('list');
-        }
         elseif($action=="save")
         {
             $this->system_save();
@@ -80,6 +76,14 @@ class Expense_outlet_monthly_check extends Root_Controller
         elseif($action=="details")
         {
             $this->system_details($id);
+        }
+        elseif($action=="set_preference")
+        {
+            $this->system_set_preference('list');
+        }
+        elseif($action=="set_preference_all")
+        {
+            $this->system_set_preference('list_all');
         }
         elseif($action=="save_preference")
         {
@@ -335,8 +339,13 @@ class Expense_outlet_monthly_check extends Root_Controller
         $expense_items=array();
         foreach($results as $result)
         {
+            $item_name=$result['name'];
+            if($result['status']!=$this->config->item('system_status_active'))
+            {
+                $item_name=$result['name'].' ('.$result['status'].')';
+            }
             $expense_items[$result['id']]['expense_item_id']=$result['id'];
-            $expense_items[$result['id']]['expense_item_name']=$result['name'].' ('.$result['status'].')';
+            $expense_items[$result['id']]['expense_item_name']=$item_name;
             $expense_items[$result['id']]['amount_request']='';
             $expense_items[$result['id']]['amount_check']='';
         }

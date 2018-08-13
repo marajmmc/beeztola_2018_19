@@ -57,10 +57,6 @@ class Expense_outlet_monthly_approve extends Root_Controller
         {
             $this->system_get_items_edit();
         }
-        elseif($action=="set_preference")
-        {
-            $this->system_set_preference('list');
-        }
         elseif($action=="save")
         {
             $this->system_save();
@@ -76,6 +72,14 @@ class Expense_outlet_monthly_approve extends Root_Controller
         elseif($action=="details")
         {
             $this->system_details($id);
+        }
+        elseif($action=="set_preference")
+        {
+            $this->system_set_preference('list');
+        }
+        elseif($action=="set_preference_all")
+        {
+            $this->system_set_preference('list_all');
         }
         elseif($action=="save_preference")
         {
@@ -95,6 +99,7 @@ class Expense_outlet_monthly_approve extends Root_Controller
         $data['amount_request']= 1;
         $data['amount_check']= 1;
         $data['amount_approve']= 1;
+        //$data['number_of_expense']= 1;
         if($method=='list_all')
         {
             $data['status_approve']= 1;
@@ -151,6 +156,8 @@ class Expense_outlet_monthly_approve extends Root_Controller
         $this->db->select('item.*');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
+        /*$this->db->join($this->config->item('table_pos_expense_outlet_monthly_details').' details','details.outlet_monthly_id=item.id','INNER');
+        $this->db->select('COUNT(details.id) number_of_expense');*/
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
         $this->db->where('item.status_forward_check',$this->config->item('system_status_forwarded'));
         $this->db->where('item.status_approve',$this->config->item('system_status_pending'));
@@ -244,6 +251,10 @@ class Expense_outlet_monthly_approve extends Root_Controller
             $this->db->select('item.*');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->select('outlet_info.name outlet_name');
+            $this->db->join($this->config->item('table_login_setup_user_info').' ui_created','ui_created.user_id = item.user_updated_check','LEFT');
+            $this->db->select('ui_created.name user_updated_full_name');
+            $this->db->join($this->config->item('table_login_setup_user_info').' ui_forward','ui_forward.user_id = item.user_forward_checked','LEFT');
+            $this->db->select('ui_forward.name user_forward_full_name');
             $this->db->where('item.id',$item_id);
             $this->db->where('item.status !=',$this->config->item('system_status_delete'));
             $data['item']=$this->db->get()->row_array();
@@ -323,8 +334,13 @@ class Expense_outlet_monthly_approve extends Root_Controller
         $expense_items=array();
         foreach($results as $result)
         {
+            $item_name=$result['name'];
+            if($result['status']!=$this->config->item('system_status_active'))
+            {
+                $item_name=$result['name'].' ('.$result['status'].')';
+            }
             $expense_items[$result['id']]['expense_item_id']=$result['id'];
-            $expense_items[$result['id']]['expense_item_name']=$result['name'].' ('.$result['status'].')';
+            $expense_items[$result['id']]['expense_item_name']=$item_name;
             $expense_items[$result['id']]['amount_request']='';
             $expense_items[$result['id']]['amount_check']='';
             $expense_items[$result['id']]['amount_approve']='';
@@ -356,7 +372,7 @@ class Expense_outlet_monthly_approve extends Root_Controller
         foreach($results as $result)
         {
             $expense_items[$result['expense_id']]['amount_check']=$result['amount_check'];
-            $expense_items[$result['expense_id']]['amount_approve']=$result['amount_approve']?$result['amount_approve']:$result['amount_check'];
+            $expense_items[$result['expense_id']]['amount_approve']=$result['amount_approve'];
         }
 
         $items=array();

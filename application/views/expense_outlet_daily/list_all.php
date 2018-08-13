@@ -5,28 +5,8 @@ $action_buttons=array();
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
     $action_buttons[]=array(
-        'label'=>'All List',
-        'href'=>site_url($CI->controller_url.'/index/list_all')
-    );
-}
-if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>'Edit',
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/edit')
-    );
-}
-if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>$CI->lang->line('ACTION_DETAILS'),
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/details')
+        'label'=>'Pending List',
+        'href'=>site_url($CI->controller_url)
     );
 }
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
@@ -53,26 +33,23 @@ if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
     $action_buttons[]=array
     (
         'label'=>'Preference',
-        'href'=>site_url($CI->controller_url.'/index/set_preference')
-    );
-}
-if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>'Approve',
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/approve')
+        'href'=>site_url($CI->controller_url.'/index/set_preference_all')
     );
 }
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_REFRESH"),
-    'href'=>site_url($CI->controller_url.'/index/list')
+    'href'=>site_url($CI->controller_url.'/index/list_all')
+);
+$action_buttons[]=array(
+    'type'=>'button',
+    'label'=>$CI->lang->line("ACTION_LOAD_MORE"),
+    'id'=>'button_jqx_load_more'
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
+
 ?>
+
 <div class="row widget">
     <div class="widget-header">
         <div class="title">
@@ -95,7 +72,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     $(document).ready(function ()
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_all');?>";
 
         // prepare the data
         var source =
@@ -126,10 +103,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        // create jqxgrid.
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            if(column=='amount_request' || column=='amount_check' || column=='amount_approve')
+            if(column=='amount_expense')
             {
                 if(value==0)
                 {
@@ -142,7 +120,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
             return element[0].outerHTML;
         };
-        // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
             {
                 width: '100%',
@@ -161,14 +138,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 enablebrowserselection: true,
                 columns:
                 [
-                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width:'50', cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>',dataField: 'outlet_name',width:'200',filterType:'list',hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_YEAR'); ?>', dataField: 'year',width:'80',filtertype: 'list', hidden: <?php echo $system_preference_items['year']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_MONTH'); ?>', dataField: 'month', width:'100',filtertype: 'list',hidden: <?php echo $system_preference_items['month']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_request']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_check']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_APPROVE'); ?>', dataField: 'amount_approve', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_approve']?0:1;?>}
-                    /*{ text: '<?php echo $CI->lang->line('LABEL_NUMBER_OF_EXPENSE'); ?>', dataField: 'number_of_expense', width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['number_of_expense']?0:1;?>}*/
+                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width: '50px', hidden: <?php echo $system_preference_items['id']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name', width: '200px',filterType:'list', hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DATE_EXPENSE'); ?>', dataField: 'date_expense', width: '100px', hidden: <?php echo $system_preference_items['date_expense']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM'); ?>', dataField: 'expense_item', width: '300px',filterType:'list', hidden: <?php echo $system_preference_items['expense_item']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_EXPENSE'); ?>', dataField: 'amount_expense', width: '100px', cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_expense']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_REMARKS'); ?>', dataField: 'remarks', hidden: <?php echo $system_preference_items['remarks']?0:1;?>}
                 ]
             });
     });

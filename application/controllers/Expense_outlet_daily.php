@@ -40,6 +40,14 @@ class Expense_outlet_daily extends Root_Controller
         {
             $this->system_get_items();
         }
+        elseif($action=="list_all")
+        {
+            $this->system_list_all();
+        }
+        elseif($action=="get_items_all")
+        {
+            $this->system_get_items_all();
+        }
         elseif($action=="add")
         {
             $this->system_add();
@@ -55,6 +63,10 @@ class Expense_outlet_daily extends Root_Controller
         elseif($action=="set_preference")
         {
             $this->system_set_preference('list');
+        }
+        elseif($action=="set_preference_all")
+        {
+            $this->system_set_preference('list_all');
         }
         elseif($action=="save_preference")
         {
@@ -73,6 +85,10 @@ class Expense_outlet_daily extends Root_Controller
         $data['expense_item']= 1;
         $data['amount_expense']= 1;
         $data['remarks']= 1;
+        if($method=='list_all')
+        {
+
+        }
         return $data;
     }
     private function system_set_preference($method='list')
@@ -122,15 +138,91 @@ class Expense_outlet_daily extends Root_Controller
     {
         $this->db->from($this->config->item('table_pos_expense_outlet_daily').' item');
         $this->db->select('item.*');
+
         $this->db->join($this->config->item('table_login_setup_expense_item_outlet').' items','items.id=item.expense_id','INNER');
         $this->db->select('items.name');
+
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
+
+        $this->db->join($this->config->item('table_pos_expense_outlet_monthly').' monthly','monthly.outlet_id = item.outlet_id AND monthly.status_forward_check="'.$this->config->item('system_status_pending').'"','INNER');
+
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
+        $this->db->where('item.date_expense >= monthly.date_start');
+        $this->db->where('item.date_expense <= monthly.date_end');
         $this->db->order_by('item.id','DESC');
         // checking pos_expense_outlet_monthly table date start & date end -> status not forwarded. (checking start date & end where status forward=pending)
         $results=$this->db->get()->result_array();
+        //echo $this->db->last_query();
+        $items=array();
+        foreach($results as $result)
+        {
+            $item['id']=$result['id'];
+            $item['outlet_name']=$result['outlet_name'];
+            $item['date_expense']=System_helper::display_date($result['date_expense']);
+            $item['expense_item']=$result['name'];
+            $item['amount_expense']=$result['amount'];
+            $item['remarks']=$result['remarks'];
+            $items[]=$item;
+        }
+        $this->json_return($items);
+    }
+    private function system_list_all()
+    {
+        if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
+        {
+            $user = User_helper::get_user();
+            $method='list_all';
+            $data['system_preference_items']= System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
+            $data['title']="Daily Outlet Expense All List";
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list_all",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url."/index/list_all");
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_get_items_all()
+    {
+        $current_records = $this->input->post('total_records');
+        if(!$current_records)
+        {
+            $current_records=0;
+        }
+        $pagesize = $this->input->post('pagesize');
+        if(!$pagesize)
+        {
+            $pagesize=100;
+        }
+        else
+        {
+            $pagesize=$pagesize*2;
+        }
+        $this->db->from($this->config->item('table_pos_expense_outlet_daily').' item');
+        $this->db->select('item.*');
+
+        $this->db->join($this->config->item('table_login_setup_expense_item_outlet').' items','items.id=item.expense_id','INNER');
+        $this->db->select('items.name');
+
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('outlet_info.name outlet_name');
+
+        $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+        $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
+        $this->db->order_by('item.id','DESC');
+        $this->db->limit($pagesize,$current_records);
+        $results=$this->db->get()->result_array();
+        //echo $this->db->last_query();
         $items=array();
         foreach($results as $result)
         {
@@ -277,7 +369,6 @@ class Expense_outlet_daily extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
-
         if((isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
             $item['date_expense']=System_helper::get_time($item['date_expense']);
@@ -340,7 +431,7 @@ class Expense_outlet_daily extends Root_Controller
         }
         $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET'),'required');
         $this->form_validation->set_rules('item[expense_id]',$this->lang->line('LABEL_EXPENSE_ITEM'),'required');
-        $this->form_validation->set_rules('item[amount]',$this->lang->line('LABEL_AMOUNT_EXPENSE'),'required');
+        /*$this->form_validation->set_rules('item[amount]',$this->lang->line('LABEL_AMOUNT_EXPENSE'),'required');*/
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();

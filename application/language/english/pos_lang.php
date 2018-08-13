@@ -108,6 +108,7 @@ $lang['LABEL_FORWARDED_BY'] = 'Forwarded By';
 $lang['LABEL_APPROVED_BY'] = 'Approved By';
 $lang['LABEL_DELIVERED_BY'] = 'Delivered By';
 $lang['LABEL_RECEIVED_BY'] = 'Received By';
+$lang['LABEL_CHECKED_BY'] = 'Checked By';
 
 /* Status */
 $lang['LABEL_STATUS']='Status';
@@ -205,6 +206,8 @@ $lang['LABEL_DATE_APPROVE']='Date for Approve';
 $lang['LABEL_DATE_DELIVERY']='Date for Delivery';
 $lang['LABEL_DATE_CHALLAN']='Date for Challan';
 $lang['LABEL_DATE_EXPENSE']='Date for Expense';
+$lang['LABEL_DATE_CHECKED_TIME']='Checked Time';
+$lang['LABEL_DATE_CHECKED_FORWARD_TIME']='Checked Forward Time';
 
 //months array
 $lang['LABEL_MONTH'] = 'Month';
