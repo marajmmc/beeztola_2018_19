@@ -182,7 +182,8 @@ $options=array
 (
     'outlet_id'=>$item['outlet_id'],
     'month'=>$item['month'],
-    'year'=>$item['year']
+    'year'=>$item['year'],
+    'grand_total_show'=>1
 );
 ?>
 <script type="text/javascript">
@@ -221,11 +222,40 @@ $options=array
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var aggregates=function (total, column, element, record)
+        {
+            if(record.expense_item_name=="Grand Total")
+            {
+                return record[element];
+            }
+            return total;
+        };
+        var aggregatesrenderer=function (aggregates)
+        {
+            var text=aggregates['total'];
+            if(((aggregates['total']=='0.00')||(aggregates['total']=='')))
+            {
+                text='';
+            }
+            return '<div style="position: relative; margin: 0px;padding: 5px;width: 100%;height: 100%; overflow: hidden;background-color:'+system_report_color_grand+';">' +text+'</div>';
+
+        };
+        var aggregatesrenderer_amount=function (aggregates)
+        {
+            var text='';
+            if(!((aggregates['total']=='0.00')||(aggregates['total']=='')))
+            {
+                text=get_string_amount(aggregates['total']);
+            }
+
+            return '<div style="position: relative; margin: 0px;padding: 5px;width: 100%;height: 100%; overflow: hidden;background-color:'+system_report_color_grand+';">' +text+'</div>';
+
+        };
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
 
-            if(column=='amount_request')
+            if(column=='amount_request' || column=='amount_check')
             {
                 if(value==0)
                 {
@@ -236,18 +266,6 @@ $options=array
                     element.html(get_string_amount(value));
                 }
             }
-            if(column=='amount_check')
-            {
-                if(value==0)
-                {
-                    element.html('');
-                }
-                else
-                {
-                    element.html(get_string_amount(value));
-                }
-            }
-
             return element[0].outerHTML;
         };
         // create jqxgrid.
@@ -262,14 +280,15 @@ $options=array
                 columnsresize: true,
                 columnsreorder: true,
                 enablebrowserselection: true,
+                showaggregates: true,
+                showstatusbar: true,
                 altrows: true,
                 rowsheight: 35,
                 columnsheight: 70,
-                editable:true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM_NAME'); ?>', dataField: 'expense_item_name',width:'250',cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false}
+                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM_NAME'); ?>', dataField: 'expense_item_name',width:'250',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount}
                 ]
             });
     });

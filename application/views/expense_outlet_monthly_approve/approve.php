@@ -53,12 +53,51 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?> </label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CHECKED_BY');?> </label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <label class="control-label"><?php echo nl2br($item['remarks_check']);?></label>
+                <label class="control-label"><?php echo $item['user_updated_full_name'];?></label>
             </div>
         </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CHECKED_TIME');?> </label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_check']);?></label>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FORWARDED_BY');?> </label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label class="control-label"><?php echo $item['user_forward_full_name'];?></label>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CHECKED_FORWARD_TIME');?> </label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label class="control-label"><?php echo System_helper::display_date_time($item['date_forward_checked']);?></label>
+            </div>
+        </div>
+        <?php
+        if($item['remarks_check'])
+        {
+            ?>
+            <div class="row show-grid">
+                <div class="col-xs-4">
+                    <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?> </label>
+                </div>
+                <div class="col-sm-4 col-xs-8">
+                    <label class="control-label"><?php echo nl2br($item['remarks_check']);?></label>
+                </div>
+            </div>
+        <?php
+        }
+        ?>
     </div>
 
     <div class="clearfix"></div>
@@ -197,7 +236,8 @@ $options=array
 (
     'outlet_id'=>$item['outlet_id'],
     'month'=>$item['month'],
-    'year'=>$item['year']
+    'year'=>$item['year'],
+    'grand_total_show'=>true
 );
 ?>
 <script type="text/javascript">
@@ -236,6 +276,35 @@ $options=array
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var aggregates=function (total, column, element, record)
+        {
+            if(record.expense_item_name=="Grand Total")
+            {
+                return record[element];
+            }
+            return total;
+        };
+        var aggregatesrenderer=function (aggregates)
+        {
+            var text=aggregates['total'];
+            if(((aggregates['total']=='0.00')||(aggregates['total']=='')))
+            {
+                text='';
+            }
+            return '<div style="position: relative; margin: 0px;padding: 5px;width: 100%;height: 100%; overflow: hidden;background-color:'+system_report_color_grand+';">' +text+'</div>';
+
+        };
+        var aggregatesrenderer_amount=function (aggregates)
+        {
+            var text='';
+            if(!((aggregates['total']=='0.00')||(aggregates['total']=='')))
+            {
+                text=get_string_amount(aggregates['total']);
+            }
+
+            return '<div style="position: relative; margin: 0px;padding: 5px;width: 100%;height: 100%; overflow: hidden;background-color:'+system_report_color_grand+';">' +text+'</div>';
+
+        };
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
@@ -265,15 +334,16 @@ $options=array
                 columnsresize: true,
                 columnsreorder: true,
                 enablebrowserselection: true,
+                showaggregates: true,
+                showstatusbar: true,
                 altrows: true,
                 rowsheight: 35,
                 columnsheight: 70,
-                editable:true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM_NAME'); ?>', dataField: 'expense_item_name',width:'250',cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_APPROVE'); ?>', dataField: 'amount_approve',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,editable:false}
+                    { text: '<?php echo $CI->lang->line('LABEL_EXPENSE_ITEM_NAME'); ?>', dataField: 'expense_item_name',width:'250',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_REQUEST'); ?>', dataField: 'amount_request',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CHECK'); ?>', dataField: 'amount_check',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_APPROVE'); ?>', dataField: 'amount_approve',width:'150', cellsAlign:'right',cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount}
                 ]
             });
     });

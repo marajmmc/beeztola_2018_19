@@ -137,6 +137,20 @@ class Expense_outlet_daily extends Root_Controller
     private function system_get_items()
     {
         $this->db->from($this->config->item('table_pos_expense_outlet_daily').' item');
+        $this->db->select('item.id');
+        $this->db->join($this->config->item('table_pos_expense_outlet_monthly').' monthly','monthly.outlet_id = item.outlet_id','INNER');
+        $this->db->where('item.date_expense >= monthly.date_start');
+        $this->db->where('item.date_expense <= monthly.date_end');
+        $this->db->where('monthly.status_forward_check',$this->config->item('system_status_forwarded'));
+        $results=$this->db->get()->result_array();
+        $checked_ids=array();
+        $checked_ids[0]=0;
+        foreach($results as $result)
+        {
+            $checked_ids[$result['id']]=$result['id'];
+        }
+
+        $this->db->from($this->config->item('table_pos_expense_outlet_daily').' item');
         $this->db->select('item.*');
 
         $this->db->join($this->config->item('table_login_setup_expense_item_outlet').' items','items.id=item.expense_id','INNER');
@@ -145,16 +159,11 @@ class Expense_outlet_daily extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.revision=1 AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
         $this->db->select('outlet_info.name outlet_name');
 
-        $this->db->join($this->config->item('table_pos_expense_outlet_monthly').' monthly','monthly.outlet_id = item.outlet_id AND monthly.status_forward_check="'.$this->config->item('system_status_pending').'"','INNER');
-
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
-        $this->db->where('item.date_expense >= monthly.date_start');
-        $this->db->where('item.date_expense <= monthly.date_end');
-        $this->db->order_by('item.id','DESC');
-        // checking pos_expense_outlet_monthly table date start & date end -> status not forwarded. (checking start date & end where status forward=pending)
+        $this->db->where_not_in('item.id',$checked_ids);
         $results=$this->db->get()->result_array();
-        //echo $this->db->last_query();
+
         $items=array();
         foreach($results as $result)
         {

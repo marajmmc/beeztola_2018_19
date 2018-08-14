@@ -64,14 +64,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div class="row show-grid">
         <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?> </label>
-        </div>
-        <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo nl2br($item['remarks_check']);?></label>
-        </div>
-    </div>
-    <div class="row show-grid">
-        <div class="col-xs-4">
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CHECKED_BY');?> </label>
         </div>
         <div class="col-sm-4 col-xs-8">
@@ -102,6 +94,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label"><?php echo System_helper::display_date_time($item['date_forward_checked']);?></label>
         </div>
     </div>
+    <?php
+    if($item['remarks_check'])
+    {
+        ?>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS_FORWARD');?> </label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label class="control-label"><?php echo nl2br($item['remarks_check']);?></label>
+            </div>
+        </div>
+    <?php
+    }
+    ?>
 </div>
 
 <div class="clearfix"></div>
@@ -193,7 +200,8 @@ $options=array
 (
     'outlet_id'=>$item['outlet_id'],
     'month'=>$item['month'],
-    'year'=>$item['year']
+    'year'=>$item['year'],
+    'grand_total_show'=>''
 );
 ?>
 <script type="text/javascript">
@@ -253,18 +261,7 @@ $options=array
         {
             var element = $(defaultHtml);
 
-            if(column=='amount_request')
-            {
-                if(value==0)
-                {
-                    element.html('');
-                }
-                else
-                {
-                    element.html(get_string_amount(value));
-                }
-            }
-            if(column=='amount_check')
+            if(column=='amount_request' || column=='amount_check')
             {
                 if(value==0)
                 {
@@ -284,7 +281,6 @@ $options=array
                 }
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
             }
-
             return element[0].outerHTML;
         };
         // create jqxgrid.
