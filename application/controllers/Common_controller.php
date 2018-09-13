@@ -36,4 +36,28 @@ class Common_controller extends Root_Controller
         $ajax['system_content'][]=array("id"=>$html_container_id,"html"=>$this->load->view("dropdown_with_select",$data,true));
         $this->json_return($ajax);
     }
+    public function get_dropdown_dealers_by_outlet_id()
+    {
+        $html_container_id='#dealer_id';
+        if($this->input->post('html_container_id'))
+        {
+            $html_container_id=$this->input->post('html_container_id');
+        }
+        $outlet_id = $this->input->post('outlet_id');
+
+        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+        $this->db->select('farmer_outlet.farmer_id value');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+        $this->db->select('farmer_farmer.name text');
+
+        $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
+        $this->db->where('farmer_farmer.farmer_type_id > ',1);
+        $this->db->where('farmer_outlet.revision',1);
+        $this->db->where('farmer_outlet.outlet_id',$outlet_id);
+        $data['items']=$this->db->get()->result_array();
+
+        $ajax['status']=true;
+        $ajax['system_content'][]=array("id"=>$html_container_id,"html"=>$this->load->view("dropdown_with_select",$data,true));
+        $this->json_return($ajax);
+    }
 }

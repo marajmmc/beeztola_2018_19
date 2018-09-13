@@ -38,6 +38,10 @@ $config['table_pos_expense_outlet_daily'] = 'arm_beeztola_2018_19.pos_expense_ou
 $config['table_pos_expense_outlet_monthly'] = 'arm_beeztola_2018_19.pos_expense_outlet_monthly';
 $config['table_pos_expense_outlet_monthly_details'] = 'arm_beeztola_2018_19.pos_expense_outlet_monthly_details';
 
+// Field Task
+$config['table_pos_ft_dealer_visit'] = 'arm_beeztola_2018_19.pos_ft_dealer_visit';
+$config['table_pos_ft_dealer_visit_setup_heads'] = 'arm_beeztola_2018_19.pos_ft_dealer_visit_setup_heads';
+
 
 
 
