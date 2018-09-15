@@ -127,10 +127,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columns:
                 [
                     { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id', width:'50', hidden: <?php echo $system_preference_items['id']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET'); ?>', dataField: 'outlet', hidden: <?php echo $system_preference_items['outlet']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DEALER'); ?>', dataField: 'dealer', hidden: <?php echo $system_preference_items['dealer']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_REMARKS'); ?>', dataField: 'remarks', hidden: <?php echo $system_preference_items['remarks']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS');?>', dataField: 'status',cellsalign: 'center',filtertype: 'list', width:100, hidden: <?php echo $system_preference_items['status']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_DATE'); ?>', dataField: 'date', width:'100', hidden: <?php echo $system_preference_items['date']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET'); ?>', dataField: 'outlet',filtertype: 'list', width:'150', hidden: <?php echo $system_preference_items['outlet']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_CREATED_BY'); ?>', dataField: 'created_by',filtertype: 'list', width:'200', hidden: <?php echo $system_preference_items['created_by']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DEALER'); ?>', dataField: 'dealer', width:'200',filtertype: 'list', hidden: <?php echo $system_preference_items['dealer']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_REMARKS'); ?>', dataField: 'remarks', width:'400', hidden: <?php echo $system_preference_items['remarks']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_STATUS_ZSC_COMMENT');?>', dataField: 'status_zsc_comment',cellsalign: 'center',filtertype: 'list', width:100, hidden: <?php echo $system_preference_items['status_zsc_comment']?0:1;?>}
                 ]
             });
     });

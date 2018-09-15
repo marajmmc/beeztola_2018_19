@@ -68,10 +68,12 @@ class Ft_dealer_visit extends Root_Controller
     private function get_preference_headers($method)
     {
         $data['id']= 1;
+        $data['date']= 1;
         $data['outlet']= 1;
+        $data['created_by']= 1;
         $data['dealer']= 1;
         $data['remarks']= 1;
-        $data['status']= 1;
+        $data['status_zsc_comment']= 1;
         return $data;
     }
     private function system_set_preference($method='list')
@@ -121,9 +123,26 @@ class Ft_dealer_visit extends Root_Controller
     {
         $this->db->from($this->config->item('table_pos_ft_dealer_visit').' item');
         $this->db->select('item.*');
+        $this->db->select("IF(item.zsc_comment is null, 'NO', 'YES') status_zsc_comment");
+
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
+
+        $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=item.user_created','LEFT');
+        $this->db->select('pos_setup_user_info.name created_by');
+
+        $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=item.dealer_id AND farmer_outlet.revision=1','INNER');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id AND farmer_farmer.farmer_type_id > 1 AND farmer_farmer.status="'.$this->config->item('system_status_active').'"','INNER');
+        $this->db->select('farmer_farmer.name dealer');
+
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+        $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->order_by('item.id','ASC');
         $items=$this->db->get()->result_array();
+        foreach($items as &$item)
+        {
+            $item['date']=System_helper::display_date($item['date']);
+        }
         $this->json_return($items);
     }
     private function system_add()
@@ -135,10 +154,17 @@ class Ft_dealer_visit extends Root_Controller
             $data['item']['outlet_id']='';
             $data['item']['dealer_id']='';
             $data['item']['date']=time();
+            $data['item']['field_visit_data']=array();
             $data['item']['remarks']='';
             $data['item']['status']='Active';
 
             $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            if(sizeof($data['heads'])>0)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Field visit head is empty';
+                $this->json_return($ajax);
+            }
 
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
@@ -169,7 +195,21 @@ class Ft_dealer_visit extends Root_Controller
                 $item_id=$this->input->post('id');
             }
 
-            $data['item']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
+            //$data['item']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
+            $this->db->from($this->config->item('table_pos_ft_dealer_visit').' item');
+            $this->db->select('item.*');
+
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
+
+            $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=item.dealer_id AND farmer_outlet.revision=1','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id AND farmer_farmer.farmer_type_id > 1 AND farmer_farmer.status="'.$this->config->item('system_status_active').'"','INNER');
+            $this->db->select('farmer_farmer.name dealer_name');
+
+            $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+            $this->db->where('item.id',$item_id);
+            $this->db->order_by('item.id','ASC');
+            $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
                 System_helper::invalid_try('Edit',$item_id,'Edit Non Exists');
@@ -177,8 +217,34 @@ class Ft_dealer_visit extends Root_Controller
                 $ajax['system_message']='Invalid Item.';
                 $this->json_return($ajax);
             }
+            if($data['item']['zsc_comment'])
+            {
+                $ajax['status']=false;
+                $ajax['system_message']="Already zsc commented this visit so you can't edit it.";
+                $this->json_return($ajax);
+            }
 
-            $data['title']="Edit Field Visit :: ". $data['item']['name'];
+            $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
+            if(sizeof($data['heads'])>0)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Field visit head is empty';
+                $this->json_return($ajax);
+            }
+
+            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+            $this->db->select('farmer_outlet.farmer_id value');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+            $this->db->select('farmer_farmer.name text');
+
+            $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
+            $this->db->where('farmer_farmer.farmer_type_id > ',1);
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where('farmer_outlet.outlet_id',$data['item']['outlet_id']);
+            $data['dealers']=$this->db->get()->result_array();
+
+
+            $data['title']="Edit Field Visit";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
             if($this->message)
@@ -202,6 +268,8 @@ class Ft_dealer_visit extends Root_Controller
         $time=time();
         $item=$this->input->post('item');
         $heads=$this->input->post('heads');
+        $date_visit=System_helper::get_time($item['date']);
+        $date_current=System_helper::get_time(System_helper::display_date(time()));
 
         if($id>0)
         {
@@ -211,13 +279,18 @@ class Ft_dealer_visit extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-
             $result=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),'*',array('id ='.$id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
             if(!$result)
             {
                 System_helper::invalid_try('Update',$id,'Update Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Item.';
+                $this->json_return($ajax);
+            }
+            if($result['zsc_comment'])
+            {
+                $ajax['status']=false;
+                $ajax['system_message']="Already zsc commented this visit so you can't edit it.";
                 $this->json_return($ajax);
             }
         }
@@ -230,6 +303,21 @@ class Ft_dealer_visit extends Root_Controller
                 $this->json_return($ajax);
             }
         }
+        if(!(isset($this->permissions['action7']) && ($this->permissions['action7']==1)))
+        {
+            if($date_visit!=$date_current)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='You have not date changes permission';
+                $this->json_return($ajax);
+            }
+        }
+        if(sizeof($heads)>0)
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Field visit head is empty';
+            $this->json_return($ajax);
+        }
         if(!$this->check_validation())
         {
             $ajax['status']=false;
@@ -239,13 +327,20 @@ class Ft_dealer_visit extends Root_Controller
 
         $this->db->trans_start();  //DB Transaction Handle START
 
-
         $field_visit_data='';
         if(sizeof($heads)>0)
         {
             $field_visit_data=json_encode($heads);
         }
         $item['field_visit_data']=$field_visit_data;
+        if($date_visit)
+        {
+            $item['date']=$date_visit;
+        }
+        else
+        {
+            $item['date']=$date_current;
+        }
         if($id>0)
         {
             $item['date_updated']=$time;
@@ -283,9 +378,13 @@ class Ft_dealer_visit extends Root_Controller
     private function check_validation()
     {
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET'),'required');
-        $this->form_validation->set_rules('item[dealer_id]',$this->lang->line('LABEL_DEALER'),'required');
-        $this->form_validation->set_rules('item[status]',$this->lang->line('LABEL_STATUS'),'required');
+        $id=$this->input->post('item');
+        $this->form_validation->set_rules('id',$this->lang->line('LABEL_ID'),'required');
+        if(!(sizeof($this->user_outlets)==1 || $id>0))
+        {
+            $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET'),'required');
+            $this->form_validation->set_rules('item[dealer_id]',$this->lang->line('LABEL_DEALER'),'required');
+        }
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();

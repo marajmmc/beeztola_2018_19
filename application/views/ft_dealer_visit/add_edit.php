@@ -49,7 +49,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php
-                if(sizeof($CI->user_outlets)==1)
+                if(sizeof($CI->user_outlets)==1 || $item['id']>0)
                 {
                     ?>
                     <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $CI->user_outlets[0]['customer_id'] ?>" />
@@ -59,13 +59,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 else
                 {
                     ?>
-                    <select name="item[outlet_id]" id="outlet_id" class="form-control">
+                    <select name="item[outlet_id]" id="outlet_id" class="form-control" onchange="dealer()">
                         <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                         <?php
-                        echo "<pre>";
-                        print_r($CI->user_outlets);
-                        echo "</pre>";
-
                         foreach($CI->user_outlets as $row)
                         {?>
                             <option value="<?php echo $row['customer_id']?>" <?php if($row['customer_id']==$item['outlet_id']){ echo "selected";}?>><?php echo $row['name'];?></option>
@@ -83,7 +79,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DEALER');?><span style="color:#FF0000">*</span></label>
             </div>
             <?php
-            if($item['dealer_id'])
+            if($item['dealer_id']>0)
             {
                 ?>
                 <div class="col-sm-4 col-xs-8">
@@ -116,7 +112,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php
-                if(isset($this->permissions['action2'])&&($this->permissions['action2']==1))
+                if(isset($this->permissions['action7'])&&($this->permissions['action7']==1))
                 {
                     ?>
                     <input type="text" name="item[date]" id="name" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date']);?>" readonly />
@@ -131,7 +127,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
             </div>
         </div>
+        <hr/>
         <?php
+        $field_visit_data=array();
+        if($item['field_visit_data'])
+        {
+            $field_visit_data=json_decode($item['field_visit_data'],true);
+        }
+
         foreach($heads as $head)
         {
             ?>
@@ -140,12 +143,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <label class="control-label pull-right"><?php echo $head['name'];?> </label>
                 </div>
                 <div class="col-sm-4 col-xs-8">
-                    <textarea name="heads[<?php echo $head['id'];?>]" id="" class="form-control" ></textarea>
+                    <textarea name="heads[<?php echo $head['id'];?>]" id="" class="form-control" ><?php echo isset($field_visit_data[$head['id']])?$field_visit_data[$head['id']]:'';?></textarea>
                 </div>
             </div>
         <?php
         }
         ?>
+        <hr/>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REMARKS');?> </label>
@@ -154,18 +158,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <textarea name="item[remarks]" id="description" class="form-control" ><?php echo $item['remarks'];?></textarea>
             </div>
         </div>
-        <div style="" class="row show-grid">
+        <!--<div style="" class="row show-grid">
             <div class="col-xs-4">
-                <label for="status" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS');?><span style="color:#FF0000">*</span></label>
+                <label for="status" class="control-label pull-right"><?php /*echo $CI->lang->line('LABEL_STATUS');*/?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select id="status" name="item[status]" class="form-control">
-                    <!--<option value=""></option>-->
-                    <option value="<?php echo $CI->config->item('system_status_active'); ?>" <?php if ($item['status'] == $CI->config->item('system_status_active')) { echo "selected='selected'"; } ?> ><?php echo $CI->lang->line('ACTIVE') ?></option>
-                    <option value="<?php echo $CI->config->item('system_status_inactive'); ?>" <?php if ($item['status'] == $CI->config->item('system_status_inactive')) { echo "selected='selected'"; } ?> ><?php echo $CI->lang->line('INACTIVE') ?></option>
+                    <option value="<?php /*echo $CI->config->item('system_status_active'); */?>" <?php /*if ($item['status'] == $CI->config->item('system_status_active')) { echo "selected='selected'"; } */?> ><?php /*echo $CI->lang->line('ACTIVE') */?></option>
+                    <option value="<?php /*echo $CI->config->item('system_status_inactive'); */?>" <?php /*if ($item['status'] == $CI->config->item('system_status_inactive')) { echo "selected='selected'"; } */?> ><?php /*echo $CI->lang->line('INACTIVE') */?></option>
                 </select>
             </div>
-        </div>
+        </div>-->
     </div>
     <div class="clearfix"></div>
 </form>
@@ -175,36 +178,42 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
 
-        $(document).on("change","#outlet_id",function()
+        var user_outlets=<?php echo sizeof($CI->user_outlets);?>;
+        var item_id=<?php echo $item['id']?>;
+        if(user_outlets==1)
         {
-            $("#dealer_id").val("");
-            var outlet_id=$('#outlet_id').val();
-            if(outlet_id>0)
-            {
-                $.ajax(
-                    {
-                        url: '<?php echo site_url('common_controller/get_dropdown_dealers_by_outlet_id'); ?>',
-                        type: 'POST',
-                        datatype: "JSON",
-                        data:
-                        {
-                            html_container_id:'#dealer_id',
-                            outlet_id:outlet_id
-                        },
-                        success: function (data, status)
-                        {
-                            $('#dealer_id_container').show();
-                        },
-                        error: function (xhr, desc, err)
-                        {
-                            console.log("error");
-                        }
-                    });
-            }
-            else
-            {
-                $('#dealer_id_container').hide();
-            }
-        });
+            dealer();
+        }
     });
+    function dealer()
+    {
+        $("#dealer_id").val("");
+        var outlet_id=$('#outlet_id').val();
+        if(outlet_id>0)
+        {
+            $.ajax(
+                {
+                    url: '<?php echo site_url('common_controller/get_dropdown_dealers_by_outlet_id'); ?>',
+                    type: 'POST',
+                    datatype: "JSON",
+                    data:
+                    {
+                        html_container_id:'#dealer_id',
+                        outlet_id:outlet_id
+                    },
+                    success: function (data, status)
+                    {
+                        $('#dealer_id_container').show();
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+                    }
+                });
+        }
+        else
+        {
+            $('#dealer_id_container').hide();
+        }
+    }
 </script>

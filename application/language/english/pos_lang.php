@@ -461,3 +461,4 @@ $lang['LABEL_EXPENSE_ITEM']='Expense Items';
 $lang['LABEL_AMOUNT_EXPENSE']='Expense Amount';
 // Field Task
 $lang['LABEL_DEALER']='Dealer Name';
+$lang['LABEL_STATUS_ZSC_COMMENT']='ZSC Comment Status';
