@@ -159,7 +159,7 @@ class Ft_dealer_visit extends Root_Controller
             $data['item']['status']='Active';
 
             $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
-            if(sizeof($data['heads'])>0)
+            if(!$data['heads'])
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Field visit head is empty';
@@ -225,7 +225,7 @@ class Ft_dealer_visit extends Root_Controller
             }
 
             $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
-            if(sizeof($data['heads'])>0)
+            if(!$data['heads'])
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Field visit head is empty';
