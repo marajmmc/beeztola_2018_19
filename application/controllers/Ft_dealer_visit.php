@@ -312,7 +312,7 @@ class Ft_dealer_visit extends Root_Controller
                 $this->json_return($ajax);
             }
         }
-        if(sizeof($heads)>0)
+        if(!(sizeof($heads)>0))
         {
             $ajax['status']=false;
             $ajax['system_message']='Field visit head is empty';
