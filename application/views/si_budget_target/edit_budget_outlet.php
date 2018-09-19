@@ -5,7 +5,7 @@ $action_buttons=array();
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_BACK"),
-    'href'=>site_url($CI->controller_url.'/index/list_budget_dealer/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
+    'href'=>site_url($CI->controller_url.'/index/list_budget_outlet/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
 );
 if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
 {
@@ -43,16 +43,15 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div style="" class="row show-grid">
         <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DEALER_NAME');?></label>
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['dealer']['farmer_name'];?></label>
+            <label class="control-label"><?php echo $item['crop']['name'];?></label>
         </div>
     </div>
-    <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_dealer');?>" method="post">
+    <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_outlet');?>" method="post">
         <input type="hidden" name="item[fiscal_year_id]" value="<?php echo $options['fiscal_year_id']; ?>" />
         <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
-        <input type="hidden" name="item[dealer_id]" value="<?php echo $options['dealer_id']; ?>" />
         <div id="jqx_inputs">
         </div>
     </form>
@@ -84,7 +83,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
         });
 
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_edit_budget_dealer');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_edit_budget_outlet');?>";
 
         // prepare the data
         var source =
@@ -105,19 +104,43 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             url: url,
             data:JSON.parse('<?php echo json_encode($options);?>')
         };
-        var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
+        var header_render=function (text, align)
         {
-            var element = $(defaultHtml);
-            if(column=='quantity_budget')
+            var words = text.split(" ");
+            var label=words[0];
+            var count=words[0].length;
+            for (i = 1; i < words.length; i++)
             {
-                /*if(value==0)
+                if((count+words[i].length)>10)
                 {
-                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                    label=label+'</br>'+words[i];
+                    count=words[i].length;
                 }
                 else
                 {
-                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-                }*/
+                    label=label+' '+words[i];
+                    count=count+words[i].length;
+                }
+
+            }
+            return '<div style="margin: 5px;">'+label+'</div>';
+        };
+        var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
+        {
+            var element = $(defaultHtml);
+            if(column.substr(0,16)=='quantity_budget_')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_kg(value));
+                }
+            }
+            else if(column=='quantity_budget')
+            {
                 element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
             }
@@ -140,13 +163,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 selectionmode: 'singlerow',
                 altrows: true,
                 rowsheight: 35,
+                columnsheight: 70,
                 editable:true,
                 columns:
                 [
-                    { text: '<?php echo $CI->lang->line('LABEL_CROP_NAME'); ?>', dataField: 'crop_name',width:'100', filtertype:'list',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_QUANTITY_BUDGET_KG'); ?>',datafield: 'quantity_budget', width: 100,filterable: false,cellsrenderer: cellsrenderer,cellsalign: 'right',columntype: 'custom',
+                    { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',renderer: header_render,pinned:true,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',renderer: header_render,pinned:true,editable:false},
+                    <?php
+                    $serial=0;
+                    foreach($dealers as $dealer)
+                    {
+                    ++$serial;
+                    ?>
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
+                    <?php
+                    }
+                    ?>
+                    { text: '<?php echo $CI->lang->line('LABEL_QUANTITY_BUDGET_KG'); ?>',datafield: 'quantity_budget', width: 100,filterable: false,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',columntype: 'custom',
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
                             editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input style="z-index: 1 !important;" type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');

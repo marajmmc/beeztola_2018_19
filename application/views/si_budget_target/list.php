@@ -12,6 +12,14 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(is
         'data-action-link'=>site_url($CI->controller_url.'/index/list_budget_dealer')
 
     );
+    $action_buttons[]=array
+    (
+        'type'=>'button',
+        'label'=>$CI->lang->line('ACTION_EDIT').' Showroom Budget',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/list_budget_outlet')
+
+    );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
