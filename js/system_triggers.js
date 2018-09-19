@@ -65,4 +65,6 @@ function system_off_events()
     /*BEEZTOLA*/
     $(document).off('change','#dealer_id');
 
+    $(document).off('click', '#button_action_save_jqx');
+
 }
