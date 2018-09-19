@@ -135,5 +135,6 @@ if($result)
             </div>
         </div>
         <script type="text/javascript" src="<?php echo base_url('js/system_common.js?version='.time()); ?>"></script>
+        <script type="text/javascript" src="<?php echo base_url('js/system_triggers.js?version='.time()); ?>"></script>
     </body>
 </html>

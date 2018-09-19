@@ -372,6 +372,7 @@ class Setup_farmer_type extends Root_Controller
             $this->db->select('outlet_info.name outlet_name');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=user_outlet.customer_id','INNER');
             $this->db->where('user_outlet.revision',1);
+            $this->db->where('outlet_info.revision',1);
             $this->db->where('user_outlet.user_id',$user->user_id);
             $this->db->where('user_outlet.customer_id',$outlet_id);
             $valid_outlet=$this->db->get()->row_array();
