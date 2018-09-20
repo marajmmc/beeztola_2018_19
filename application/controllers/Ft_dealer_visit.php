@@ -40,9 +40,9 @@ class Ft_dealer_visit extends Root_Controller
         {
             $this->system_get_items();
         }
-        elseif($action=="add")
+        elseif($action=="search")
         {
-            $this->system_add();
+            $this->system_search();
         }
         elseif($action=="edit")
         {
@@ -145,7 +145,7 @@ class Ft_dealer_visit extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function system_add()
+    private function system_search()
     {
         if(isset($this->permissions['action1'])&&($this->permissions['action1']==1))
         {
@@ -158,6 +158,18 @@ class Ft_dealer_visit extends Root_Controller
             $data['item']['remarks']='';
             $data['item']['status']='Active';
 
+            if(sizeof($this->user_outlets)==1)
+            {
+                $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+                $this->db->select('farmer_outlet.farmer_id value');
+                $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
+                $this->db->select('farmer_farmer.name text');
+                $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
+                $this->db->where('farmer_farmer.farmer_type_id > ',1);
+                $this->db->where('farmer_outlet.revision',1);
+                $this->db->where('farmer_outlet.outlet_id',$this->user_outlets[0]['customer_id']);
+                $data['dealers']=$this->db->get()->result_array();
+            }
             $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
             if(!$data['heads'])
             {
@@ -167,12 +179,12 @@ class Ft_dealer_visit extends Root_Controller
             }
 
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/add');
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/search');
             $this->json_return($ajax);
         }
         else
@@ -242,7 +254,6 @@ class Ft_dealer_visit extends Root_Controller
             $this->db->select('farmer_outlet.farmer_id value');
             $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
             $this->db->select('farmer_farmer.name text');
-
             $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
             $this->db->where('farmer_farmer.farmer_type_id > ',1);
             $this->db->where('farmer_outlet.revision',1);

@@ -31,7 +31,6 @@ $action_buttons[]=array(
     'data-form'=>'#save_form'
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
-
 ?>
 <form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save');?>" method="post">
     <input type="hidden" id="id" name="id" value="<?php echo $item['id']?>" />
@@ -95,7 +94,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
             </div>
         </div>
-        <div style="<?php if(!($item['dealer_id'])){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
+        <div style="<?php if(sizeof($CI->user_outlets)>1){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DEALER');?><span style="color:#FF0000">*</span></label>
             </div>
@@ -145,12 +144,37 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
 
-        var user_outlets=<?php echo sizeof($CI->user_outlets);?>;
-        var item_id=<?php echo $item['id']?>;
-        if(user_outlets==1)
-        {
-            dealer();
-        }
+0        $(".outlet_id").on('change', function(){
+            $("#dealer_id").val("");
+            var outlet_id=$('#outlet_id').val();
+            if(outlet_id>0)
+            {
+                $.ajax(
+                    {
+                        url: '<?php echo site_url('common_controller/get_dropdown_dealers_by_outlet_id'); ?>',
+                        type: 'POST',
+                        datatype: "JSON",
+                        data:
+                        {
+                            html_container_id:'#dealer_id',
+                            outlet_id:outlet_id
+                        },
+                        success: function (data, status)
+                        {
+                            $('#dealer_id_container').show();
+                        },
+                        error: function (xhr, desc, err)
+                        {
+                            console.log("error");
+                        }
+                    });
+            }
+            else
+            {
+                $('#dealer_id_container').hide();
+            }
+        });
+
         if(item_id>0)
         {
             previous_visit();
@@ -168,6 +192,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             previous_visit();
         });
     });
+
+
+
     function previous_visit()
     {
         $("#visit_head_container").html("");
@@ -209,37 +236,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         console.log("error");
                     }
                 });
-        }
-    }
-    function dealer()
-    {
-        $("#dealer_id").val("");
-        var outlet_id=$('#outlet_id').val();
-        if(outlet_id>0)
-        {
-            $.ajax(
-                {
-                    url: '<?php echo site_url('common_controller/get_dropdown_dealers_by_outlet_id'); ?>',
-                    type: 'POST',
-                    datatype: "JSON",
-                    data:
-                    {
-                        html_container_id:'#dealer_id',
-                        outlet_id:outlet_id
-                    },
-                    success: function (data, status)
-                    {
-                        $('#dealer_id_container').show();
-                    },
-                    error: function (xhr, desc, err)
-                    {
-                        console.log("error");
-                    }
-                });
-        }
-        else
-        {
-            $('#dealer_id_container').hide();
         }
     }
 </script>
