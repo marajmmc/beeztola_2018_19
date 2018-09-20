@@ -181,7 +181,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                                 <label class="quantity_approve_kg " id="quantity_approve_kg_<?php echo $index+1;?>"> <?php echo System_helper::get_string_kg($quantity_approve_kg);?> </label>
                             </td>
                             <td>
-                                <input type="text" value="<?php echo System_helper::get_string_quantity($quantity_receive); ?>" id="quantity_receive_<?php echo $index+1;?>" data-current-id="<?php echo $index+1;?>" name="items[<?php echo $index+1;?>][quantity_receive]" class="form-control float_type_positive quantity_receive" />
+                                <input type="text" value="<?php echo System_helper::get_string_quantity($quantity_receive); ?>" id="quantity_receive_<?php echo $index+1;?>" data-current-id="<?php echo $index+1;?>" name="items[<?php echo $index+1;?>][quantity_receive]" class="form-control integer_type_positive quantity_receive" />
                             </td>
                             <td class="text-right">
                                 <label class="" id="quantity_receive_kg_<?php echo $index+1;?>"> <?php echo System_helper::get_string_kg($quantity_receive_kg);?> </label>
