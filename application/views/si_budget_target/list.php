@@ -92,22 +92,20 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 width: '100%',
                 source: dataAdapter,
-                pageable: true,
                 filterable: true,
                 sortable: true,
                 showfilterrow: true,
                 columnsresize: true,
-                pagesize:50,
-                pagesizeoptions: ['50', '100', '200','300','500','1000','5000'],
                 selectionmode: 'singlerow',
                 altrows: true,
-                height: '350px',
+                height: '250px',
                 columnsreorder: true,
                 enablebrowserselection: true,
                 columns:
                 [
                     { text: '<?php echo $CI->lang->line('LABEL_FISCAL_YEAR'); ?>', dataField: 'fiscal_year',width:'80',filtertype: 'list'},
-                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name',width:'200',filtertype: 'list'}
+                    { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name',width:'200',filtertype: 'list'},
+                    { text: '<?php echo $CI->lang->line('LABEL_STATUS_BUDGET_FORWARD'); ?>', dataField: 'status_budget_forward', width:'100',filtertype: 'list'}
                 ]
             });
     });

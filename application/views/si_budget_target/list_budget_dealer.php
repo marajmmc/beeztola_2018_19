@@ -87,23 +87,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 width: '100%',
                 source: dataAdapter,
-                pageable: true,
                 filterable: true,
                 sortable: true,
                 showfilterrow: true,
                 columnsresize: true,
-                pagesize:50,
-                pagesizeoptions: ['50', '100', '200','300','500','1000','5000'],
                 selectionmode: 'singlerow',
                 altrows: true,
-                height: '350px',
+                height: '450px',
                 columnsreorder: true,
                 enablebrowserselection: true,
                 columns:
                 [
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'farmer_name', width:200},
                     { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:150},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>', dataField: 'status', width:100,filtertype: 'list'}
+                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>', dataField: 'status', width:100,filtertype: 'list'},
+                    { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT_BUDGET'); ?>', dataField: 'revision_count_budget', width:'100',filtertype: 'list',cellsAlign:'right'}
                 ]
             });
     });
