@@ -15,7 +15,7 @@ $CI=& get_instance();
             <tr>
                 <th style="width: 5px;">SL#</th>
                 <th style="width: 300px;">Visit Head</th>
-                <th>Previous Discussion</th>
+                <th>Previous Visit (<?php echo System_helper::display_date($item_previous['date'])?>)</th>
                 <th>Discussion</th>
             </tr>
             </thead>

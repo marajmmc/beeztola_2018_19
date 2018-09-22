@@ -94,7 +94,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
             </div>
         </div>
-        <div style="<?php if(sizeof($CI->user_outlets)>1){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
+        <div style="<?php if(sizeof($CI->user_outlets)>1 && !($item['id']>0)){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DEALER');?><span style="color:#FF0000">*</span></label>
             </div>
@@ -136,15 +136,84 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
     </div>
     <div class="clearfix"></div>
-    <div id="visit_head_container"></div>
+    <div id="visit_head_container">
+        <?php
+        if($item['id']>0)
+        {
+            ?>
+            <div class="row widget">
+                <div class="widget-header">
+                    <div class="title">
+                        <?php echo $title; ?>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row show-grid">
+                    <table class="table table-bordered table-responsive">
+                        <thead>
+                        <tr>
+                            <th style="width: 5px;">SL#</th>
+                            <th style="width: 300px;">Visit Head</th>
+                            <th>Previous Visit (<?php echo System_helper::display_date($item_previous['date'])?>)</th>
+                            <th>Discussion</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        $field_visit_data_previous=array();
+                        if($item_previous['field_visit_data'])
+                        {
+                            $field_visit_data_previous=json_decode($item_previous['field_visit_data'],true);
+                        }
+                        $field_visit_data=array();
+                        if($item['field_visit_data'])
+                        {
+                            $field_visit_data=json_decode($item['field_visit_data'],true);
+                        }
+
+                        $serial=0;
+                        foreach($heads as $head)
+                        {
+                            ++$serial;
+                            ?>
+                            <tr>
+                                <td><?php echo $serial?></td>
+                                <td><?php echo $head['name'];?></td>
+                                <td><?php echo isset($field_visit_data_previous[$head['id']])?$field_visit_data_previous[$head['id']]:'';?></td>
+                                <td><textarea name="heads[<?php echo $head['id'];?>]" id="" class="form-control" ><?php echo isset($field_visit_data[$head['id']])?$field_visit_data[$head['id']]:'';?></textarea></td>
+                            </tr>
+                        <?php
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php
+        }
+        ?>
+    </div>
 </form>
 <script>
     jQuery(document).ready(function()
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
+        var item_id="<?php echo $item['id']?>";
+        if(!(item_id>0))
+        {
+            $(".datepicker").on('change', function(){
+                $("#outlet_id").val("");
+                $("#dealer_id").val("");
+                $('#dealer_id_container').hide();
+                $("#visit_head_container").html("");
+            });
+        }
 
-0        $(".outlet_id").on('change', function(){
+        $(document).on('change','#outlet_id',function()
+        {
+            $('#dealer_id_container').hide();
+            $("#visit_head_container").html("");
             $("#dealer_id").val("");
             var outlet_id=$('#outlet_id').val();
             if(outlet_id>0)
@@ -169,56 +238,31 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         }
                     });
             }
-            else
-            {
-                $('#dealer_id_container').hide();
-            }
-        });
-
-        if(item_id>0)
-        {
-            previous_visit();
-        }
-        $(".datepicker").on('change', function(){
-            previous_visit();
-        });
-        $(document).on('change','#outlet_id',function()
-        {
-            dealer();
-            previous_visit();
         });
         $(document).on('change','#dealer_id',function()
         {
-            previous_visit();
-        });
-    });
+            $("#visit_head_container").html("");
+            var outlet_id=$('#outlet_id').val();
 
-
-
-    function previous_visit()
-    {
-        $("#visit_head_container").html("");
-        var outlet_id=$('#outlet_id').val();
-
-        if($('#dealer_id').val()!==undefined)
-        {
-            var dealer_id=$('#dealer_id').val();
-        }
-        else
-        {
-            var dealer_id="<?php echo $item['dealer_id']?>";
-        }
-        if($('#date').val()!==undefined)
-        {
-            var date=$('#date').val();
-        }
-        else
-        {
-            var date="<?php echo System_helper::display_date($item['date']);?>";
-        }
-        if(dealer_id>0)
-        {
-            $.ajax(
+            if($('#dealer_id').val()!==undefined)
+            {
+                var dealer_id=$('#dealer_id').val();
+            }
+            else
+            {
+                var dealer_id="<?php echo $item['dealer_id']?>";
+            }
+            if($('#date').val()!==undefined)
+            {
+                var date=$('#date').val();
+            }
+            else
+            {
+                var date="<?php echo System_helper::display_date($item['date']);?>";
+            }
+            if(dealer_id>0)
+            {
+                $.ajax(
                 {
                     url: '<?php echo site_url($CI->controller_url.'/visit_head'); ?>',
                     type: 'POST',
@@ -229,13 +273,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     },
                     success: function (data, status)
                     {
-                        $('#dealer_id_container').show();
+
                     },
                     error: function (xhr, desc, err)
                     {
                         console.log("error");
                     }
                 });
-        }
-    }
+            }
+        });
+    });
 </script>

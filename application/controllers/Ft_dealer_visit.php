@@ -263,7 +263,7 @@ class Ft_dealer_visit extends Root_Controller
 
             $data['title']="Edit Field Visit";
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
@@ -295,7 +295,7 @@ class Ft_dealer_visit extends Root_Controller
         }
         $data['title']="Field Visit Head";
         $ajax['status']=true;
-        $ajax['system_content'][]=array("id"=>"#visit_head_container","html"=>$this->load->view($this->controller_url."/add_edit_head",$data,true));
+        $ajax['system_content'][]=array("id"=>"#visit_head_container","html"=>$this->load->view($this->controller_url."/visit_head",$data,true));
         if($this->message)
         {
             $ajax['system_message']=$this->message;
