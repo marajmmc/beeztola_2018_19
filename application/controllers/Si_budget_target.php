@@ -81,6 +81,14 @@ class Si_budget_target extends Root_Controller
         {
             $this->system_save_budget_outlet();
         }
+        elseif($action=="forward_budget")
+        {
+            $this->system_forward_budget($id,$id1);
+        }
+        elseif($action=="save_forward_budget")
+        {
+            $this->system_save_forward_budget();
+        }
         else
         {
             $this->system_list();
@@ -193,21 +201,6 @@ class Si_budget_target extends Root_Controller
         }
         $this->json_return($items);
     }
-    private function get_dealers($outlet_id)
-    {
-        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
-        $this->db->select('farmer_outlet.farmer_id');
-        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id=farmer_outlet.farmer_id','INNER');
-        $this->db->select('farmer.name farmer_name,farmer.mobile_no,farmer.status');
-        if(!(isset($this->permissions['action3'])&&($this->permissions['action3']==1)))
-        {
-            $this->db->where('farmer.status',$this->config->item('system_status_active'));
-        }
-        $this->db->where('farmer.farmer_type_id > ',1);
-        $this->db->where('farmer_outlet.revision',1);
-        $this->db->where('farmer_outlet.outlet_id',$outlet_id);
-        return $this->db->get()->result_array();
-    }
     private function system_list_budget_dealer($fiscal_year_id=0,$outlet_id=0)
     {
         $user = User_helper::get_user();
@@ -225,7 +218,7 @@ class Si_budget_target extends Root_Controller
             //validation fiscal year
             if(!Budget_helper::check_validation_fiscal_year($fiscal_year_id))
             {
-                System_helper::invalid_try('list_budget_dealer',$fiscal_year_id,'Invalid Fiscal year');
+                System_helper::invalid_try(__FUNCTION__,$fiscal_year_id,'Invalid Fiscal year');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Fiscal Year';
                 $this->json_return($ajax);
@@ -233,7 +226,7 @@ class Si_budget_target extends Root_Controller
             //validation assigned outlet
             if(!in_array($outlet_id, $this->user_outlet_ids))
             {
-                System_helper::invalid_try('list_budget_dealer',$outlet_id,'Outlet Not Assigned');
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Outlet Not Assigned');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Outlet.';
                 $this->json_return($ajax);
@@ -329,7 +322,7 @@ class Si_budget_target extends Root_Controller
             //validation fiscal year
             if(!Budget_helper::check_validation_fiscal_year($fiscal_year_id))
             {
-                System_helper::invalid_try('list_budget_dealer',$fiscal_year_id,'Invalid Fiscal year');
+                System_helper::invalid_try(__FUNCTION__,$fiscal_year_id,'Invalid Fiscal year');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Fiscal Year';
                 $this->json_return($ajax);
@@ -337,7 +330,7 @@ class Si_budget_target extends Root_Controller
             //validation assigned outlet
             if(!in_array($outlet_id, $this->user_outlet_ids))
             {
-                System_helper::invalid_try('list_budget_dealer',$outlet_id,'Outlet Not Assigned');
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Outlet Not Assigned');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Outlet.';
                 $this->json_return($ajax);
@@ -368,7 +361,7 @@ class Si_budget_target extends Root_Controller
             }
             if(!$valid_dealer)
             {
-                System_helper::invalid_try('edit_budget_dealer',$outlet_id,'Invalid Dealer-'.$dealer_id);
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Invalid Dealer-'.$dealer_id);
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Dealer.';
                 $this->json_return($ajax);
@@ -483,7 +476,7 @@ class Si_budget_target extends Root_Controller
         //validation fiscal year
         if(!Budget_helper::check_validation_fiscal_year($item_head['fiscal_year_id']))
         {
-            System_helper::invalid_try('list_budget_dealer',$item_head['fiscal_year_id'],'Invalid Fiscal year');
+            System_helper::invalid_try(__FUNCTION__,$item_head['fiscal_year_id'],'Invalid Fiscal year');
             $ajax['status']=false;
             $ajax['system_message']='Invalid Fiscal Year';
             $this->json_return($ajax);
@@ -491,7 +484,7 @@ class Si_budget_target extends Root_Controller
         //validation assigned outlet
         if(!in_array($item_head['outlet_id'], $this->user_outlet_ids))
         {
-            System_helper::invalid_try('list_budget_dealer',$item_head['outlet_id'],'Outlet Not Assigned');
+            System_helper::invalid_try(__FUNCTION__,$item_head['outlet_id'],'Outlet Not Assigned');
             $ajax['status']=false;
             $ajax['system_message']='Invalid Outlet.';
             $this->json_return($ajax);
@@ -582,7 +575,7 @@ class Si_budget_target extends Root_Controller
             //validation fiscal year
             if(!Budget_helper::check_validation_fiscal_year($fiscal_year_id))
             {
-                System_helper::invalid_try('list_budget_dealer',$fiscal_year_id,'Invalid Fiscal year');
+                System_helper::invalid_try(__FUNCTION__,$fiscal_year_id,'Invalid Fiscal year');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Fiscal Year';
                 $this->json_return($ajax);
@@ -590,10 +583,21 @@ class Si_budget_target extends Root_Controller
             //validation assigned outlet
             if(!in_array($outlet_id, $this->user_outlet_ids))
             {
-                System_helper::invalid_try('list_budget_dealer',$outlet_id,'Outlet Not Assigned');
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Outlet Not Assigned');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Outlet.';
                 $this->json_return($ajax);
+            }
+            //validation forward
+            $info_budget_target=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            if(($info_budget_target['status_budget_forward']==$this->config->item('system_status_forwarded')))
+            {
+                if(!(isset($this->permissions['action3']) && ($this->permissions['action3']==1)))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Budget Already Forwarded.';
+                    $this->json_return($ajax);
+                }
             }
 
             $data['system_preference_items']= $this->get_preference_headers($method);
@@ -678,7 +682,7 @@ class Si_budget_target extends Root_Controller
             //validation fiscal year
             if(!Budget_helper::check_validation_fiscal_year($fiscal_year_id))
             {
-                System_helper::invalid_try('list_budget_dealer',$fiscal_year_id,'Invalid Fiscal year');
+                System_helper::invalid_try(__FUNCTION__,$fiscal_year_id,'Invalid Fiscal year');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Fiscal Year';
                 $this->json_return($ajax);
@@ -686,10 +690,21 @@ class Si_budget_target extends Root_Controller
             //validation assigned outlet
             if(!in_array($outlet_id, $this->user_outlet_ids))
             {
-                System_helper::invalid_try('list_budget_dealer',$outlet_id,'Outlet Not Assigned');
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Outlet Not Assigned');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Outlet.';
                 $this->json_return($ajax);
+            }
+            //validation forward
+            $info_budget_target=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            if(($info_budget_target['status_budget_forward']==$this->config->item('system_status_forwarded')))
+            {
+                if(!(isset($this->permissions['action3']) && ($this->permissions['action3']==1)))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Budget Already Forwarded.';
+                    $this->json_return($ajax);
+                }
             }
             $data['fiscal_years_previous_sales']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
             $data['fiscal_year']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
@@ -824,7 +839,7 @@ class Si_budget_target extends Root_Controller
         //validation fiscal year
         if(!Budget_helper::check_validation_fiscal_year($item_head['fiscal_year_id']))
         {
-            System_helper::invalid_try('list_budget_dealer',$item_head['fiscal_year_id'],'Invalid Fiscal year');
+            System_helper::invalid_try(__FUNCTION__,$item_head['fiscal_year_id'],'Invalid Fiscal year');
             $ajax['status']=false;
             $ajax['system_message']='Invalid Fiscal Year';
             $this->json_return($ajax);
@@ -832,7 +847,7 @@ class Si_budget_target extends Root_Controller
         //validation assigned outlet
         if(!in_array($item_head['outlet_id'], $this->user_outlet_ids))
         {
-            System_helper::invalid_try('list_budget_dealer',$item_head['outlet_id'],'Outlet Not Assigned');
+            System_helper::invalid_try(__FUNCTION__,$item_head['outlet_id'],'Outlet Not Assigned');
             $ajax['status']=false;
             $ajax['system_message']='Invalid Outlet.';
             $this->json_return($ajax);
@@ -904,6 +919,134 @@ class Si_budget_target extends Root_Controller
             $this->json_return($ajax);
         }
     }
+    private function system_forward_budget($fiscal_year_id=0,$outlet_id=0)
+    {
+        $user = User_helper::get_user();
+        $method='list_budget_dealer';
+        if(isset($this->permissions['action7'])&&($this->permissions['action7']==1))
+        {
+            if(!($fiscal_year_id>0))
+            {
+                $fiscal_year_id=$this->input->post('fiscal_year_id');
+            }
+            if(!($outlet_id>0))
+            {
+                $outlet_id=$this->input->post('outlet_id');
+            }
+            //validation fiscal year
+            if(!Budget_helper::check_validation_fiscal_year($fiscal_year_id))
+            {
+                System_helper::invalid_try(__FUNCTION__,$fiscal_year_id,'Invalid Fiscal year');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Fiscal Year';
+                $this->json_return($ajax);
+            }
+            //validation assigned outlet
+            if(!in_array($outlet_id, $this->user_outlet_ids))
+            {
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Outlet Not Assigned');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Outlet.';
+                $this->json_return($ajax);
+            }
+            //validation forward
+            $info_budget_target=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            if(($info_budget_target['status_budget_forward']==$this->config->item('system_status_forwarded')))
+            {
+                if(!(isset($this->permissions['action3']) && ($this->permissions['action3']==1)))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Budget Already Forwarded.';
+                    $this->json_return($ajax);
+                }
+            }
+           // $data['system_preference_items']= $this->get_preference_headers($method);
+            $data['fiscal_year_budget_target']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
+            $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
+            $data['title']="Forward/Complete budget";
+            $data['options']['fiscal_year_id']=$fiscal_year_id;
+            $data['options']['outlet_id']=$outlet_id;
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/forward_budget",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/forward_budget/'.$fiscal_year_id.'/'.$outlet_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_forward_budget()
+    {
+        $user = User_helper::get_user();
+        $time=time();
+        $item_head=$this->input->post('item');
+        if(!((isset($this->permissions['action7']) && ($this->permissions['action7']==1))))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        if($item_head['status_budget_forward']!=$this->config->item('system_status_forwarded'))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Select Forward Option.';
+            $this->json_return($ajax);
+        }
+        //validation fiscal year
+        if(!Budget_helper::check_validation_fiscal_year($item_head['fiscal_year_id']))
+        {
+            System_helper::invalid_try(__FUNCTION__,$item_head['fiscal_year_id'],'Invalid Fiscal year');
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Fiscal Year';
+            $this->json_return($ajax);
+        }
+        //validation assigned outlet
+        if(!in_array($item_head['outlet_id'], $this->user_outlet_ids))
+        {
+            System_helper::invalid_try(__FUNCTION__,$item_head['outlet_id'],'Outlet Not Assigned');
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Outlet.';
+            $this->json_return($ajax);
+        }
+        //validation forward
+        $info_budget_target=$this->get_info_budget_target($item_head['fiscal_year_id'],$item_head['outlet_id']);
+        if(($info_budget_target['status_budget_forward']==$this->config->item('system_status_forwarded')))
+        {
+            if(!(isset($this->permissions['action3']) && ($this->permissions['action3']==1)))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Budget Already Forwarded.';
+                $this->json_return($ajax);
+            }
+        }
+
+        $this->db->trans_start();  //DB Transaction Handle START
+        $data=array();
+        $data['status_budget_forward']=$item_head['status_budget_forward'];
+        $data['date_budget_forwarded']=$time;
+        $data['user_budget_forwarded']=$user->user_id;
+        Query_helper::update($this->config->item('table_pos_si_budget_target'),$data,array('id='.$info_budget_target['id']));
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
     private function get_info_budget_target($fiscal_year_id,$outlet_id)
     {
 
@@ -920,6 +1063,22 @@ class Si_budget_target extends Root_Controller
             $info=Query_helper::get_info($this->config->item('table_pos_si_budget_target'),'*',array('id ='.$id),1);
         }
         return $info;
+    }
+
+    private function get_dealers($outlet_id)
+    {
+        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+        $this->db->select('farmer_outlet.farmer_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id=farmer_outlet.farmer_id','INNER');
+        $this->db->select('farmer.name farmer_name,farmer.mobile_no,farmer.status');
+        if(!(isset($this->permissions['action3'])&&($this->permissions['action3']==1)))
+        {
+            $this->db->where('farmer.status',$this->config->item('system_status_active'));
+        }
+        $this->db->where('farmer.farmer_type_id > ',1);
+        $this->db->where('farmer_outlet.revision',1);
+        $this->db->where('farmer_outlet.outlet_id',$outlet_id);
+        return $this->db->get()->result_array();
     }
     private function get_sales_previous_years_dealers($fiscal_years,$dealer_ids)
     {

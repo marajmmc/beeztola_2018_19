@@ -21,16 +21,6 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(is
 
     );
 }
-if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>$CI->lang->line('ACTION_DETAILS'),
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/details')
-    );
-}
 if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
 {
     $action_buttons[]=array
@@ -39,6 +29,16 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
         'label'=>'Forward Budget',
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/forward_budget')
+    );
+}
+if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
+{
+    $action_buttons[]=array
+    (
+        'type'=>'button',
+        'label'=>$CI->lang->line('ACTION_DETAILS'),
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/details')
     );
 }
 $action_buttons[]=array
