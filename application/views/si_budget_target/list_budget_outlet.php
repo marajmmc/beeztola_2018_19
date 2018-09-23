@@ -38,7 +38,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['fiscal_year']['name'];?></label>
+            <label class="control-label"><?php echo $fiscal_year['name'];?></label>
         </div>
     </div>
     <div style="" class="row show-grid">
@@ -46,7 +46,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['outlet']['name'];?></label>
+            <label class="control-label"><?php echo $outlet['name'];?></label>
         </div>
     </div>
     <div class="col-xs-12" id="system_jqx_container">
@@ -103,7 +103,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 [
                     { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'crop_id',width:'50',cellsAlign:'right'},
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_NAME'); ?>', dataField: 'crop_name', width:100},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>', dataField: 'status_budget', width:100,filtertype: 'list'}
+                    { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT_BUDGET'); ?>', dataField: 'revision_count_budget', width:'100',filtertype: 'list',cellsAlign:'right'}
                 ]
             });
     });

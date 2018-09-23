@@ -86,7 +86,7 @@ class Si_budget_target extends Root_Controller
             $this->system_list();
         }
     }
-    private function get_preference_headers($method,$dealers=array())
+    private function get_preference_headers($method)
     {
         $data=array();
         if($method=='list')
@@ -111,23 +111,22 @@ class Si_budget_target extends Root_Controller
             $data['crop_type_name']= 1;
             $data['variety_name']= 1;
             $data['variety_id']= 1;
+            //more datas
             $data['quantity_budget']= 1;
         }
         else if($method=='list_budget_outlet')
         {
             $data['crop_id']= 1;
             $data['crop_name']= 1;
-            $data['status_budget']= 1;
+            $data['revision_count_budget']= 1;
         }
         else if($method=='edit_budget_outlet')
         {
             $data['crop_type_name']= 1;
             $data['variety_name']= 1;
             $data['variety_id']= 1;
-            foreach($dealers as $dealer)
-            {
-                $data['quantity_budget_dealer_'.$dealer['farmer_id']]= 1;
-            }
+            //more data
+            $data['quantity_budget_dealer_total']= 1;
             $data['quantity_budget']= 1;
         }
         return $data;
@@ -464,7 +463,6 @@ class Si_budget_target extends Root_Controller
             {
                 $item['quantity_budget']='';
             }
-
             $items[]=$item;
         }
 
@@ -599,8 +597,8 @@ class Si_budget_target extends Root_Controller
             }
 
             $data['system_preference_items']= $this->get_preference_headers($method);
-            $data['item']['fiscal_year']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
-            $data['item']['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
+            $data['fiscal_year']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
+            $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
             $data['title']="Yearly Budget Crop list";
             $data['options']['fiscal_year_id']=$fiscal_year_id;
             $data['options']['outlet_id']=$outlet_id;
@@ -626,11 +624,35 @@ class Si_budget_target extends Root_Controller
         $fiscal_year_id=$this->input->post('fiscal_year_id');
         $outlet_id=$this->input->post('outlet_id');
 
+        //get budget revision
+        $this->db->from($this->config->item('table_pos_si_budget_target_outlet').' budget_target_outlet');
+        $this->db->select('MAX(budget_target_outlet.revision_count_budget) revision_count_budget');
+
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = budget_target_outlet.variety_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->select('crop_type.crop_id');
+        $this->db->where('budget_target_outlet.fiscal_year_id',$fiscal_year_id);
+        $this->db->where('budget_target_outlet.outlet_id',$outlet_id);
+        $this->db->group_by('crop_type.crop_id');
+        $results=$this->db->get()->result_array();
+        $budgeted=array();
+        foreach($results as $result)
+        {
+            $budgeted[$result['crop_id']]=$result['revision_count_budget'];
+        }
+        //crop list
         $results=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),array('id crop_id','name crop_name'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC','id ASC'));
         foreach($results as $crop)
         {
             $item=$crop;
-            $item['status_budget']=$this->lang->line('LABEL_STATUS_NOT_DONE');
+            if(isset($budgeted[$crop['crop_id']]))
+            {
+                $item['revision_count_budget']=$budgeted[$crop['crop_id']];
+            }
+            else
+            {
+                $item['revision_count_budget']=0;
+            }
             $items[]=$item;
         }
         $this->json_return($items);
@@ -669,13 +691,14 @@ class Si_budget_target extends Root_Controller
                 $ajax['system_message']='Invalid Outlet.';
                 $this->json_return($ajax);
             }
-            $data['item']['fiscal_year']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
-            $data['item']['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
-            $data['item']['crop']=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),'*',array('id ='.$crop_id),1);
+            $data['fiscal_years_previous_sales']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
+            $data['fiscal_year']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
+            $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
+            $data['crop']=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),'*',array('id ='.$crop_id),1);
             $data['dealers']=$this->get_dealers($outlet_id);
 
-            $data['system_preference_items']= $this->get_preference_headers($method,$data['dealers']);
-            $data['title']="Yearly Budget for (".$data['item']['crop']['name'].')';
+            $data['system_preference_items']= $this->get_preference_headers($method);
+            $data['title']="Yearly Budget for (".$data['crop']['name'].')';
             $data['options']['fiscal_year_id']=$fiscal_year_id;
             $data['options']['outlet_id']=$outlet_id;
             $data['options']['crop_id']=$crop_id;
@@ -703,7 +726,25 @@ class Si_budget_target extends Root_Controller
         $crop_id=$this->input->post('crop_id');
 
         $dealers=$this->get_dealers($outlet_id);
+        //dealers budget
+        $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_dealer'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
+        $budget_dealers=array();
+        foreach($results as $result)
+        {
+            $budget_dealers[$result['dealer_id']][$result['variety_id']]=$result;
+        }
+        $fiscal_years_previous_sales=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
+        $sales_previous=$this->get_sales_previous_years_outlet($fiscal_years_previous_sales,$outlet_id);
 
+        //old items
+        $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_outlet'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
+        $items_old=array();
+        foreach($results as $result)
+        {
+            $items_old[$result['variety_id']]=$result;
+        }
+
+        //variety lists
         $this->db->from($this->config->item('table_login_setup_classification_varieties').' v');
         $this->db->select('v.id variety_id,v.name variety_name');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
@@ -721,11 +762,48 @@ class Si_budget_target extends Root_Controller
         foreach($results as $result)
         {
             $item=$result;
+            foreach($fiscal_years_previous_sales as $fy)
+            {
+                if(isset($sales_previous[$fy['id']][$result['variety_id']]))
+                {
+                    $item['quantity_sale_'.$fy['id']]=$sales_previous[$fy['id']][$result['variety_id']]/1000;
+                }
+                else
+                {
+                    $item['quantity_sale_'.$fy['id']]=0;
+                }
+            }
+
+            $quantity_budget_dealer_total=0;
             foreach($dealers as $dealer)
             {
-                $item['quantity_budget_dealer_'.$dealer['farmer_id']]= 1;
+                //$item['quantity_budget_dealer_'.$dealer['farmer_id']]= 1;
+                if(isset($budget_dealers[$dealer['farmer_id']][$result['variety_id']]))
+                {
+                    $item['quantity_budget_dealer_'.$dealer['farmer_id']]= $budget_dealers[$dealer['farmer_id']][$result['variety_id']]['quantity_budget'];
+                    $quantity_budget_dealer_total+=$budget_dealers[$dealer['farmer_id']][$result['variety_id']]['quantity_budget'];
+                }
+                else
+                {
+                    $item['quantity_budget_dealer_'.$dealer['farmer_id']]= 0;
+                }
             }
-            $item['quantity_budget']='';
+            $item['quantity_budget_dealer_total']= $quantity_budget_dealer_total;
+            if(isset($items_old[$result['variety_id']]))
+            {
+                if($items_old[$result['variety_id']]['quantity_budget']>0)
+                {
+                    $item['quantity_budget']=$items_old[$result['variety_id']]['quantity_budget'];
+                }
+                else
+                {
+                    $item['quantity_budget']='';
+                }
+            }
+            else
+            {
+                $item['quantity_budget']='';
+            }
             $items[]=$item;
         }
 
@@ -733,9 +811,96 @@ class Si_budget_target extends Root_Controller
     }
     private function system_save_budget_outlet()
     {
+        $user = User_helper::get_user();
+        $time=time();
+        $item_head=$this->input->post('item');
+        $items=$this->input->post('items');
+        if(!((isset($this->permissions['action1']) && ($this->permissions['action1']==1))||(isset($this->permissions['action2']) && ($this->permissions['action2']==1))))
         {
             $ajax['status']=false;
-            $ajax['system_message']="under progress2";
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        //validation fiscal year
+        if(!Budget_helper::check_validation_fiscal_year($item_head['fiscal_year_id']))
+        {
+            System_helper::invalid_try('list_budget_dealer',$item_head['fiscal_year_id'],'Invalid Fiscal year');
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Fiscal Year';
+            $this->json_return($ajax);
+        }
+        //validation assigned outlet
+        if(!in_array($item_head['outlet_id'], $this->user_outlet_ids))
+        {
+            System_helper::invalid_try('list_budget_dealer',$item_head['outlet_id'],'Outlet Not Assigned');
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Outlet.';
+            $this->json_return($ajax);
+        }
+        //validation forward
+        $info_budget_target=$this->get_info_budget_target($item_head['fiscal_year_id'],$item_head['outlet_id']);
+        if(($info_budget_target['status_budget_forward']==$this->config->item('system_status_forwarded')))
+        {
+            if(!(isset($this->permissions['action3']) && ($this->permissions['action3']==1)))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Budget Already Forwarded.';
+                $this->json_return($ajax);
+            }
+        }
+        //old items
+        $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_outlet'),'*',array('fiscal_year_id ='.$item_head['fiscal_year_id'],'outlet_id ='.$item_head['outlet_id']));
+        $items_old=array();
+        foreach($results as $result)
+        {
+            $items_old[$result['variety_id']]=$result;
+        }
+        $this->db->trans_start();  //DB Transaction Handle START
+        foreach($items as $variety_id=>$quantity_budget)
+        {
+            if(isset($items_old[$variety_id]))
+            {
+                if($items_old[$variety_id]['quantity_budget']!=$quantity_budget)
+                {
+                    $this->db->where('id',$items_old[$variety_id]['id']);
+                    $this->db->set('revision_count_budget','revision_count_budget+1',false);
+                    $this->db->set('quantity_budget',$quantity_budget);
+                    $this->db->set('date_updated_budget',$time);
+                    $this->db->set('user_updated_budget',$user->user_id);
+                    $this->db->update($this->config->item('table_pos_si_budget_target_outlet'));
+                }
+            }
+            else
+            {
+                $data=array();
+                $data['fiscal_year_id']=$item_head['fiscal_year_id'];
+                $data['outlet_id']=$item_head['outlet_id'];
+                $data['variety_id']=$variety_id;
+                if($quantity_budget>0)
+                {
+                    $data['quantity_budget']=$quantity_budget;
+                    $data['revision_count_budget']=1;
+                }
+                else
+                {
+                    $data['quantity_budget']=0;
+                }
+                $data['date_updated_budget'] = $time;
+                $data['user_updated_budget'] = $user->user_id;
+                Query_helper::add($this->config->item('table_pos_si_budget_target_outlet'),$data,false);
+            }
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list_budget_outlet($item_head['fiscal_year_id'],$item_head['outlet_id']);
+
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
             $this->json_return($ajax);
         }
     }
@@ -780,7 +945,32 @@ class Si_budget_target extends Root_Controller
             }
         }
         return $sales;
+    }
+    private function get_sales_previous_years_outlet($fiscal_years,$outlet_id)
+    {
+        $sales=array();
+        foreach($fiscal_years as $fy)
+        {
+            $this->db->from($this->config->item('table_pos_sale_details').' details');
+            $this->db->select('details.variety_id');
+            $this->db->select('SUM(details.pack_size*details.quantity) quantity_sale');
+            $this->db->join($this->config->item('table_pos_sale').' sale','sale.id = details.sale_id','INNER');
+            $this->db->select('sale.outlet_id');
+
+            $this->db->where('sale.date_sale >=',$fy['date_start']);
+            $this->db->where('sale.date_sale <=',$fy['date_end']);
+            $this->db->where('sale.status',$this->config->item('system_status_active'));
+            $this->db->where('sale.outlet_id',$outlet_id);
+            $this->db->group_by('details.variety_id');
+            $results=$this->db->get()->result_array();
+            foreach($results as $result)
+            {
+                $sales[$fy['id']][$result['variety_id']]=$result['quantity_sale'];
+            }
+        }
+        return $sales;
 
     }
+
 
 }

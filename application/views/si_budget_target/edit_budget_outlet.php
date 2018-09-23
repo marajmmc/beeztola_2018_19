@@ -30,7 +30,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['fiscal_year']['name'];?></label>
+            <label class="control-label"><?php echo $fiscal_year['name'];?></label>
         </div>
     </div>
     <div style="" class="row show-grid">
@@ -38,7 +38,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['outlet']['name'];?></label>
+            <label class="control-label"><?php echo $outlet['name'];?></label>
         </div>
     </div>
     <div style="" class="row show-grid">
@@ -46,7 +46,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['crop']['name'];?></label>
+            <label class="control-label"><?php echo $crop['name'];?></label>
         </div>
     </div>
     <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_outlet');?>" method="post">
@@ -96,7 +96,19 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ?>
                 { name: '<?php echo $key ?>', type: 'string' },
                 <?php
-             }
+            }
+            foreach($dealers as $dealer)
+            {
+                    ?>
+                { name: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>', type: 'string' },
+                <?php
+            }
+            foreach($fiscal_years_previous_sales as $fy)
+            {
+                    ?>
+                { name: 'quantity_sale_<?php echo $fy['id']; ?>', type: 'string' },
+                <?php
+            }
             ?>
             ],
             id: 'id',
@@ -141,9 +153,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
             else if(column=='quantity_budget')
             {
-                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
             }
+            else if(column.substr(0,14)=='quantity_sale_')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_kg(value));
+                }
+            }
+            element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
             return element[0].outerHTML;
         };
 
@@ -170,14 +194,11 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',renderer: header_render,pinned:true,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',renderer: header_render,pinned:true,editable:false},
                     <?php
-                    $serial=0;
-                    foreach($dealers as $dealer)
-                    {
-                    ++$serial;
-                    ?>
-                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
-                    <?php
-                    }
+                        for($i=sizeof($fiscal_years_previous_sales)-1;$i>=0;$i--)
+                            //foreach($fiscal_years_previous_sales as $fy)
+                            {?>{text: 'Sales</br><?php echo $fiscal_years_previous_sales[$i]['name']; ?>', dataField: 'quantity_sale_<?php echo $fiscal_years_previous_sales[$i]['id']; ?>',width:'100',filterable: false,cellsrenderer: cellsrenderer,align:'center',cellsAlign:'right',editable:false},
+                        <?php
+                        }
                     ?>
                     { text: '<?php echo $CI->lang->line('LABEL_QUANTITY_BUDGET_KG'); ?>',datafield: 'quantity_budget', width: 100,filterable: false,renderer: header_render,cellsrenderer: cellsrenderer,cellsalign: 'right',columntype: 'custom',
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
@@ -191,7 +212,19 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             var selectedRowData = $('#system_jqx_container').jqxGrid('getrowdata', row);
                             return editor.find('input').val();
                         }
+                    },
+                    { text: 'Total</br>Budget', dataField: 'quantity_budget_dealer_total',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
+                    <?php
+                    $serial=0;
+                    foreach($dealers as $dealer)
+                    {
+                    ++$serial;
+                    ?>
+                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
+                    <?php
                     }
+                    ?>
+
                 ]
             });
     });

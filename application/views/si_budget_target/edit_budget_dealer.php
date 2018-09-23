@@ -122,14 +122,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 if(value==0)
                 {
-                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-                }
-                else
-                {
-
-                }
-                if(value==0)
-                {
                     element.html('');
                 }
                 else
