@@ -38,7 +38,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['fiscal_year']['name'];?></label>
+            <label class="control-label"><?php echo $fiscal_year_budget_target['name'];?></label>
         </div>
     </div>
     <div style="" class="row show-grid">
@@ -46,7 +46,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['outlet']['name'];?></label>
+            <label class="control-label"><?php echo $outlet['name'];?></label>
         </div>
     </div>
     <div class="col-xs-12" id="system_jqx_container">

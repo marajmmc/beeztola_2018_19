@@ -30,7 +30,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['fiscal_year']['name'];?></label>
+            <label class="control-label"><?php echo $fiscal_year_budget_target['name'];?></label>
         </div>
     </div>
     <div style="" class="row show-grid">
@@ -38,7 +38,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['outlet']['name'];?></label>
+            <label class="control-label"><?php echo $outlet['name'];?></label>
         </div>
     </div>
     <div style="" class="row show-grid">
@@ -46,7 +46,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DEALER_NAME');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $item['dealer']['farmer_name'];?></label>
+            <label class="control-label"><?php echo $dealer['farmer_name'];?></label>
         </div>
     </div>
     <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_dealer');?>" method="post">
@@ -97,7 +97,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ?>
                 { name: '<?php echo $key ?>', type: 'string' },
                 <?php
-             }
+            }
+            foreach($fiscal_years_previous_sales as $fy)
+            {
+                    ?>
+                { name: 'quantity_sale_<?php echo $fy['id']; ?>', type: 'string' },
+                <?php
+            }
             ?>
             ],
             id: 'id',
@@ -110,17 +116,28 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var element = $(defaultHtml);
             if(column=='quantity_budget')
             {
-                /*if(value==0)
+                element.html('<div class="jqxgrid_input">'+value+'</div>');
+            }
+            else if(column.substr(0,14)=='quantity_sale_')
+            {
+                if(value==0)
                 {
                     element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
                 }
                 else
                 {
-                    element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-                }*/
-                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-                element.html('<div class="jqxgrid_input">'+value+'</div>');
+
+                }
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_kg(value));
+                }
             }
+            element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
             return element[0].outerHTML;
         };
 
@@ -146,6 +163,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_NAME'); ?>', dataField: 'crop_name',width:'100', filtertype:'list',pinned:true,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',pinned:true,editable:false},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',pinned:true,editable:false},
+                    <?php
+                        for($i=sizeof($fiscal_years_previous_sales)-1;$i>=0;$i--)
+                        //foreach($fiscal_years_previous_sales as $fy)
+                            {?>{columngroup: 'previous_years',text: '<?php echo $fiscal_years_previous_sales[$i]['name']; ?>', dataField: 'quantity_sale_<?php echo $fiscal_years_previous_sales[$i]['id']; ?>',width:'100',filterable: false,cellsrenderer: cellsrenderer,align:'center',cellsAlign:'right',editable:false},
+                            <?php
+                        }
+                    ?>
                     { text: '<?php echo $CI->lang->line('LABEL_QUANTITY_BUDGET_KG'); ?>',datafield: 'quantity_budget', width: 100,filterable: false,cellsrenderer: cellsrenderer,cellsalign: 'right',columntype: 'custom',
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
@@ -159,6 +183,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             return editor.find('input').val();
                         }
                     }
+                ],
+                columngroups:
+                [
+                    { text: '<?php echo $CI->lang->line('LABEL_PREVIOUS_YEARS'); ?> Achieved', align: 'center', name: 'previous_years' }
                 ]
             });
     });
