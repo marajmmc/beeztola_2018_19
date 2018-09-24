@@ -372,6 +372,7 @@ class Si_budget_target extends Root_Controller
             $data['fiscal_year_budget_target']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
             $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
             $data['dealer']=$dealer_current;
+            $data['acres']=$this->get_acres($outlet_id);
 
             $data['system_preference_items']= $this->get_preference_headers($method);
             $data['title']="Yearly Budget for (".$dealer_current['farmer_name'].')';
@@ -711,6 +712,7 @@ class Si_budget_target extends Root_Controller
             $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
             $data['crop']=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),'*',array('id ='.$crop_id),1);
             $data['dealers']=$this->get_dealers($outlet_id);
+            $data['acres']=$this->get_acres($outlet_id,$crop_id);
 
             $data['system_preference_items']= $this->get_preference_headers($method);
             $data['title']="Yearly Budget for (".$data['crop']['name'].')';
@@ -1129,6 +1131,33 @@ class Si_budget_target extends Root_Controller
         }
         return $sales;
 
+    }
+    private function get_acres($outlet_id,$crop_id=0)
+    {
+        $results=Query_helper::get_info($this->config->item('table_login_csetup_cus_assign_upazillas'),array('upazilla_id'),array('customer_id ='.$outlet_id,'revision ='.'1'));
+        $upazilla_ids[0]=0;
+        foreach($results as $result)
+        {
+            $upazilla_ids[$result['upazilla_id']]=$result['upazilla_id'];
+        }
+        $this->db->from($this->config->item('table_login_setup_classification_type_acres').' acres');
+        $this->db->select('SUM(acres.quantity_acres) quantity',false);
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id=acres.type_id','INNER');
+        $this->db->select('crop_type.id crop_type_id, crop_type.name crop_type_name,crop_type.quantity_kg_acre');
+        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id=crop_type.crop_id','INNER');
+        $this->db->select('crop.id crop_id, crop.name crop_name');
+        $this->db->order_by('crop.ordering');
+        $this->db->order_by('crop.id');
+        $this->db->order_by('crop_type.ordering');
+        $this->db->order_by('crop_type.id');
+        if($crop_id>0)
+        {
+            $this->db->where('crop.id',$crop_id);
+        }
+        $this->db->where_in('acres.upazilla_id',$upazilla_ids);
+        $this->db->group_by('crop_type.id');
+        $results=$this->db->get()->result_array();
+        return $results;
     }
 
 

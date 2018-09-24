@@ -15,7 +15,6 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(is
         'id'=>'button_action_save_jqx'
     );
 }
-
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
 <div class="row widget">
@@ -47,6 +46,43 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="col-sm-4 col-xs-8">
             <label class="control-label"><?php echo $dealer['farmer_name'];?></label>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse3" href="#">+ Acres Information</a></label>
+            </h4>
+        </div>
+        <div id="collapse3" class="panel-collapse collapse">
+            <table class="table table-bordered table-responsive system_table_details_view">
+                <thead>
+                    <tr>
+                        <th><label class="control-label"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label></th>
+                        <th><label class="control-label"><?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME');?></label></th>
+                        <th><label class="control-label">Acres</label></th>
+                        <th><label class="control-label">Seeds per Acre(kg)</label></th>
+                        <th><label class="control-label">Total Seeds(kg)</label></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                foreach($acres as $result)
+                {
+                ?>
+                    <tr>
+                        <td><?php echo $result['crop_name']; ?></td>
+                        <td><?php echo $result['crop_type_name']; ?></td>
+                        <td class="text-right"><?php echo number_format($result['quantity'],3,'.',''); ?></td>
+                        <td class="text-right"><?php echo number_format($result['quantity_kg_acre'],3,'.',''); ?></td>
+                        <td class="text-right"><?php echo number_format($result['quantity']*$result['quantity_kg_acre'],3,'.',''); ?></td>
+                    </tr>
+                <?php
+                }
+                ?>
+
+                </tbody>
+            </table>
         </div>
     </div>
     <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_dealer');?>" method="post">
