@@ -85,6 +85,10 @@ class Si_budget_target extends Root_Controller
         {
             $this->system_forward_budget($id,$id1);
         }
+        elseif($action=="get_items_forward_budget")
+        {
+            $this->system_get_items_forward_budget();
+        }
         elseif($action=="save_forward_budget")
         {
             $this->system_save_forward_budget();
@@ -134,6 +138,16 @@ class Si_budget_target extends Root_Controller
             $data['variety_name']= 1;
             $data['variety_id']= 1;
             //more data
+            $data['quantity_budget_dealer_total']= 1;
+            $data['quantity_budget']= 1;
+        }
+        else if($method=='list_budget_forward')
+        {
+            $data['crop_name']= 1;
+            $data['crop_type_name']= 1;
+            $data['variety_name']= 1;
+            $data['variety_id']= 1;
+            //more datas
             $data['quantity_budget_dealer_total']= 1;
             $data['quantity_budget']= 1;
         }
@@ -924,7 +938,7 @@ class Si_budget_target extends Root_Controller
     private function system_forward_budget($fiscal_year_id=0,$outlet_id=0)
     {
         $user = User_helper::get_user();
-        $method='list_budget_dealer';
+        $method='list_budget_forward';
         if(isset($this->permissions['action7'])&&($this->permissions['action7']==1))
         {
             if(!($fiscal_year_id>0))
@@ -962,7 +976,35 @@ class Si_budget_target extends Root_Controller
                     $this->json_return($ajax);
                 }
             }
-           // $data['system_preference_items']= $this->get_preference_headers($method);
+
+
+            $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_dealer'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
+            if(!$results)
+            {
+                System_helper::invalid_try(__FUNCTION__,$outlet_id,'Invalid Try');
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
+                $this->json_return($ajax);
+            }
+            $budgeted_dealers[0]=0;
+            foreach($results as $result)
+            {
+                $budgeted_dealers[$result['dealer_id']]=$result['dealer_id'];
+            }
+
+            $data['system_preference_items']= $this->get_preference_headers($method);
+            $data['fiscal_years_previous_sales']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
+
+            // get dealer list
+            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+            $this->db->select('farmer_outlet.farmer_id');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id=farmer_outlet.farmer_id','INNER');
+            $this->db->select('farmer.name farmer_name,farmer.mobile_no,farmer.status');
+            $this->db->where('farmer.farmer_type_id > ',1);
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where_in('farmer_outlet.farmer_id',$budgeted_dealers);
+            $data['dealers']=$this->db->get()->result_array();
+
             $data['fiscal_year_budget_target']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
             $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
             $data['title']="Forward/Complete budget";
@@ -983,6 +1025,89 @@ class Si_budget_target extends Root_Controller
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
+    }
+    private function system_get_items_forward_budget()
+    {
+        $items=array();
+        $fiscal_year_id=$this->input->post('fiscal_year_id');
+        $outlet_id=$this->input->post('outlet_id');
+        //$dealer_id=$this->input->post('dealer_id');
+        $fiscal_years_previous_sales=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
+        $sales_previous=$this->get_sales_previous_years_outlet($fiscal_years_previous_sales,$outlet_id);
+
+        //old items
+        $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_dealer'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
+        //$budgeted_dealers[0]=0;
+        $items_old=array();
+        foreach($results as $result)
+        {
+            $items_old[$result['variety_id']]=$result;
+            //$budgeted_dealers[$result['dealer_id']]=$result['dealer_id'];
+        }
+
+        /*// get dealer list
+        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+        $this->db->select('farmer_outlet.farmer_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id=farmer_outlet.farmer_id','INNER');
+        $this->db->select('farmer.name farmer_name,farmer.mobile_no,farmer.status');
+        $this->db->where('farmer.farmer_type_id > ',1);
+        $this->db->where('farmer_outlet.revision',1);
+        $this->db->where_in('farmer_outlet.farmer_id',$budgeted_dealers);
+        $results=$this->db->get()->result_array();
+        foreach($results as $result)
+        {
+
+        }*/
+
+        //variety lists
+        $this->db->from($this->config->item('table_login_setup_classification_varieties').' v');
+        $this->db->select('v.id variety_id,v.name variety_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
+        $this->db->select('crop_type.name crop_type_name');
+        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = crop_type.crop_id','INNER');
+        $this->db->select('crop.name crop_name');
+        $this->db->where('v.status',$this->config->item('system_status_active'));
+        $this->db->where('v.whose','ARM');
+        $this->db->order_by('crop.ordering','ASC');
+        $this->db->order_by('crop.id','ASC');
+        $this->db->order_by('crop_type.ordering','ASC');
+        $this->db->order_by('crop_type.id','ASC');
+        $this->db->order_by('v.ordering','ASC');
+        $this->db->order_by('v.id','ASC');
+        $results=$this->db->get()->result_array();
+        foreach($results as $result)
+        {
+            $item=$result;
+            foreach($fiscal_years_previous_sales as $fy)
+            {
+                if(isset($sales_previous[$fy['id']][$result['variety_id']]))
+                {
+                    $item['quantity_sale_'.$fy['id']]=$sales_previous[$fy['id']][$result['variety_id']]/1000;
+                }
+                else
+                {
+                    $item['quantity_sale_'.$fy['id']]=0;
+                }
+            }
+            if(isset($items_old[$result['variety_id']]))
+            {
+                if($items_old[$result['variety_id']]['quantity_budget']>0)
+                {
+                    $item['quantity_budget']=$items_old[$result['variety_id']]['quantity_budget'];
+                }
+                else
+                {
+                    $item['quantity_budget']='';
+                }
+            }
+            else
+            {
+                $item['quantity_budget']='';
+            }
+            $items[]=$item;
+        }
+
+        $this->json_return($items);
     }
     private function system_save_forward_budget()
     {
