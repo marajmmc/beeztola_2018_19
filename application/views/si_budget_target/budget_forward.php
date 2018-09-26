@@ -34,6 +34,50 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label"><?php echo $outlet['name'];?></label>
         </div>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse3" href="#">+ Acres Information</a></label>
+            </h4>
+        </div>
+        <div id="collapse3" class="panel-collapse collapse">
+            <table class="table table-bordered table-responsive system_table_details_view">
+                <thead>
+                <tr>
+                    <th><label class="control-label"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label></th>
+                    <th><label class="control-label"><?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME');?></label></th>
+                    <th><label class="control-label">Acres</label></th>
+                    <th><label class="control-label">Seeds per Acre(kg)</label></th>
+                    <th><label class="control-label">Total Seeds(kg)</label></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                foreach($acres as $result)
+                {
+                    ?>
+                    <tr>
+                        <td><?php echo $result['crop_name']; ?></td>
+                        <td><?php echo $result['crop_type_name']; ?></td>
+                        <td class="text-right"><?php echo number_format($result['quantity'],3,'.',''); ?></td>
+                        <td class="text-right"><?php echo number_format($result['quantity_kg_acre'],3,'.',''); ?></td>
+                        <td class="text-right"><?php echo number_format($result['quantity']*$result['quantity_kg_acre'],3,'.',''); ?></td>
+                    </tr>
+                <?php
+                }
+                ?>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
+        <div class="col-xs-4"></div>
+        <div class="col-sm-4 col-xs-8 text-center">
+            <strong>Note:</strong> All item amount showing to kg.
+        </div>
+    </div>
     <div class="col-xs-12" id="system_jqx_container">
 
     </div>
@@ -82,24 +126,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        $(document).on("click", "#button_action_save_jqx", function(event)
-        {
-            $('#save_form_jqx #jqx_inputs').html('');
-            var data=$('#system_jqx_container').jqxGrid('getrows');
-            for(var i=0;i<data.length;i++)
-            {
-                $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']" value="'+data[i]['quantity_budget']+'">');
 
-
-            }
-            var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
-            if(sure)
-            {
-                $("#save_form_jqx").submit();
-            }
-        });
-
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_forward_budget');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/budget_forward_items');?>";
 
         // prepare the data
         var source =
@@ -156,11 +184,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            /*if(column=='quantity_budget')
-            {
-                element.html('<div class="jqxgrid_input">'+value+'</div>');
-            }
-            else if(column.substr(0,14)=='quantity_sale_')
+            /*if(column.substr(0,14)=='quantity_sale_' || column=='quantity_budget_outlet' || column.substr(0,23)=='quantity_budget_dealer_')
             {
                 if(value==0)
                 {
@@ -171,7 +195,40 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     element.html(get_string_kg(value));
                 }
             }*/
-            element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+            if(value==0)
+            {
+                element.html('');
+            }
+            else
+            {
+                element.html(get_string_kg(value));
+            }
+
+            if (record.variety_name=="Total Type")
+            {
+                if(!((column=='crop_name')||(column=='crop_type_name')))
+                {
+                    element.css({ 'background-color': system_report_color_type,'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
+            }
+            else if (record.crop_type_name=="Total Crop")
+            {
+                if(column!='crop_name')
+                {
+                    element.css({ 'background-color': system_report_color_crop,'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+                }
+            }
+            else if (record.crop_name=="Grand Total")
+            {
+
+                element.css({ 'background-color': system_report_color_grand,'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+
+            }
+            else
+            {
+                element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+            }
+
             return element[0].outerHTML;
         };
 
@@ -206,6 +263,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                                 <?php
                             }
                         ?>
+                        { text: 'Total</br>Oultet Budget', dataField: 'quantity_budget_outlet',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
+                        { text: 'Total</br>Dealer Budget', dataField: 'quantity_budget_dealer_total',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer},
                         <?php
                     $serial=0;
                     foreach($dealers as $dealer)

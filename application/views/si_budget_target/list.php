@@ -28,7 +28,7 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
         'type'=>'button',
         'label'=>'Forward Budget',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/forward_budget')
+        'data-action-link'=>site_url($CI->controller_url.'/index/budget_forward')
     );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
