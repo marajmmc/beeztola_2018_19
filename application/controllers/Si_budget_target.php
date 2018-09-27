@@ -1039,8 +1039,10 @@ class Si_budget_target extends Root_Controller
         //old items
         $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_dealer'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
         $budget_dealers=array();
+        $dealer_ids=array();
         foreach($results as $result)
         {
+            $dealer_ids[$result['dealer_id']]=$result['dealer_id'];
             $budget_dealers[$result['dealer_id']][$result['variety_id']]=$result;
         }
 
@@ -1068,32 +1070,33 @@ class Si_budget_target extends Root_Controller
         $this->db->order_by('v.ordering','ASC');
         $this->db->order_by('v.id','ASC');
         $results=$this->db->get()->result_array();
-        $type_total=array();
-        $crop_total=array();
-        $grand_total=array();
-
-        $type_total['crop_name']='';
-        $type_total['crop_type_name']='';
-        $type_total['variety_name']='Total Type';
-        $crop_total['crop_name']='';
-        $crop_total['crop_type_name']='Total Crop';
-        $crop_total['variety_name']='';
-        $grand_total['crop_name']='Grand Total';
-        $grand_total['crop_type_name']='';
-        $grand_total['variety_name']='';
 
         $prev_crop_name='';
         $prev_type_name='';
         $first_row=true;
+
+        $type_total=$this->initialize_row($fiscal_years_previous_sales,$dealer_ids,'','','Total Type','');
+        $crop_total=$this->initialize_row($fiscal_years_previous_sales,$dealer_ids,'','Total Crop','','');
+        $grand_total=$this->initialize_row($fiscal_years_previous_sales,$dealer_ids,'Grand Total','','','');
+
+
         foreach($results as $result)
         {
-            $item=$result;
+            $info=$this->initialize_row($fiscal_years_previous_sales,$dealer_ids,$result['crop_name'],$result['crop_type_name'],$result['variety_name']);
+
+
             if(!$first_row)
             {
                 if($prev_crop_name!=$result['crop_name'])
                 {
-                    $items[]=$this->get_row($type_total);
-                    $items[]=$this->get_row($crop_total);
+                    $type_total['crop_name']=$prev_crop_name;
+                    $type_total['crop_type_name']=$prev_type_name;
+                    $crop_total['crop_name']=$prev_crop_name;
+                    $items[]=$type_total;
+                    $items[]=$crop_total;
+
+                    $type_total=$this->reset_row($type_total);
+                    $crop_total=$this->reset_row($crop_total);
 
                     $prev_crop_name=$result['crop_name'];
                     $prev_type_name=$result['crop_type_name'];
@@ -1101,14 +1104,17 @@ class Si_budget_target extends Root_Controller
                 }
                 elseif($prev_type_name!=$result['crop_type_name'])
                 {
-                    $items[]=$this->get_row($type_total);
-
+                    $type_total['crop_name']=$prev_crop_name;
+                    $type_total['crop_type_name']=$prev_type_name;
+                    $items[]=$type_total;
+                    $type_total=$this->reset_row($type_total);
+                    //$info['crop_name']='';
                     $prev_type_name=$result['crop_type_name'];
                 }
                 else
                 {
-                    $result['crop_name']='';
-                    $result['crop_type_name']='';
+                    //$info['crop_name']='';
+                    //$info['crop_type_name']='';
                 }
             }
             else
@@ -1117,64 +1123,79 @@ class Si_budget_target extends Root_Controller
                 $prev_type_name=$result['crop_type_name'];
                 $first_row=false;
             }
-
             foreach($fiscal_years_previous_sales as $fy)
             {
-                $item['quantity_sale_'.$fy['id']]=0;
-                //$type_total['quantity_sale_'.$fy['id']]='??';
                 if(isset($sales_previous[$fy['id']][$result['variety_id']]))
                 {
-                    $item['quantity_sale_'.$fy['id']]=$sales_previous[$fy['id']][$result['variety_id']]/1000;
-                    //$type_total['quantity_sale_'.$fy['id']]=$item['quantity_sale_'.$fy['id']];
+                    $info['quantity_sale_'.$fy['id']]=$sales_previous[$fy['id']][$result['variety_id']]/1000;
+                    $type_total['quantity_sale_'.$fy['id']]+=$info['quantity_sale_'.$fy['id']];
+                    $crop_total['quantity_sale_'.$fy['id']]+=$info['quantity_sale_'.$fy['id']];
+                    $grand_total['quantity_sale_'.$fy['id']]+=$info['quantity_sale_'.$fy['id']];
                 }
             }
-            $quantity_budget_dealer_total=0;
-            foreach($budget_dealers as $dealer)
-            {
-                $item['quantity_budget_dealer_'.$dealer[$result['variety_id']]['dealer_id']]= '';
-                if(isset($dealer[$result['variety_id']]) && $dealer[$result['variety_id']]['quantity_budget']>0)
-                {
-                    $item['quantity_budget_dealer_'.$dealer[$result['variety_id']]['dealer_id']]= $dealer[$result['variety_id']]['quantity_budget'];
-                    $quantity_budget_dealer_total+=$dealer[$result['variety_id']]['quantity_budget'];
-                }
-            }
-            $item['quantity_budget_dealer_total']= $quantity_budget_dealer_total;
-
             if(isset($budget_outlets[$result['variety_id']]))
             {
-                if($budget_outlets[$result['variety_id']]['quantity_budget']>0)
-                {
-                    $item['quantity_budget_outlet']=$budget_outlets[$result['variety_id']]['quantity_budget'];
-                }
-                else
-                {
-                    $item['quantity_budget_outlet']='';
-                }
+                $info['quantity_budget_outlet']=$budget_outlets[$result['variety_id']]['quantity_budget'];
+                $type_total['quantity_budget_outlet']+=$info['quantity_budget_outlet'];
+                $crop_total['quantity_budget_outlet']+=$info['quantity_budget_outlet'];
+                $grand_total['quantity_budget_outlet']+=$info['quantity_budget_outlet'];
             }
-            else
+            $quantity_budget_dealer_total=0;
+            foreach($dealer_ids as $dealer_id)
             {
-                $item['quantity_budget']='';
-            }
-            $items[]=$item;
+                if(isset($budget_dealers[$dealer_id][$result['variety_id']]))
+                {
+                    $info['quantity_budget_dealer_'.$dealer_id]=$budget_dealers[$dealer_id][$result['variety_id']]['quantity_budget'];
+                    $quantity_budget_dealer_total+=$info['quantity_budget_dealer_'.$dealer_id];
+                    $type_total['quantity_budget_dealer_'.$dealer_id]+=$info['quantity_budget_dealer_'.$dealer_id];
+                    $crop_total['quantity_budget_dealer_'.$dealer_id]+=$info['quantity_budget_dealer_'.$dealer_id];
+                    $grand_total['quantity_budget_dealer_'.$dealer_id]+=$info['quantity_budget_dealer_'.$dealer_id];
 
+                }
+            }
+            $info['quantity_budget_dealer_total']=$quantity_budget_dealer_total;
+            $type_total['quantity_budget_dealer_total']+=$quantity_budget_dealer_total;
+            $crop_total['quantity_budget_dealer_total']+=$quantity_budget_dealer_total;
+            $grand_total['quantity_budget_dealer_total']+=$quantity_budget_dealer_total;
+            $items[]=$info;
         }
-        $items[]=$this->get_row($type_total);
+
+        $items[]=$type_total;
+        $items[]=$crop_total;
+        $items[]=$grand_total;
         $this->json_return($items);
+
     }
-    private function get_row($info)
+    private function initialize_row($fiscal_years,$dealer_ids,$crop_name,$crop_type_name,$variety_name)
     {
         $row=array();
-        /*$row['crop_name']=$info['crop_name'];
-        $row['crop_type_name']=$info['crop_type_name'];
-        $row['variety_name']=$info['variety_name'];
-        echo "<pre>";
-        print_r($info);
-        echo "</pre>";*/
-        if($info)
+        $row['crop_name']=$crop_name;
+        $row['crop_type_name']=$crop_type_name;
+        $row['variety_name']=$variety_name;
+
+        $row['quantity_budget_outlet']=0;
+        $row['quantity_budget_dealer_total']=0;
+
+        foreach($fiscal_years as $fy)
         {
-            $row=$info;
+            $row['quantity_sale_'.$fy['id']]=0;
+        }
+        foreach($dealer_ids as $dealer_id)
+        {
+            $row['quantity_budget_dealer_'.$dealer_id]= 0;
         }
 
+        return $row;
+    }
+    private function reset_row($info)
+    {
+        foreach($info as $key=>$r)
+        {
+            if(!(($key=='crop_name')||($key=='crop_type_name')||($key=='variety_name')))
+            {
+                $info[$key]=0;
+            }
+        }
         return $info;
     }
     private function system_save_forward_budget()
