@@ -45,7 +45,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_EXPENSE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <label class="control-label"><?php echo System_helper::display_date($item['date']);?></label>
@@ -65,8 +65,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <tr>
                     <th style="width: 5px;">SL#</th>
                     <th style="width: 300px;">Visit Head</th>
-                    <th>Previous Discussion</th>
-                    <th>Discussion</th>
+                    <th>Previous Visit (<?php echo System_helper::display_date($item_previous['date'])?>)</th>
+                    <th><?php echo $CI->lang->line('LABEL_REMARKS');?></th>
                 </tr>
                 </thead>
                 <tbody>

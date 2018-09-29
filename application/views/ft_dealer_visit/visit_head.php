@@ -16,7 +16,7 @@ $CI=& get_instance();
                 <th style="width: 5px;">SL#</th>
                 <th style="width: 300px;">Visit Head</th>
                 <th>Previous Visit (<?php echo System_helper::display_date($item_previous['date'])?>)</th>
-                <th>Discussion</th>
+                <th><?php echo $CI->lang->line('LABEL_REMARKS');?></th>
             </tr>
             </thead>
             <tbody>
