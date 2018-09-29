@@ -309,7 +309,12 @@ class Ft_dealer_visit extends Root_Controller
         $time=time();
         $item=$this->input->post('item');
         $heads=$this->input->post('heads');
-        $date_visit=System_helper::get_time($item['date']);
+
+        $date_visit=System_helper::get_time(System_helper::display_date(time()));
+        if(isset($item['date']))
+        {
+            $date_visit=System_helper::get_time($item['date']);
+        }
         $date_current=System_helper::get_time(System_helper::display_date(time()));
 
         if($id>0)
