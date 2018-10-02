@@ -164,8 +164,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right">Attachment (Document)</label></td>
-                <td class="header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></td>
-                <td class="header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item_current['image_location']; ?>" alt="<?php echo $item_current['image_name']; ?>"></td>
+                <td class="header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>"></td>
+                <td class="header_value"><img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item_current['image_location']; ?>" alt="<?php echo $item_current['image_name']; ?>"></td>
             </tr>
 
             </tbody>

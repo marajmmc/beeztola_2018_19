@@ -213,10 +213,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div class="col-xs-4">
             </div>
             <div class="col-xs-4" id="image_payment">
-                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
             </div>
             <div class="col-xs-4">
-                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_payment_attachment').$item_current['image_location']; ?>" alt="<?php echo $item_current['image_name']; ?>">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item_current['image_location']; ?>" alt="<?php echo $item_current['image_name']; ?>">
             </div>
 
         </div>
