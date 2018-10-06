@@ -3,7 +3,7 @@ $config['offline_controllers']=array('home','sys_site_offline');
 $config['external_controllers']=array('home');//user can use them without login
 $config['system_max_actions']=8;
 
-$config['system_site_root_folder']='login_2018_19';
+$config['system_site_root_folder']='beeztola_2018_19';
 $config['system_upload_image_auth_key']='ems_2018_19';
 $config['system_upload_api_url']='http://45.251.59.5/api_file_server/upload';
 
