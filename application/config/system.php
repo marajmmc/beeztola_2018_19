@@ -7,6 +7,10 @@ $config['system_site_root_folder']='beeztola_2018_19';
 $config['system_upload_image_auth_key']='ems_2018_19';
 $config['system_upload_api_url']='http://45.251.59.5/api_file_server/upload';
 
+$config['system_bulk_sms_api_url']='http://bangladeshsms.com/smsapi';
+$config['system_bulk_sms_api_key']='C20023045bb88951db45b5.36134381';
+$config['system_bulk_sms_api_senderid']='8804445629106';
+
 $config['system_status_yes']='Yes';
 $config['system_status_no']='No';
 $config['system_status_active']='Active';
