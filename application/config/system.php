@@ -3,9 +3,9 @@ $config['offline_controllers']=array('home','sys_site_offline');
 $config['external_controllers']=array('home');//user can use them without login
 $config['system_max_actions']=8;
 
-$config['system_site_root_folder']='beeztola_2018_19';
+$config['system_site_root_folder']='login_2018_19';
 $config['system_upload_image_auth_key']='ems_2018_19';
-$config['system_upload_api_url']='http://180.234.223.205/api_file_server/upload';
+$config['system_upload_api_url']='http://45.251.59.5/api_file_server/upload';
 
 $config['system_status_yes']='Yes';
 $config['system_status_no']='No';
@@ -26,7 +26,7 @@ $config['USER_TYPE_EMPLOYEE']=1;
 
 $config['system_status_not_done']='Not Done';
 $config['system_status_done']='Done';
-$config['system_base_url_picture']='http://180.234.223.205/beeztola_2018_19/';
+$config['system_base_url_picture']='http://45.251.59.5/beeztola_2018_19/';
 
 // Outlet Type Config
 $config['system_customer_type_outlet_id']=1;
