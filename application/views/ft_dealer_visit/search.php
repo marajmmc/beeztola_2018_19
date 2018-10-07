@@ -58,6 +58,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 {
                     ?>
                     <label class="control-label"><?php echo System_helper::display_date($item['date']);?></label>
+                    <input type="hidden" name="item[date]" id="date" value="<?php echo System_helper::display_date($item['date']);?>" />
                 <?php
                 }
                 ?>
@@ -69,12 +70,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <?php
-                if(sizeof($CI->user_outlets)==1 || $item['id']>0)
+                if(sizeof($outlets)==1)
                 {
                     ?>
-                    <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $CI->user_outlets[0]['customer_id'] ?>" />
-                    <label class="control-label"><?php echo $CI->user_outlets[0]['name'] ?></label>
-                <?php
+                        <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $outlets[0]['customer_id'] ?>" />
+                        <label class="control-label"><?php echo $outlets[0]['name'] ?></label>
+                    <?php 
                 }
                 else
                 {
@@ -82,9 +83,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <select name="item[outlet_id]" id="outlet_id" class="form-control">
                         <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                         <?php
-                        foreach($CI->user_outlets as $row)
+                        foreach($outlets as $row)
                         {?>
-                            <option value="<?php echo $row['customer_id']?>" <?php if($row['customer_id']==$item['outlet_id']){ echo "selected";}?>><?php echo $row['name'];?></option>
+                            <option value="<?php echo $row['customer_id']?>"><?php echo $row['name'];?></option>
                         <?php
                         }
                         ?>
@@ -94,18 +95,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
             </div>
         </div>
-        <div style="<?php if(sizeof($CI->user_outlets)>1 && !($item['id']>0)){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
+        <div style="<?php if(sizeof($outlets)>1 && !($item['id']>0)){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DEALER');?><span style="color:#FF0000">*</span></label>
             </div>
-            <?php
-            if($item['dealer_id']>0)
+            <?php 
+            if(sizeof($dealers)==1)
             {
                 ?>
-                <div class="col-sm-4 col-xs-8">
-                    <label class="control-label"><?php echo $item['dealer_name'];?></label>
-                </div>
-            <?php
+                    <input type="hidden" name="item[dealer_id]" id="dealer_id" value="<?php echo $dealers[0]['value'] ?>" />
+                    <label class="control-label"><?php echo $dealers[0]['text'] ?></label>
+                <?php 
             }
             else
             {
@@ -116,13 +116,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <?php
                         foreach($dealers as $dealer)
                         {?>
-                            <option value="<?php echo $dealer['value']?>" <?php if($dealer['value']==$item['dealer_id']){ echo "selected";}?>><?php echo $dealer['text'];?></option>
+                            <option value="<?php echo $dealer['value']?>"><?php echo $dealer['text'];?></option>
                         <?php
                         }
                         ?>
                     </select>
                 </div>
-            <?php
+                <?php
             }
             ?>
         </div>
@@ -137,78 +137,25 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div class="clearfix"></div>
     <div id="visit_head_container">
-        <?php
-        if($item['id']>0)
-        {
-            ?>
-            <div class="row widget">
-                <div class="widget-header">
-                    <div class="title">
-                        <?php echo $title; ?>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row show-grid">
-                    <table class="table table-bordered table-responsive">
-                        <thead>
-                        <tr>
-                            <th style="width: 5px;">SL#</th>
-                            <th style="width: 300px;">Visit Head</th>
-                            <th>Previous Visit (<?php echo System_helper::display_date($item_previous['date'])?>)</th>
-                            <th>Discussion</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                        $field_visit_data_previous=array();
-                        if($item_previous['field_visit_data'])
-                        {
-                            $field_visit_data_previous=json_decode($item_previous['field_visit_data'],true);
-                        }
-                        $field_visit_data=array();
-                        if($item['field_visit_data'])
-                        {
-                            $field_visit_data=json_decode($item['field_visit_data'],true);
-                        }
-
-                        $serial=0;
-                        foreach($heads as $head)
-                        {
-                            ++$serial;
-                            ?>
-                            <tr>
-                                <td><?php echo $serial?></td>
-                                <td><?php echo $head['name'];?></td>
-                                <td><?php echo isset($field_visit_data_previous[$head['id']])?$field_visit_data_previous[$head['id']]:'';?></td>
-                                <td><textarea name="heads[<?php echo $head['id'];?>]" id="" class="form-control" ><?php echo isset($field_visit_data[$head['id']])?$field_visit_data[$head['id']]:'';?></textarea></td>
-                            </tr>
-                        <?php
-                        }
-                        ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        <?php
-        }
-        ?>
+        
     </div>
 </form>
 <script>
     jQuery(document).ready(function()
     {
+
+        system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
-        var item_id="<?php echo $item['id']?>";
-        if(!(item_id>0))
+        load_head();
+
+        $(document).on('change','.datepicker',function() 
         {
-            $(".datepicker").on('change', function(){
-                $("#outlet_id").val("");
-                $("#dealer_id").val("");
-                $('#dealer_id_container').hide();
-                $("#visit_head_container").html("");
-            });
-        }
+            $("#outlet_id").val("");
+            $("#dealer_id").val("");
+            $('#dealer_id_container').hide();
+            $("#visit_head_container").html("");
+        });
 
         $(document).on('change','#outlet_id',function()
         {
@@ -242,45 +189,34 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).on('change','#dealer_id',function()
         {
             $("#visit_head_container").html("");
-            var outlet_id=$('#outlet_id').val();
-
-            if($('#dealer_id').val()!==undefined)
-            {
-                var dealer_id=$('#dealer_id').val();
-            }
-            else
-            {
-                var dealer_id="<?php echo $item['dealer_id']?>";
-            }
-            if($('#date').val()!==undefined)
-            {
-                var date=$('#date').val();
-            }
-            else
-            {
-                var date="<?php echo System_helper::display_date($item['date']);?>";
-            }
-            if(dealer_id>0)
-            {
-                $.ajax(
-                {
-                    url: '<?php echo site_url($CI->controller_url.'/visit_head'); ?>',
-                    type: 'POST',
-                    datatype: "JSON",
-                    data:
-                    {
-                        outlet_id:outlet_id,dealer_id:dealer_id,date:date
-                    },
-                    success: function (data, status)
-                    {
-
-                    },
-                    error: function (xhr, desc, err)
-                    {
-                        console.log("error");
-                    }
-                });
-            }
+            load_head();
         });
     });
+    function load_head()
+    {
+        var outlet_id=$('#outlet_id').val();
+        var dealer_id=$('#dealer_id').val();
+        var date=$('#date').val();
+        if(outlet_id>0 && dealer_id>0)
+        {
+            $.ajax(
+            {
+                url: '<?php echo site_url($CI->controller_url.'/visit_head'); ?>',
+                type: 'POST',
+                datatype: "JSON",
+                data:
+                {
+                    outlet_id:outlet_id,dealer_id:dealer_id,date:date
+                },
+                success: function (data, status)
+                {
+
+                },
+                error: function (xhr, desc, err)
+                {
+                    console.log("error");
+                }
+            });
+        }
+    }
 </script>

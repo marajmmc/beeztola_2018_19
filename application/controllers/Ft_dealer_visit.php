@@ -155,14 +155,14 @@ class Ft_dealer_visit extends Root_Controller
         {
             $data['title']="Create New Field Visit";
             $data['item']['id']=0;
-            $data['item']['outlet_id']='';
-            $data['item']['dealer_id']='';
             $data['item']['date']=time();
             $data['item']['field_visit_data']=array();
             $data['item']['remarks']='';
             $data['item']['status']='Active';
 
-            if(sizeof($this->user_outlets)==1)
+            $data['outlets']=$this->user_outlets;
+            $data['dealers']=array();
+            if(sizeof($data['outlets'])==1)
             {
                 $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
                 $this->db->select('farmer_outlet.farmer_id value');
@@ -181,6 +181,8 @@ class Ft_dealer_visit extends Root_Controller
                 $ajax['system_message']='Field visit head is empty';
                 $this->json_return($ajax);
             }
+
+            
 
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/search",$data,true));
@@ -253,17 +255,9 @@ class Ft_dealer_visit extends Root_Controller
                 $this->json_return($ajax);
             }
 
-
-            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
-            $this->db->select('farmer_outlet.farmer_id value');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
-            $this->db->select('farmer_farmer.name text');
-            $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
-            $this->db->where('farmer_farmer.farmer_type_id > ',1);
-            $this->db->where('farmer_outlet.revision',1);
-            $this->db->where('farmer_outlet.outlet_id',$data['item']['outlet_id']);
-            $data['dealers']=$this->db->get()->result_array();
-
+            $data['outlets']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('customer_id','name'),array('customer_id='.$outlet_id, 'revision = 1'));
+            $data['dealers']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('id value','name text'),array('id='.$dealer_id));
+            
 
             $data['title']="Edit Field Visit";
             $ajax['status']=true;
@@ -488,16 +482,8 @@ class Ft_dealer_visit extends Root_Controller
                 $this->json_return($ajax);
             }
 
-            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
-            $this->db->select('farmer_outlet.farmer_id value');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
-            $this->db->select('farmer_farmer.name text');
-
-            $this->db->where('farmer_farmer.status',$this->config->item('system_status_active'));
-            $this->db->where('farmer_farmer.farmer_type_id > ',1);
-            $this->db->where('farmer_outlet.revision',1);
-            $this->db->where('farmer_outlet.outlet_id',$data['item']['outlet_id']);
-            $data['dealers']=$this->db->get()->result_array();
+            $data['outlets']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('customer_id','name'),array('customer_id='.$outlet_id, 'revision = 1'));
+            $data['dealers']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('id value','name text'),array('id='.$dealer_id));
 
 
             $data['title']='Field Visit Details';

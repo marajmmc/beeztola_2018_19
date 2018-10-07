@@ -31,8 +31,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $CI->user_outlets[0]['customer_id'] ?>" />
-                <label class="control-label"><?php echo $CI->user_outlets[0]['name'] ?></label>
+                <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $outlets[0]['customer_id'] ?>" />
+                <label class="control-label"><?php echo $outlets[0]['name'] ?></label>
             </div>
         </div>
         <div style="<?php if(!($item['dealer_id'])){echo 'display:none';} ?>" class="row show-grid" id="dealer_id_container">
