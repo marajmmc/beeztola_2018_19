@@ -386,7 +386,8 @@ class Sales_sale extends Root_Controller
         {
             foreach($pack_sizes as $info)
             {
-                $data['sale_varieties_info'][Barcode_helper::get_barcode_variety($info['crop_id'],$info['variety_id'],$info['pack_size_id'])]=$info;
+                //$data['sale_varieties_info'][Barcode_helper::get_barcode_variety($info['crop_id'],$info['variety_id'],$info['pack_size_id'])]=$info;
+                $data['sale_varieties_info'][Barcode_helper::get_barcode_variety($outlet_id,$info['variety_id'],$info['pack_size_id'])]=$info;
             }
         }
 

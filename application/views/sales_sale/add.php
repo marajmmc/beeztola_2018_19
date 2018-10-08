@@ -323,7 +323,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     }
     function add_variety()
     {
-        var variety_barcode=$('#variety_barcode').val();
+        var scanned_code=$('#variety_barcode').val();
+        var outlet_id='<?php echo $item['outlet_id'];?>';
+        if(scanned_code.length!=8)//validation of barcode length
+        {
+            animate_message("Invalid Barcode length.");
+            return;
+        }
+        var variety_barcode=outlet_id.concat(scanned_code.substr(3));
         if(sale_varieties_info[variety_barcode]===undefined)
         {
             animate_message("Invalid Barcode.");
