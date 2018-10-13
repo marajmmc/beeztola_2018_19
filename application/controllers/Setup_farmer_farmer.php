@@ -587,13 +587,13 @@ class Setup_farmer_farmer extends Root_Controller
         $data['mobile_no']= 1;
         $data['nid']= 1;
         $data['address']= 1;
-        $data['status']= 1;
         $data['division_name']= 1;
         $data['zone_name']= 1;
         $data['territory_name']= 1;
         $data['district_name']= 1;
         $data['upazilla_name']= 1;
         $data['union_name']= 1;
+        $data['status']= 1;
 
         if($result)
         {

@@ -85,6 +85,12 @@ class Report_farmer extends Root_Controller
         $data['mobile_no']= 1;
         $data['farmer_type_name']= 1;
         $data['status_card_require']= 1;
+        $data['division_name']= 1;
+        $data['zone_name']= 1;
+        $data['territory_name']= 1;
+        $data['district_name']= 1;
+        $data['upazilla_name']= 1;
+        $data['union_name']= 1;
         $data['address']= 1;
         $data['total_invoice']= 1;
         $data['status']= 1;
@@ -199,9 +205,23 @@ class Report_farmer extends Root_Controller
         $this->db->select('farmer.*');
         $this->db->join($this->config->item('table_pos_setup_farmer_type').' farmer_type','farmer_type.id = farmer.farmer_type_id','INNER');
         $this->db->select('farmer_type.name farmer_type_name, farmer_type.discount_self_percentage');
+
+        $this->db->join($this->config->item('table_login_setup_location_unions').' union','union.id = farmer.union_id','LEFT');
+        $this->db->select('union.name union_name');
+        $this->db->join($this->config->item('table_login_setup_location_upazillas').' u','u.id = union.upazilla_id','LEFT');
+        $this->db->select('u.name upazilla_name');
+        $this->db->join($this->config->item('table_login_setup_location_districts').' d','d.id = u.district_id','LEFT');
+        $this->db->select('d.name district_name');
+        $this->db->join($this->config->item('table_login_setup_location_territories').' t','t.id = d.territory_id','LEFT');
+        $this->db->select('t.name territory_name');
+        $this->db->join($this->config->item('table_login_setup_location_zones').' zone','zone.id = t.zone_id','LEFT');
+        $this->db->select('zone.name zone_name');
+        $this->db->join($this->config->item('table_login_setup_location_divisions').' division','division.id = zone.division_id','LEFT');
+        $this->db->select('division.name division_name');
+
         if($mobile_no)
         {
-            $this->db->or_where('farmer.mobile_no',$mobile_no);
+            $this->db->where('farmer.mobile_no',$mobile_no);
             $this->db->join("(SELECT count(sale.id) total_invoice, sale.farmer_id FROM ".$this->config->item('table_pos_sale')." sale WHERE sale.status='".$this->config->item('system_status_active')."' GROUP BY sale.farmer_id) saleTbl",'saleTbl.farmer_id=farmer.id','LEFT');
             $this->db->select('saleTbl.total_invoice');
         }
