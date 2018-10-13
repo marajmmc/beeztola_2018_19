@@ -160,9 +160,15 @@ class Setup_farmer_farmer extends Root_Controller
                 'mobile_no' => '',
                 'nid' => '',
                 'address' => '',
+                'district_id' => 0,
+                'upazilla_id' => 0,
+                'union_id' => 0,
                 'status' => $this->config->item('system_status_active'),
                 'ordering' => 999
             );
+            $data['districts']=Query_helper::get_info($this->config->item('table_login_setup_location_districts'),array('id value','name text'),array());
+            $data['upazillas']=array();
+            $data['unions']=array();
             $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
             $ajax['system_page_url']=site_url($this->controller_url."/index/add");
             $ajax['status']=true;
