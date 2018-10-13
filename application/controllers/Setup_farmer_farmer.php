@@ -192,8 +192,17 @@ class Setup_farmer_farmer extends Root_Controller
             {
                 $item_id=$this->input->post('id');
             }
+            $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
+            $this->db->select('f.*');
+            $this->db->join($this->config->item('table_login_setup_location_unions').' union','union.id = f.union_id','LEFT');
+            $this->db->select('union.id union_id');
+            $this->db->join($this->config->item('table_login_setup_location_upazillas').' u','u.id = union.upazilla_id','LEFT');
+            $this->db->select('u.id upazilla_id');
+            $this->db->join($this->config->item('table_login_setup_location_districts').' d','d.id = u.district_id','LEFT');
+            $this->db->select('d.id district_id');
+            $this->db->where('f.id',$item_id);
+            $data['item']=$this->db->get()->row_array();
 
-            $data['item']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$item_id),1);
             if(!$data['item'])
             {
                 System_helper::invalid_try('Edit Non Exists',$item_id);
@@ -201,7 +210,18 @@ class Setup_farmer_farmer extends Root_Controller
                 $ajax['system_message']='Invalid Farmer Selection.';
                 $this->json_return($ajax);
             }
+            $data['districts']=Query_helper::get_info($this->config->item('table_login_setup_location_districts'),array('id value','name text'),array());
+            $data['upazillas']=array();
+            $data['unions']=array();
+            if($data['item']['district_id']>0)
+            {
+                $data['upazillas']=Query_helper::get_info($this->config->item('table_login_setup_location_upazillas'),array('id value','name text'),array('district_id ='.$data['item']['district_id']));
+                if($data['item']['upazilla_id']>0)
+                {
+                    $data['unions']=Query_helper::get_info($this->config->item('table_login_setup_location_unions'),array('id value','name text'),array('upazilla_id ='.$data['item']['upazilla_id']));
+                }
 
+            }
             $data['title']="Edit Farmer (".$data['item']['name'].')';
             $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
             $ajax['status']=true;
@@ -477,6 +497,18 @@ class Setup_farmer_farmer extends Root_Controller
             $this->db->select('f.*');
             $this->db->select('ft.name farmer_type_name,ft.discount_self_percentage');
             $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
+            $this->db->join($this->config->item('table_login_setup_location_unions').' union','union.id = f.union_id','LEFT');
+            $this->db->select('union.name union_name');
+            $this->db->join($this->config->item('table_login_setup_location_upazillas').' u','u.id = union.upazilla_id','LEFT');
+            $this->db->select('u.name upazilla_name');
+            $this->db->join($this->config->item('table_login_setup_location_districts').' d','d.id = u.district_id','LEFT');
+            $this->db->select('d.name district_name');
+            $this->db->join($this->config->item('table_login_setup_location_territories').' t','t.id = d.territory_id','LEFT');
+            $this->db->select('t.name territory_name');
+            $this->db->join($this->config->item('table_login_setup_location_zones').' zone','zone.id = t.zone_id','LEFT');
+            $this->db->select('zone.name zone_name');
+            $this->db->join($this->config->item('table_login_setup_location_divisions').' division','division.id = zone.division_id','LEFT');
+            $this->db->select('division.name division_name');
             $this->db->where('f.id',$item_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])

@@ -102,6 +102,58 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <input type="text" name="item[nid]"  class="form-control" value="<?php echo $item['nid'];?>"/>
             </div>
         </div>
+        <div class="row show-grid" id="district_id_container">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISTRICT_NAME');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="district_id" class="form-control">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <?php
+                    foreach($districts as $district)
+                    {?>
+                        <option value="<?php echo $district['value']?>" <?php if($district['value']==$item['district_id']){ echo "selected";}?>><?php echo $district['text'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div style="<?php if(!(sizeof($upazillas)>0)){echo 'display:none';} ?>" class="row show-grid" id="upazilla_id_container">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_UPAZILLA_NAME');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="upazilla_id" class="form-control">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <?php
+                    foreach($upazillas as $upazilla)
+                    {?>
+                        <option value="<?php echo $upazilla['value']?>" <?php if($upazilla['value']==$item['upazilla_id']){ echo "selected";}?>><?php echo $upazilla['text'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+
+        <div style="<?php if(!(sizeof($unions)>0)){echo 'display:none';} ?>" class="row show-grid" id="union_id_container">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_UNION_NAME');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="union_id" name="item[union_id]" class="form-control">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <?php
+                    foreach($unions as $union)
+                    {?>
+                        <option value="<?php echo $union['value']?>" <?php if($union['value']==$item['union_id']){ echo "selected";}?>><?php echo $union['text'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_ADDRESS');?></label>
@@ -138,6 +190,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
     jQuery(document).ready(function()
     {
+        system_off_events();
         $(document).off("change", "#farmer_type_id");
         $(document).on("change","#farmer_type_id",function()
         {
@@ -149,6 +202,61 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             else
             {
                 $('#status_card_require').val('<?php echo $CI->config->item('system_status_no');?>');
+            }
+        });
+        $(document).on("change","#district_id",function()
+        {
+            $("#upazilla_id").val("");
+            $("#union_id").val("");
+            var district_id=$("#district_id").val();
+            $('#upazilla_id_container').hide();
+            $('#union_id_container').hide();
+            if(district_id>0)
+            {
+                $('#upazilla_id_container').show();
+                $.ajax({
+                    url: '<?php echo site_url("common_controller/get_dropdown_upazillas_by_districtid/");?>',
+                    type: 'POST',
+                    datatype: "JSON",
+                    data:{district_id:district_id},
+                    success: function (data, status)
+                    {
+
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+
+                    }
+                });
+            }
+        });
+        $(document).on("change","#upazilla_id",function()
+        {
+            $("#union_id").val("");
+            var upazilla_id=$("#upazilla_id").val();
+            $('#union_id_container').hide();
+            if(upazilla_id>0)
+            {
+                $('#union_id_container').show();
+                $.ajax({
+                    url: '<?php echo site_url('common_controller/get_dropdown_unions_by_upazillaid'); ?>',
+                    type: 'POST',
+                    datatype: "JSON",
+                    data:{
+                        upazilla_id:upazilla_id,
+                        html_container_id:'#union_id'
+                    },
+                    success: function (data, status)
+                    {
+
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+
+                    }
+                });
             }
         });
 
