@@ -109,6 +109,20 @@ class Setup_farmer_farmer extends Root_Controller
         $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
         $this->db->select('ft.name farmer_type_name');
 
+        $this->db->join($this->config->item('table_login_setup_location_unions').' union','union.id = f.union_id','LEFT');
+        $this->db->select('union.name union_name');
+        $this->db->join($this->config->item('table_login_setup_location_upazillas').' u','u.id = union.upazilla_id','LEFT');
+        $this->db->select('u.name upazilla_name');
+        $this->db->join($this->config->item('table_login_setup_location_districts').' d','d.id = u.district_id','LEFT');
+        $this->db->select('d.name district_name');
+        $this->db->join($this->config->item('table_login_setup_location_territories').' t','t.id = d.territory_id','LEFT');
+        $this->db->select('t.name territory_name');
+        $this->db->join($this->config->item('table_login_setup_location_zones').' zone','zone.id = t.zone_id','LEFT');
+        $this->db->select('zone.name zone_name');
+        $this->db->join($this->config->item('table_login_setup_location_divisions').' division','division.id = zone.division_id','LEFT');
+        $this->db->select('division.name division_name');
+
+
         /*$this->db->join($this->config->item('table_pos_setup_farmer_outlet').' fo','fo.farmer_id = f.id and fo.revision =1','LEFT');
         $this->db->select('count(outlet_id) total_outlet',true);
 
@@ -536,6 +550,12 @@ class Setup_farmer_farmer extends Root_Controller
         $data['nid']= 1;
         $data['address']= 1;
         $data['status']= 1;
+        $data['division_name']= 1;
+        $data['zone_name']= 1;
+        $data['territory_name']= 1;
+        $data['district_name']= 1;
+        $data['upazilla_name']= 1;
+        $data['union_name']= 1;
 
         if($result)
         {

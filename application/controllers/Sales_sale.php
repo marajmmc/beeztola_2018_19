@@ -211,12 +211,24 @@ class Sales_sale extends Root_Controller
         }
         else
         {
+            $this->db->from($this->config->item('table_login_csetup_cus_info').' cus_info');
+            //$this->db->select('cus_info.name,cus_info.type,cus_info.customer_id id');
+            $this->db->select('d.id district_id,d.territory_id territory_id');
+            $this->db->join($this->config->item('table_login_setup_location_districts').' d','d.id = cus_info.district_id','INNER');
+            $this->db->where('cus_info.customer_id',$outlet_id);
+            $this->db->where('cus_info.revision',1);
+            $outlet_info=$this->db->get()->row_array();
+
+            $data['items']=Query_helper::get_info($this->config->item('table_login_setup_location_districts'),array('id value','name text'),array('territory_id ='.$outlet_info['territory_id'],'status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC','id ASC'));
+
+
             $ajax['status']=false;
             $ajax['farmer_new']=true;
             if($code_type!='mobile')
             {
                 $ajax['hide_code']=true;
             }
+            $ajax['system_content'][]=array("id"=>'#district_id',"html"=>$this->load->view("dropdown_with_select",$data,true));
             $ajax['system_message']='Customer '.$this->lang->line("MSG_NOT_FOUND");
             $this->json_return($ajax);
         }
@@ -246,6 +258,7 @@ class Sales_sale extends Root_Controller
             $data=array();
             $data['name'] = $this->input->post("name");
             $data['farmer_type_id'] = 1;
+            $data['union_id'] = $this->input->post("union_id");
             $data['status_card_require'] = $this->config->item('system_status_no');
             $data['mobile_no'] = $this->input->post("mobile_no");
             $data['nid'] = $this->input->post("nid");
@@ -290,6 +303,7 @@ class Sales_sale extends Root_Controller
         $this->form_validation->set_rules('outlet_id',$this->lang->line('LABEL_OUTLET_NAME'),'required');
         $this->form_validation->set_rules('name',$this->lang->line('LABEL_NAME'),'required');
         $this->form_validation->set_rules('mobile_no',$this->lang->line('LABEL_MOBILE_NO'),'required');
+        $this->form_validation->set_rules('union_id',$this->lang->line('LABEL_UNION_NAME'),'required');
 
         if($this->form_validation->run() == FALSE)
         {

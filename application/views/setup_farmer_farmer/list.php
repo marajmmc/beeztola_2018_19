@@ -109,6 +109,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'mobile_no', type: 'string' },
                 { name: 'nid', type: 'string' },
                 { name: 'address', type: 'string' },
+                { name: 'division_name', type: 'string' },
+                { name: 'zone_name', type: 'string' },
+                { name: 'territory_name', type: 'string' },
+                { name: 'district_name', type: 'string' },
+                { name: 'upazilla_name', type: 'string' },
+                { name: 'union_name', type: 'string' },
                 { name: 'status', type: 'string' }
             ],
             id: 'id',
@@ -143,6 +149,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:150,hidden: <?php echo $system_preference_items['mobile_no']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_NID'); ?>', dataField: 'nid', width:150,hidden: <?php echo $system_preference_items['nid']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_ADDRESS'); ?>', dataField: 'address', width:150,hidden: <?php echo $system_preference_items['address']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DIVISION_NAME'); ?>', dataField: 'division_name',filtertype: 'list', width:100,hidden: <?php echo $system_preference_items['division_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_ZONE_NAME'); ?>', dataField: 'zone_name', width:100,hidden: <?php echo $system_preference_items['zone_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_TERRITORY_NAME'); ?>', dataField: 'territory_name', width:100,hidden: <?php echo $system_preference_items['territory_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DISTRICT_NAME'); ?>', dataField: 'district_name', width:100,hidden: <?php echo $system_preference_items['district_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_UPAZILLA_NAME'); ?>', dataField: 'upazilla_name', width:100,hidden: <?php echo $system_preference_items['upazilla_name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_UPAZILLA_NAME'); ?>', dataField: 'union_name', width:100,hidden: <?php echo $system_preference_items['union_name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>', dataField: 'status', width:100,filtertype: 'list', hidden: <?php echo $system_preference_items['status']?0:1;?>}
                 ]
             });
