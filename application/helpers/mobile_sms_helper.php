@@ -24,6 +24,8 @@ class Mobile_sms_helper
         $data['msg']=$msg;
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,TRUE);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0);//wait for response
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60); //timeout in seconds 2min
         $response = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
