@@ -11,4 +11,5 @@ $config['table_system_history_hack'] = 'arm_beeztola_2018_19.system_history_hack
 $config['table_system_user_preference'] = 'arm_beeztola_2018_19.system_user_preference';
 //print setup
 $config['table_system_setup_print'] = 'arm_beeztola_2018_19.system_setup_print';
-$config['table_system_history_bulk_sms'] = 'arm_beeztola_2018_19.system_history_bulk_sms';
+//Mobile sms history
+$config['table_system_history_mobile_sms'] = 'arm_beeztola_2018_19.system_history_mobile_sms';
