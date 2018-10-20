@@ -635,6 +635,17 @@ class Sales_sale extends Root_Controller
         if ($this->db->trans_status() === TRUE)
         {
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_status_sms_sales_invoice').'"','status ="'.$this->config->item('system_status_active').'"'),1);
+            //if sms on and dealer
+            if($result && ($result['config_value']==1) && ($farmer_info['farmer_type_id']>1))
+            {
+                $this->load->helper('mobile_sms');
+                $this->lang->load('mobile_sms');
+                $mobile_no=$farmer_info['mobile_no'];
+                $invoice=Barcode_helper::get_barcode_sales($sale_id);
+                $amount=System_helper::get_string_amount($item_head['amount_payable_actual']);
+                Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$mobile_no,sprintf($this->lang->line('SMS_SALES_INVOICE'),$amount,$invoice));
+            }
             $this->system_details($sale_id);
         }
         else
