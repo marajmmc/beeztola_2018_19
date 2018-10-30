@@ -303,7 +303,7 @@ class Sales_sale extends Root_Controller
         $this->form_validation->set_rules('outlet_id',$this->lang->line('LABEL_OUTLET_NAME'),'required');
         $this->form_validation->set_rules('name',$this->lang->line('LABEL_NAME'),'required');
         $this->form_validation->set_rules('mobile_no',$this->lang->line('LABEL_MOBILE_NO'),'required');
-        $this->form_validation->set_rules('union_id',$this->lang->line('LABEL_UNION_NAME'),'required');
+        //$this->form_validation->set_rules('union_id',$this->lang->line('LABEL_UNION_NAME'),'required');
 
         if($this->form_validation->run() == FALSE)
         {
