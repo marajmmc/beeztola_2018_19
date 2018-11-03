@@ -143,7 +143,7 @@ class Ft_dealer_visit_zsc_comment extends Root_Controller
         $this->db->from($this->config->item('table_pos_ft_dealer_visit').' item');
         $this->db->select('item.*');
 
-        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'" AND outlet_info.revision = 1','INNER');
         $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
 
         $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=item.user_created','LEFT');
