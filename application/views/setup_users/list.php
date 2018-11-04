@@ -35,6 +35,12 @@ if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/edit_outlet')
     );
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>'Authentication Setup',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/edit_authentication_setup')
+    );
 }
 if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
 {
@@ -47,7 +53,6 @@ if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
     $action_buttons[]=array(
         'type'=>'button',
         'label'=>'Change status',
-        'data-message-confirm'=>'Are you sure to Change Status?',
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/edit_status')
     );
@@ -58,7 +63,7 @@ if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
         'data-action-link'=>site_url($CI->controller_url.'/index/edit_employee_id')
     );
 }
-/*if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
+if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
     $action_buttons[]=array
     (
@@ -67,7 +72,7 @@ if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/details')
     );
-}*/
+}
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
 {
     $action_buttons[]=array
