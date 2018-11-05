@@ -232,11 +232,11 @@ class Ft_dealer_visit_zsc_comment extends Root_Controller
             $this->db->from($this->config->item('table_pos_ft_dealer_visit').' item');
             $this->db->select('item.*');
 
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'" AND outlet_info.revision = 1','INNER');
             $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
 
             $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=item.dealer_id AND farmer_outlet.revision=1','INNER');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id AND farmer_farmer.farmer_type_id > 1 AND farmer_farmer.status="'.$this->config->item('system_status_active').'"','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
             $this->db->select('farmer_farmer.name dealer_name');
 
             $this->db->where('item.status !=',$this->config->item('system_status_delete'));
@@ -369,11 +369,11 @@ class Ft_dealer_visit_zsc_comment extends Root_Controller
             $this->db->from($this->config->item('table_pos_ft_dealer_visit').' item');
             $this->db->select('item.*');
 
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'" AND outlet_info.revision = 1','INNER');
             $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
 
             $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=item.dealer_id AND farmer_outlet.revision=1','INNER');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id AND farmer_farmer.farmer_type_id > 1 AND farmer_farmer.status="'.$this->config->item('system_status_active').'"','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
             $this->db->select('farmer_farmer.name dealer_name');
 
             $this->db->where('item.status !=',$this->config->item('system_status_delete'));
@@ -511,23 +511,16 @@ class Ft_dealer_visit_zsc_comment extends Root_Controller
                 $item_id=$this->input->post('id');
             }
 
-            //$data['item']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('id ='.$item_id,'status !="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
             $this->db->from($this->config->item('table_pos_ft_dealer_visit').' item');
             $this->db->select('item.*');
             $this->db->select("IF(item.zsc_comment is null, 'NO', 'YES') status_zsc_comment");
 
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'" AND outlet_info.revision = 1','INNER');
             $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
 
             $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=item.dealer_id AND farmer_outlet.revision=1','INNER');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id AND farmer_farmer.farmer_type_id > 1 AND farmer_farmer.status="'.$this->config->item('system_status_active').'"','INNER');
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
             $this->db->select('farmer_farmer.name dealer_name');
-
-            $this->db->join($this->config->item('table_pos_setup_user_info').' user_info_created','user_info_created.user_id=item.user_created','LEFT');
-            $this->db->select('user_info_created.name full_name_created');
-
-            $this->db->join($this->config->item('table_pos_setup_user_info').' user_info_updated','user_info_updated.user_id=item.user_updated','LEFT');
-            $this->db->select('user_info_updated.name full_name_updated');
 
             $this->db->where('item.status !=',$this->config->item('system_status_delete'));
             $this->db->where('item.id',$item_id);
@@ -542,9 +535,20 @@ class Ft_dealer_visit_zsc_comment extends Root_Controller
             }
 
             $user_ids=array();
-            $user_ids[$data['item']['user_update_zsc_comment']]=$data['item']['user_update_zsc_comment'];
-            $user_ids[$data['item']['user_updated_admin']]=$data['item']['user_updated_admin'];
-            $data['users']=$this->get_sms_users_info($user_ids);
+            $user_ids[$data['item']['user_created']]=$data['item']['user_created'];
+            if($data['item']['user_updated']>0)
+            {
+                $user_ids[$data['item']['user_updated']]=$data['item']['user_updated'];
+            }
+            if($data['item']['user_update_zsc_comment']>0)
+            {
+                $user_ids[$data['item']['user_update_zsc_comment']]=$data['item']['user_update_zsc_comment'];
+            }
+            if($data['item']['user_updated_admin']>0)
+            {
+                $user_ids[$data['item']['user_updated_admin']]=$data['item']['user_updated_admin'];
+            }
+            $data['users']=System_helper::get_users_info($user_ids);
 
             $outlet_id=$data['item']['outlet_id'];
             $dealer_id=$data['item']['dealer_id'];
@@ -592,24 +596,5 @@ class Ft_dealer_visit_zsc_comment extends Root_Controller
             return false;
         }
         return true;
-    }
-    private function get_sms_users_info($user_ids)
-    {
-        $this->db->from($this->config->item('table_login_setup_user').' user');
-        $this->db->select('user.id,user.employee_id,user.user_name,user.status');
-        $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user.id = user_info.user_id','INNER');
-        $this->db->select('user_info.name,user_info.ordering,user_info.blood_group,user_info.mobile_no');
-        $this->db->where('user_info.revision',1);
-        if(sizeof($user_ids)>0)
-        {
-            $this->db->where_in('user.id',$user_ids);
-        }
-        $results=$this->db->get()->result_array();
-        $users=array();
-        foreach($results as $result)
-        {
-            $users[$result['id']]=$result;
-        }
-        return $users;
     }
 }
