@@ -132,11 +132,11 @@ class Ft_dealer_visit extends Root_Controller
         $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=item.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'" AND outlet_info.revision = 1','INNER');
         $this->db->select('outlet_info.name outlet, outlet_info.customer_code outlet_code');
 
-        $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=item.user_created','LEFT');
+        $this->db->join($this->config->item('table_pos_setup_user_info').' pos_setup_user_info','pos_setup_user_info.user_id=item.user_created  AND pos_setup_user_info.revision = 1','LEFT');
         $this->db->select('pos_setup_user_info.name created_by');
 
         $this->db->join($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet','farmer_outlet.farmer_id=item.dealer_id AND farmer_outlet.revision=1','INNER');
-        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id AND farmer_farmer.farmer_type_id > 1 AND farmer_farmer.status="'.$this->config->item('system_status_active').'"','INNER');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer_farmer','farmer_farmer.id=farmer_outlet.farmer_id','INNER');
         $this->db->select('farmer_farmer.name dealer');
 
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
