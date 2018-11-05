@@ -146,7 +146,7 @@ $CI = & get_instance();
     jQuery(document).ready(function()
     {
         system_off_events();
-        $(".date_large").datepicker({dateFormat : display_date_format,changeMonth: true,changeYear: true,yearRange: "2015:+0"});
+        $(".date_large").datepicker({dateFormat : display_date_format,changeMonth: true,changeYear: true,yearRange: "c-2:c+2"});
         $("#crop_id").html(get_dropdown_with_select(system_crops));
         $(document).on("change","#crop_id",function()
         {
