@@ -28,7 +28,7 @@ $lang['MSG_ALREADY_FINALIZED'] = 'Already Finalized.';
 $lang['MSG_QC_EDIT_WARNING'] = 'If currency price, packing or direct cost changed, please save this budget again to get lastest COGS and Total COGS.';
 $lang['MSG_OUTLET_NOT_ASSIGNED'] = 'Outlet not assigned.';
 $lang['MSG_NOT_FOUND'] = 'Not Found';
-
+$lang['MSG_SESSION_TIME_OUT'] = 'Your session expired.Please login again';
 //Action buttons
 $lang['ACTION_DASHBOARD'] = 'Dashboard';
 $lang['ACTION_NEW'] = 'New';
