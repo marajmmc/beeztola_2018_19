@@ -247,7 +247,7 @@ class Ft_dealer_visit extends Root_Controller
             $date=$data['item']['date'];
             $data['item_previous']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date < '.$date),1,0,array('id DESC'));
 
-            $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
             if(!$data['heads'])
             {
                 $ajax['status']=false;
@@ -284,7 +284,7 @@ class Ft_dealer_visit extends Root_Controller
 
         $data['item_previous']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date < '.$date),1,0,array('id DESC'));
         $data['item']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date='.$date),1,0,array('id DESC'));
-        $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+        $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
         if(!$data['heads'])
         {
             $ajax['status']=false;
