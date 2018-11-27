@@ -195,7 +195,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right">Attachment(Document)</label>
             </div>
             <div class="col-xs-4">
-                <input type="file" class="browse_button" data-preview-container="#image_payment" data-preview-width="300" name="image_payment">
+                <input type="file" class="browse_button" data-resize-width="800" data-resize-height="600" data-resize-size="1372022" data-preview-container="#image_payment" data-preview-width="300" name="image_payment">
             </div>
         </div>
         <div class="row show-grid">
