@@ -13,3 +13,4 @@ $config['table_system_user_preference'] = 'arm_beeztola_2018_19.system_user_pref
 $config['table_system_setup_print'] = 'arm_beeztola_2018_19.system_setup_print';
 //Mobile sms history
 $config['table_system_history_mobile_sms'] = 'arm_beeztola_2018_19.system_history_mobile_sms';
+$config['table_system_history_login_verification_code'] = 'arm_beeztola_2018_19.system_history_login_verification_code';

@@ -45,7 +45,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div class="col-sm-4 col-xs-8">
                 <select name="item[max_logged_browser]" class="form-control">
                     <?php
-                    for($i=0;$i<10;$i++)
+                    for($i=1;$i<10;$i++)
                     {?>
                         <option value="<?php echo $i;?>" <?php if($i==$user['max_logged_browser']){ echo "selected";}?>><?php echo $i;?></option>
                     <?php

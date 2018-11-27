@@ -36,6 +36,9 @@ $config['system_customer_type_customer_id']=2;
 $config['system_bank_account_purpose_sale_receive']='sale_receive';
 
 //System Configuration
+
+$config['system_purpose_pos_max_wrong_password']='pos_max_wrong_password';//maximum password wrong allow
+$config['system_purpose_pos_status_mobile_verification']='pos_status_mobile_verification';//on off mobile verification
 $config['system_purpose_pos_menu_odd_color']='pos_menu_odd_color';
 $config['system_purpose_pos_menu_even_color']='pos_menu_even_color';
 $config['system_purpose_status_sms_sales_invoice']='pos_status_sms_sales_invoice';//for sms after new invoice to dealer
