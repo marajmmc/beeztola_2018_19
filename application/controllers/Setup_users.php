@@ -624,6 +624,7 @@ class Setup_users extends Root_Controller
             if($result['status']==$this->config->item('system_status_inactive'))
             {
                 $data['status']=$this->config->item('system_status_active');
+                $data['password_wrong_consecutive']=0;
             }
 
             $this->db->trans_start();  //DB Transaction Handle START
