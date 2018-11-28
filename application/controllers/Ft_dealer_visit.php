@@ -282,14 +282,18 @@ class Ft_dealer_visit extends Root_Controller
         $dealer_id = $this->input->post("dealer_id");
         $date = System_helper::get_time($this->input->post("date"));
 
-        $data['item_previous']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date < '.$date),1,0,array('id DESC'));
+        $data['item_previous']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date < '.$date),3,0,array('id DESC'));
         $data['item']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date='.$date),1,0,array('id DESC'));
-        $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
-        if(!$data['heads'])
+        $results=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
+        if(!$results)
         {
             $ajax['status']=false;
             $ajax['system_message']='Field visit head is empty';
             $this->json_return($ajax);
+        }
+        foreach($results as $result)
+        {
+            $data['heads'][$result['id']]=$result;
         }
         $data['title']="Field Visit Head";
         $ajax['status']=true;
@@ -475,15 +479,17 @@ class Ft_dealer_visit extends Root_Controller
             $outlet_id=$data['item']['outlet_id'];
             $dealer_id=$data['item']['dealer_id'];
             $date=$data['item']['date'];
-            $data['item_previous']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date < '.$date),1,0,array('id DESC'));
-
-
-            $data['heads']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
-            if(!$data['heads'])
+            $data['item_previous']=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit'),array('*'),array('outlet_id='.$outlet_id,'dealer_id='.$dealer_id,'date < '.$date),3,0,array('id DESC'));
+            $results=Query_helper::get_info($this->config->item('table_pos_ft_dealer_visit_setup_heads'),array('*'),array('status !="'.$this->config->item('system_status_delete').'"'),0,0,array('ordering ASC'));
+            if(!$results)
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Field visit head is empty';
                 $this->json_return($ajax);
+            }
+            foreach($results as $result)
+            {
+                $data['heads'][$result['id']]=$result;
             }
 
             $data['outlets']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('customer_id','name'),array('customer_id='.$outlet_id, 'revision = 1'));
