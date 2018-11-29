@@ -103,6 +103,8 @@ class Si_budget_target extends Root_Controller
             $data['fiscal_year']= 1;
             $data['outlet_id']= 1;
             $data['outlet_name']= 1;
+            $data['number_of_dealer_active']= 1;
+            $data['number_of_dealer_budgeted']= 1;
             $data['status_budget_forward']= 1;
         }
         else if($method=='list_budget_dealer')
@@ -111,7 +113,8 @@ class Si_budget_target extends Root_Controller
             $data['farmer_name']= 1;
             $data['mobile_no']= 1;
             $data['status']= 1;
-            $data['revision_count_budget']= 1;
+            $data['number_of_variety_active']= 1;
+            $data['number_of_variety_budgeted']= 1;
         }
         else if($method=='edit_budget_dealer')
         {
@@ -126,7 +129,8 @@ class Si_budget_target extends Root_Controller
         {
             $data['crop_id']= 1;
             $data['crop_name']= 1;
-            $data['revision_count_budget']= 1;
+            $data['number_of_variety_active']= 1;
+            $data['number_of_variety_budgeted']= 1;
         }
         else if($method=='edit_budget_outlet')
         {
@@ -151,7 +155,7 @@ class Si_budget_target extends Root_Controller
     }
     private function system_list()
     {
-        $user = User_helper::get_user();
+        //$user = User_helper::get_user();
         $method='list';
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
@@ -176,16 +180,34 @@ class Si_budget_target extends Root_Controller
     private function system_get_items()
     {
         $fiscal_years=Budget_helper::get_fiscal_years();
-        $this->db->from($this->config->item('table_pos_si_budget_target').' budget_target');
-        $this->db->select('budget_target.status_budget_forward');
-        $this->db->select('budget_target.fiscal_year_id');
-        $this->db->select('budget_target.outlet_id');
-        $this->db->where_in('budget_target.outlet_id',$this->user_outlet_ids);
+        $this->db->from($this->config->item('table_pos_si_budget_target').' item');
+        $this->db->select('item.status_budget_forward, item.fiscal_year_id, item.outlet_id');
+
+        $this->db->join($this->config->item('table_pos_si_budget_target_dealer').' dealer','dealer.fiscal_year_id=item.fiscal_year_id AND dealer.outlet_id=item.outlet_id AND dealer.quantity_budget>0','INNER');
+        $this->db->select('COUNT(DISTINCT dealer.dealer_id) number_of_dealer_budgeted');
+
+        $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $results=$this->db->get()->result_array();
         $budget_target=array();
         foreach($results as $result)
         {
             $budget_target[$result['fiscal_year_id']][$result['outlet_id']]=$result;
+        }
+
+        $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+        $this->db->select('COUNT(farmer_outlet.farmer_id) number_of_dealer, farmer_outlet.outlet_id');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' farmer','farmer.id=farmer_outlet.farmer_id','INNER');
+        //$this->db->select('farmer.name farmer_name,farmer.mobile_no,farmer.status');
+        $this->db->where('farmer.status',$this->config->item('system_status_active'));
+        $this->db->where('farmer.farmer_type_id > ',1);
+        $this->db->where('farmer_outlet.revision',1);
+        $this->db->where_in('farmer_outlet.outlet_id',$this->user_outlet_ids);
+        $this->db->group_by('farmer_outlet.outlet_id');
+        $results = $this->db->get()->result_array();
+        $dealers=array();
+        foreach($results as $result)
+        {
+            $dealers[$result['outlet_id']]=$result['number_of_dealer'];
         }
 
         $items=array();
@@ -198,14 +220,16 @@ class Si_budget_target extends Root_Controller
                 $data['fiscal_year']=$fy['text'];
                 $data['outlet_id']=$outlet['customer_id'];
                 $data['outlet_name']=$outlet['name'];
+                $data['number_of_dealer_active']=isset($dealers[$outlet['customer_id']])?$dealers[$outlet['customer_id']]:0;
+
+                $data['number_of_dealer_budgeted']=0;
+                $data['status_budget_forward']=$this->config->item('system_status_pending');
                 if(isset($budget_target[$fy['id']][$outlet['customer_id']]))
                 {
+                    $data['number_of_dealer_budgeted']=$budget_target[$fy['id']][$outlet['customer_id']]['number_of_dealer_budgeted'];
                     $data['status_budget_forward']=$budget_target[$fy['id']][$outlet['customer_id']]['status_budget_forward'];
                 }
-                else
-                {
-                    $data['status_budget_forward']=$this->config->item('system_status_pending');
-                }
+
                 $items[]=$data;
             }
         }
@@ -214,7 +238,7 @@ class Si_budget_target extends Root_Controller
 
     private function system_list_budget_dealer($fiscal_year_id=0,$outlet_id=0)
     {
-        $user = User_helper::get_user();
+        //$user = User_helper::get_user();
         $method='list_budget_dealer';
         if((isset($this->permissions['action1']) && ($this->permissions['action1']==1))||(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
@@ -283,7 +307,8 @@ class Si_budget_target extends Root_Controller
 
         $this->db->from($this->config->item('table_pos_si_budget_target_dealer').' budget_target_dealer');
         $this->db->select('budget_target_dealer.dealer_id');
-        $this->db->select('MAX(budget_target_dealer.revision_count_budget) revision_count_budget');
+        //$this->db->select('SUM(budget_target_dealer.variety_id) number_of_variety_budgeted');
+        $this->db->select('SUM(CASE WHEN budget_target_dealer.quantity_budget>0 then 1 ELSE 0 END) number_of_variety_budgeted',false);
         $this->db->where('budget_target_dealer.fiscal_year_id',$fiscal_year_id);
         $this->db->where('budget_target_dealer.outlet_id',$outlet_id);
         $this->db->group_by('budget_target_dealer.dealer_id');
@@ -291,19 +316,18 @@ class Si_budget_target extends Root_Controller
         $budgeted=array();
         foreach($results as $result)
         {
-            $budgeted[$result['dealer_id']]=$result['revision_count_budget'];
+            $budgeted[$result['dealer_id']]=$result['number_of_variety_budgeted'];
         }
+        $varieties=Budget_helper::get_crop_type_varieties();
 
         $dealers=$this->get_dealers($outlet_id);
         foreach($dealers as $dealer)
         {
+            $dealer['number_of_variety_active']=sizeof($varieties);
+            $dealer['number_of_variety_budgeted']=0;
             if(isset($budgeted[$dealer['farmer_id']]))
             {
-                $dealer['revision_count_budget']=$budgeted[$dealer['farmer_id']];
-            }
-            else
-            {
-                $dealer['revision_count_budget']=0;
+                $dealer['number_of_variety_budgeted']=$budgeted[$dealer['farmer_id']];
             }
             $items[]=$dealer;
         }
@@ -311,7 +335,7 @@ class Si_budget_target extends Root_Controller
     }
     private function system_edit_budget_dealer($fiscal_year_id=0,$outlet_id=0,$dealer_id=0)
     {
-        $user = User_helper::get_user();
+        //$user = User_helper::get_user();
         $method='edit_budget_dealer';
         if((isset($this->permissions['action1']) && ($this->permissions['action1']==1))||(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
@@ -421,7 +445,7 @@ class Si_budget_target extends Root_Controller
         }
 
         //variety lists
-        $this->db->from($this->config->item('table_login_setup_classification_varieties').' v');
+        /*$this->db->from($this->config->item('table_login_setup_classification_varieties').' v');
         $this->db->select('v.id variety_id,v.name variety_name');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
         $this->db->select('crop_type.name crop_type_name');
@@ -435,7 +459,8 @@ class Si_budget_target extends Root_Controller
         $this->db->order_by('crop_type.id','ASC');
         $this->db->order_by('v.ordering','ASC');
         $this->db->order_by('v.id','ASC');
-        $results=$this->db->get()->result_array();
+        $results=$this->db->get()->result_array();*/
+        $results=Budget_helper::get_crop_type_varieties();
         foreach($results as $result)
         {
             $info=$this->initialize_row_edit_budget_dealer($fiscal_years_previous_sales,$result);
@@ -645,8 +670,7 @@ class Si_budget_target extends Root_Controller
 
         //get budget revision
         $this->db->from($this->config->item('table_pos_si_budget_target_outlet').' budget_target_outlet');
-        $this->db->select('MAX(budget_target_outlet.revision_count_budget) revision_count_budget');
-
+        $this->db->select('SUM(CASE WHEN budget_target_outlet.quantity_budget>0 then 1 ELSE 0 END) number_of_variety_budgeted',false);
         $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = budget_target_outlet.variety_id','INNER');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' crop_type','crop_type.id = v.crop_type_id','INNER');
         $this->db->select('crop_type.crop_id');
@@ -657,20 +681,32 @@ class Si_budget_target extends Root_Controller
         $budgeted=array();
         foreach($results as $result)
         {
-            $budgeted[$result['crop_id']]=$result['revision_count_budget'];
+            $budgeted[$result['crop_id']]=$result['number_of_variety_budgeted'];
+        }
+
+        $number_of_variety_active=array();
+        $varieties=Budget_helper::get_crop_type_varieties();
+        foreach($varieties as $variety)
+        {
+            if(isset($number_of_variety_active[$variety['crop_id']]))
+            {
+                $number_of_variety_active[$variety['crop_id']]+=1;
+            }
+            else
+            {
+                $number_of_variety_active[$variety['crop_id']]=1;
+            }
         }
         //crop list
         $results=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),array('id crop_id','name crop_name'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC','id ASC'));
         foreach($results as $crop)
         {
             $item=$crop;
+            $item['number_of_variety_active']=isset($number_of_variety_active[$item['crop_id']])?$number_of_variety_active[$item['crop_id']]:0;
+            $item['number_of_variety_budgeted']=0;
             if(isset($budgeted[$crop['crop_id']]))
             {
-                $item['revision_count_budget']=$budgeted[$crop['crop_id']];
-            }
-            else
-            {
-                $item['revision_count_budget']=0;
+                $item['number_of_variety_budgeted']=$budgeted[$crop['crop_id']];
             }
             $items[]=$item;
         }
@@ -1363,7 +1399,15 @@ class Si_budget_target extends Root_Controller
         $this->db->where_in('acres.upazilla_id',$upazilla_ids);
         $this->db->group_by('crop_type.id');
         $results=$this->db->get()->result_array();
-        return $results;
+        $items=array();
+        foreach($results as $result)
+        {
+            $items[$result['crop_id']][$result['crop_type_id']]['crop_name']=$result['crop_name'];
+            $items[$result['crop_id']][$result['crop_type_id']]['crop_type_name']=$result['crop_type_name'];
+            $items[$result['crop_id']][$result['crop_type_id']]['quantity']=$result['quantity'];
+            $items[$result['crop_id']][$result['crop_type_id']]['quantity_kg_acre']=$result['quantity_kg_acre'];
+        }
+        return $items;
     }
 
 

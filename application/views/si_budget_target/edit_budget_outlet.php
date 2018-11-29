@@ -49,43 +49,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="control-label"><?php echo $crop['name'];?></label>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">
-                <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse3" href="#">+ Acres Information</a></label>
-            </h4>
-        </div>
-        <div id="collapse3" class="panel-collapse collapse">
-            <table class="table table-bordered table-responsive system_table_details_view">
-                <thead>
-                <tr>
-                    <th><label class="control-label"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label></th>
-                    <th><label class="control-label"><?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME');?></label></th>
-                    <th><label class="control-label">Acres</label></th>
-                    <th><label class="control-label">Seeds per Acre(kg)</label></th>
-                    <th><label class="control-label">Total Seeds(kg)</label></th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                foreach($acres as $result)
-                {
-                    ?>
-                    <tr>
-                        <td><?php echo $result['crop_name']; ?></td>
-                        <td><?php echo $result['crop_type_name']; ?></td>
-                        <td class="text-right"><?php echo number_format($result['quantity'],3,'.',''); ?></td>
-                        <td class="text-right"><?php echo number_format($result['quantity_kg_acre'],3,'.',''); ?></td>
-                        <td class="text-right"><?php echo number_format($result['quantity']*$result['quantity_kg_acre'],3,'.',''); ?></td>
-                    </tr>
-                <?php
-                }
-                ?>
-
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <?php
+    echo $CI->load->view($this->controller_url."/acres_info",$acres,true);
+    ?>
     <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_outlet');?>" method="post">
         <input type="hidden" name="item[fiscal_year_id]" value="<?php echo $options['fiscal_year_id']; ?>" />
         <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
