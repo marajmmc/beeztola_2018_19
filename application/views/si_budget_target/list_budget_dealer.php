@@ -150,6 +150,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             selectionmode: 'singlerow',
             altrows: true,
             height: '450px',
+            rowsheight: 35,
             columnsreorder: true,
             enablebrowserselection: true,
             columns:
