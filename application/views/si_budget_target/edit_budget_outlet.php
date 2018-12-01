@@ -94,8 +94,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             for(var i=0;i<data.length;i++)
             {
                 $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+']" value="'+data[i]['quantity_budget']+'">');
-
-
             }
             var sure = confirm('<?php echo $CI->lang->line('MSG_CONFIRM_SAVE'); ?>');
             if(sure)
@@ -114,7 +112,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php
                 foreach($system_preference_items as $key=>$item)
                 {
-                    if(($key=='id')||($key=='quantity_budget'))
+                    if(($key=='id')||($key=='quantity_budget')||($key=='quantity_budget_dealer_total'))
                     {
                         ?>
                         { name: '<?php echo $key ?>', type: 'number' },
@@ -131,13 +129,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 foreach($dealers as $dealer)
                 {
                 ?>
-                    { name: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>', type: 'string' },
+                    { name: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>', type: 'number' },
                     <?php
                 }
                 foreach($fiscal_years_previous_sales as $fy)
                 {
                         ?>
-                    { name: 'quantity_sale_<?php echo $fy['id']; ?>', type: 'string' },
+                    { name: 'quantity_sale_<?php echo $fy['id']; ?>', type: 'number' },
                     <?php
                 }
                 ?>
@@ -171,18 +169,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            if(column.substr(0,16)=='quantity_budget_')
-            {
-                if(value==0)
-                {
-                    element.html('');
-                }
-                else
-                {
-                    element.html(get_string_kg(value));
-                }
-            }
-            else if(column=='quantity_budget')
+            if(column=='quantity_budget')
             {
                 if(value==0)
                 {
@@ -190,7 +177,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
             }
-            else if(column.substr(0,14)=='quantity_sale_')
+            else if(column.substr(0,14)=='quantity_sale_' || column.substr(0,23)=='quantity_budget_dealer_' || column=='quantity_budget_dealer_total')
             {
                 if(value==0)
                 {
@@ -252,7 +239,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         <?php
                         }
                     ?>
-                    { text: '<?php echo $CI->lang->line('LABEL_QUANTITY_BUDGET_KG'); ?>',datafield: 'quantity_budget', width: 100,filterable: false,cellsrenderer: cellsrenderer,cellsalign: 'right',aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg,columntype: 'custom',
+                    { text: 'Budget</br> Qty (kg)',datafield: 'quantity_budget', width: 100,filterable: false,cellsrenderer: cellsrenderer,cellsalign: 'right',aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg,columntype: 'custom',
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
                             editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input style="z-index: 1 !important;" type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
@@ -265,14 +252,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             return editor.find('input').val();
                         }
                     },
-                    { text: 'Total</br>Budget', dataField: 'quantity_budget_dealer_total',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg},
+                    { text: 'Total</br>Dealer Budget', dataField: 'quantity_budget_dealer_total',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg},
                     <?php
                     $serial=0;
                     foreach($dealers as $dealer)
                     {
                     ++$serial;
                     ?>
-                    { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg},
+                    { columngroup:'dealer_list', text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg},
                     <?php
                     }
                     ?>
@@ -280,7 +267,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ],
                 columngroups:
                     [
-                        { text: '<?php echo $CI->lang->line('LABEL_PREVIOUS_YEARS'); ?> Achieved', align: 'center', name: 'previous_years' }
+                        { text: '<?php echo $CI->lang->line('LABEL_PREVIOUS_YEARS'); ?> Achieved', align: 'center', name: 'previous_years' },
+                        { text: 'Dealer Budgeted Quantity', align: 'center', name: 'dealer_list' }
                     ]
             });
     });

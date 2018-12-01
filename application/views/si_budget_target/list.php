@@ -94,7 +94,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php
                 foreach($system_preference_items as $key => $value)
                 {
-                    if($key=='id')
+                    if(($key=='id') || ($key=='number_of_dealer_active') || ($key=='number_of_dealer_budgeted') || ($key=='number_of_dealer_budget_due'))
                     {
                         ?>
                         { name: '<?php echo $key ?>', type: 'number' },
@@ -153,9 +153,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 sortable: true,
                 showfilterrow: true,
                 columnsresize: true,
+                pageable: true,
+                pagesize:50,
+                pagesizeoptions: ['50', '100', '200','300','500','1000','5000'],
                 selectionmode: 'singlerow',
                 altrows: true,
-                height: '250px',
+                height: '350px',
                 rowsheight: 35,
                 columnsreorder: true,
                 enablebrowserselection: true,
