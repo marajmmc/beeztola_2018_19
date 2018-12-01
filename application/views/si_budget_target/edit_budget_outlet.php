@@ -15,7 +15,25 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(is
         'id'=>'button_action_save_jqx'
     );
 }
-
+if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line("ACTION_PRINT"),
+        'class'=>'button_action_download',
+        'data-title'=>"Print",
+        'data-print'=>true
+    );
+}
+if(isset($CI->permissions['action5']) && ($CI->permissions['action5']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line("ACTION_DOWNLOAD"),
+        'class'=>'button_action_download',
+        'data-title'=>"Download"
+    );
+}
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>
 <div class="row widget">
@@ -58,6 +76,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         <div id="jqx_inputs">
         </div>
     </form>
+    <div id="quantity_budgeted">
+
+    </div>
     <div class="col-xs-12" id="system_jqx_container">
 
     </div>
@@ -94,25 +115,35 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             dataType: "json",
             dataFields: [
                 <?php
-                 foreach($system_preference_items as $key=>$item)
-                 {
-                    ?>
-                { name: '<?php echo $key ?>', type: 'string' },
-                <?php
-            }
-            foreach($dealers as $dealer)
-            {
-                    ?>
-                { name: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>', type: 'string' },
-                <?php
-            }
-            foreach($fiscal_years_previous_sales as $fy)
-            {
-                    ?>
-                { name: 'quantity_sale_<?php echo $fy['id']; ?>', type: 'string' },
-                <?php
-            }
-            ?>
+                foreach($system_preference_items as $key=>$item)
+                {
+                    if($key=='id')
+                    {
+                        ?>
+                        { name: '<?php echo $key ?>', type: 'number' },
+                        <?php
+                    }
+                    else
+                    {
+                        ?>
+                        { name: '<?php echo $key ?>', type: 'string' },
+                        <?php
+                    }
+                }
+
+                foreach($dealers as $dealer)
+                {
+                ?>
+                    { name: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>', type: 'string' },
+                    <?php
+                }
+                foreach($fiscal_years_previous_sales as $fy)
+                {
+                        ?>
+                    { name: 'quantity_sale_<?php echo $fy['id']; ?>', type: 'string' },
+                    <?php
+                }
+                ?>
             ],
             id: 'id',
             type: 'POST',
@@ -156,8 +187,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             }
             else if(column=='quantity_budget')
             {
-
+                if(value==0)
+                {
+                    value='';
+                }
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
+                var data=$('#system_jqx_container').jqxGrid('getrows');
+                var quantity_budgeted=0;
+                for(var i=0;i<data.length;i++)
+                {
+                    quantity_budgeted+=parseFloat(data[i]['quantity_budget']);
+                }
+                $('#quantity_budgeted').html(get_string_kg(quantity_budgeted));
             }
             else if(column.substr(0,14)=='quantity_sale_')
             {
@@ -195,7 +236,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columns:
                 [
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',width:'100', filtertype:'list',pinned:true,editable:false},
-                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', filtertype:'list',pinned:true,editable:false},
+                    { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',width:'150', pinned:true,editable:false},
                     <?php
                         for($i=sizeof($fiscal_years_previous_sales)-1;$i>=0;$i--)
                             //foreach($fiscal_years_previous_sales as $fy)
@@ -235,4 +276,5 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ]
             });
     });
+
 </script>

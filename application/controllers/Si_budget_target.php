@@ -105,6 +105,7 @@ class Si_budget_target extends Root_Controller
             $data['outlet_name']= 1;
             $data['number_of_dealer_active']= 1;
             $data['number_of_dealer_budgeted']= 1;
+            $data['number_of_dealer_budget_due']= 1;
             $data['status_budget_forward']= 1;
         }
         else if($method=='list_budget_dealer')
@@ -112,9 +113,9 @@ class Si_budget_target extends Root_Controller
             $data['farmer_id']= 1;
             $data['farmer_name']= 1;
             $data['mobile_no']= 1;
-            $data['status']= 1;
             $data['number_of_variety_active']= 1;
             $data['number_of_variety_budgeted']= 1;
+            $data['number_of_variety_budget_due']= 1;
         }
         else if($method=='edit_budget_dealer')
         {
@@ -131,6 +132,7 @@ class Si_budget_target extends Root_Controller
             $data['crop_name']= 1;
             $data['number_of_variety_active']= 1;
             $data['number_of_variety_budgeted']= 1;
+            $data['number_of_variety_budget_due']= 1;
         }
         else if($method=='edit_budget_outlet')
         {
@@ -433,6 +435,7 @@ class Si_budget_target extends Root_Controller
         $fiscal_year_id=$this->input->post('fiscal_year_id');
         $outlet_id=$this->input->post('outlet_id');
         $dealer_id=$this->input->post('dealer_id');
+
         $fiscal_years_previous_sales=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
         $sales_previous=$this->get_sales_previous_years_dealers($fiscal_years_previous_sales,array($dealer_id));
 
@@ -548,13 +551,6 @@ class Si_budget_target extends Root_Controller
             {
                 if($items_old[$variety_id]['quantity_budget']!=$quantity_budget)
                 {
-                        /*$this->db->where('id',$items_old[$variety_id]['id']);
-                        $this->db->set('revision_count_budget','revision_count_budget+1',false);
-                        $this->db->set('quantity_budget',$quantity_budget);
-                        $this->db->set('date_updated_budget',$time);
-                        $this->db->set('user_updated_budget',$user->user_id);
-                        $this->db->update($this->config->item('table_pos_si_budget_target_dealer'));*/
-
                     $data['quantity_budget']=$quantity_budget;
                     $data['date_updated_budget']=$time;
                     $data['user_updated_budget']=$user->user_id;
@@ -569,15 +565,13 @@ class Si_budget_target extends Root_Controller
                 $data['outlet_id']=$item_head['outlet_id'];
                 $data['dealer_id']=$item_head['dealer_id'];
                 $data['variety_id']=$variety_id;
+                $data['quantity_budget']=0;
                 if($quantity_budget>0)
                 {
                     $data['quantity_budget']=$quantity_budget;
                     $data['revision_count_budget']=1;
                 }
-                else
-                {
-                    $data['quantity_budget']=0;
-                }
+
                 $data['date_updated_budget'] = $time;
                 $data['user_updated_budget'] = $user->user_id;
                 Query_helper::add($this->config->item('table_pos_si_budget_target_dealer'),$data,false);
@@ -600,7 +594,7 @@ class Si_budget_target extends Root_Controller
 
     private function system_list_budget_outlet($fiscal_year_id=0,$outlet_id=0)
     {
-        $user = User_helper::get_user();
+        //$user = User_helper::get_user();
         $method='list_budget_outlet';
         if((isset($this->permissions['action1']) && ($this->permissions['action1']==1))||(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {

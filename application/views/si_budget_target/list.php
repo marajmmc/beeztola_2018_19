@@ -41,6 +41,25 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'data-action-link'=>site_url($CI->controller_url.'/index/details')
     );
 }
+if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line("ACTION_PRINT"),
+        'class'=>'button_action_download',
+        'data-title'=>"Print",
+        'data-print'=>true
+    );
+}
+if(isset($CI->permissions['action5']) && ($CI->permissions['action5']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line("ACTION_DOWNLOAD"),
+        'class'=>'button_action_download',
+        'data-title'=>"Download"
+    );
+}
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_REFRESH"),
@@ -97,6 +116,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
+            var number_of_dealer_budget_due=0;
             if(column=='number_of_dealer_active' || column=='number_of_dealer_budgeted')
             {
                 if(value==0)
@@ -106,6 +126,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 else if(value>0)
                 {
                     element.html(get_string_quantity(value));
+                }
+            }
+            else if(column=='number_of_dealer_budget_due')
+            {
+                number_of_dealer_budget_due=(parseFloat(record['number_of_dealer_active'])-parseFloat(record['number_of_dealer_budgeted']));
+                if(number_of_dealer_budget_due==0)
+                {
+                    element.html('');
+                }
+                else if(number_of_dealer_budget_due>0)
+                {
+                    element.html(get_string_quantity(number_of_dealer_budget_due));
                 }
             }
             element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
@@ -132,6 +164,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name',width:'200',filtertype: 'list',cellsrenderer: cellsrenderer},
                     { columngroup: 'number_of_dealer',text: 'Active', dataField: 'number_of_dealer_active',width:'100', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
                     { columngroup: 'number_of_dealer',text: 'Budgeted', dataField: 'number_of_dealer_budgeted',width:'100', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
+                    { columngroup: 'number_of_dealer',text: 'Due Budget', dataField: 'number_of_dealer_budget_due',width:'100', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
                     { text: '<?php echo $CI->lang->line('LABEL_STATUS_BUDGET_FORWARD'); ?>', dataField: 'status_budget_forward', width:'100',filtertype: 'list',cellsrenderer: cellsrenderer}
                 ],
                 columngroups:
