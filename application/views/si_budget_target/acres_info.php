@@ -8,7 +8,7 @@ $CI=& get_instance();
             <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse3" href="#">+ Acres Information ( Number of crop {<?php echo sizeof($acres)?>})</a></label>
         </h4>
     </div>
-    <div id="collapse3" class="panel-collapse  <?php if($acres){ echo 'collapse';}?>">
+    <div id="collapse3" class="panel-collapse  <?php if($acres){ echo 'collapse out';}?>">
         <?php
         if(!$acres)
         {
