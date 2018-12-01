@@ -52,15 +52,15 @@ class Budget_helper
         $CI->db->select('crop.id crop_id,crop.name crop_name');
         if($crop_ids)
         {
-            $CI->db->where('crop.id',$crop_ids);
+            $CI->db->where_in('crop.id',$crop_ids);
         }
         if($crop_type_ids)
         {
-            $CI->db->where('crop_type.id',$crop_type_ids);
+            $CI->db->where_in('crop_type.id',$crop_type_ids);
         }
         if($variety_ids)
         {
-            $CI->db->where('v.id',$variety_ids);
+            $CI->db->where_in('v.id',$variety_ids);
         }
         $CI->db->where('v.status',$CI->config->item('system_status_active'));
         $CI->db->where('v.whose','ARM');

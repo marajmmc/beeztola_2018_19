@@ -824,7 +824,7 @@ class Si_budget_target extends Root_Controller
         $this->db->order_by('v.ordering','ASC');
         $this->db->order_by('v.id','ASC');
         $results=$this->db->get()->result_array();*/
-        $results=Budget_helper::get_crop_type_varieties();
+        $results=Budget_helper::get_crop_type_varieties(array($crop_id));
         foreach($results as $result)
         {
             $info=$this->initialize_row_edit_budget_outlet($fiscal_years_previous_sales,$dealers,$result);
