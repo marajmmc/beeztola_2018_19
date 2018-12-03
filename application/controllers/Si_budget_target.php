@@ -143,7 +143,6 @@ class Si_budget_target extends Root_Controller
             $data['crop_type_name']= 1;
             $data['variety_name']= 1;
             $data['variety_id']= 1;
-            //more data
             $data['quantity_budget_dealer_total']= 1;
             $data['quantity_budget']= 1;
         }
@@ -682,25 +681,27 @@ class Si_budget_target extends Root_Controller
             $budgeted[$result['crop_id']]=$result['number_of_variety_budgeted'];
         }
 
-        $number_of_variety_active=array();
         $varieties=Budget_helper::get_crop_type_varieties();
+        $crops=array();
         foreach($varieties as $variety)
         {
-            if(isset($number_of_variety_active[$variety['crop_id']]))
+            $crops[$variety['crop_id']]['crop_id']=$variety['crop_id'];
+            $crops[$variety['crop_id']]['crop_name']=$variety['crop_name'];
+            if(isset($crops[$variety['crop_id']]['number_of_variety_active']))
             {
-                $number_of_variety_active[$variety['crop_id']]+=1;
+                $crops[$variety['crop_id']]['number_of_variety_active']+=1;
             }
             else
             {
-                $number_of_variety_active[$variety['crop_id']]=1;
+                $crops[$variety['crop_id']]['number_of_variety_active']=1;
             }
         }
         //crop list
-        $results=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),array('id crop_id','name crop_name'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC','id ASC'));
-        foreach($results as $crop)
+        //$results=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),array('id crop_id','name crop_name'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC','id ASC'));
+        foreach($crops as $crop)
         {
             $item=$crop;
-            $item['number_of_variety_active']=isset($number_of_variety_active[$item['crop_id']])?$number_of_variety_active[$item['crop_id']]:0;
+            $item['number_of_variety_active']=$crop['number_of_variety_active'];
             $item['number_of_variety_budgeted']=0;
             if(isset($budgeted[$crop['crop_id']]))
             {
@@ -712,7 +713,7 @@ class Si_budget_target extends Root_Controller
     }
     private function system_edit_budget_outlet($fiscal_year_id=0,$outlet_id=0,$crop_id=0)
     {
-        $user = User_helper::get_user();
+        //$user = User_helper::get_user();
         $method='edit_budget_outlet';
         if((isset($this->permissions['action1']) && ($this->permissions['action1']==1))||(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
         {
@@ -744,6 +745,14 @@ class Si_budget_target extends Root_Controller
                 $ajax['system_message']='Invalid Outlet.';
                 $this->json_return($ajax);
             }
+            // valid crop check
+            $crop=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),'*',array('id ='.$crop_id),1);
+            if(!$crop)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Wrong crop id.';
+                $this->json_return($ajax);
+            }
             //validation forward
             $info_budget_target=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
             if(($info_budget_target['status_budget_forward']==$this->config->item('system_status_forwarded')))
@@ -758,7 +767,7 @@ class Si_budget_target extends Root_Controller
             $data['fiscal_years_previous_sales']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
             $data['fiscal_year']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
             $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
-            $data['crop']=Query_helper::get_info($this->config->item('table_login_setup_classification_crops'),'*',array('id ='.$crop_id),1);
+            $data['crop']=$crop;
             $data['dealers']=$this->get_dealers($outlet_id);
             $data['acres']=$this->get_acres($outlet_id,$crop_id);
 
@@ -857,7 +866,11 @@ class Si_budget_target extends Root_Controller
     }
     private function initialize_row_edit_budget_outlet($fiscal_years,$dealers,$info)
     {
-        $row=array();
+        $row=$this->get_preference_headers('edit_budget_zone');
+        foreach($row  as $key=>$r)
+        {
+            $row[$key]=0;
+        }
         $row['crop_type_name']=$info['crop_type_name'];
         $row['variety_name']=$info['variety_name'];
         $row['variety_id']=$info['variety_id'];
@@ -869,8 +882,6 @@ class Si_budget_target extends Root_Controller
         {
             $info['quantity_budget_dealer_'.$dealer['farmer_id']]=0;
         }
-        $row['quantity_budget_dealer_total']=0;
-        $row['quantity_budget']=0;
         return $row;
     }
     private function system_save_budget_outlet()
