@@ -122,7 +122,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     element.html(get_string_quantity(value));
                 }
             }
-            else if(column=='number_of_variety_budget_due')
+            /*else if(column=='number_of_variety_budget_due')
             {
                 number_of_variety_budget_due=(parseFloat(record['number_of_variety_active'])-parseFloat(record['number_of_variety_budgeted']));
                 if(number_of_variety_budget_due==0)
@@ -133,7 +133,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 {
                     element.html(get_string_quantity(number_of_variety_budget_due));
                 }
-            }
+            }*/
             element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
             return element[0].outerHTML;
         };
