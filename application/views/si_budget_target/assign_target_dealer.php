@@ -72,7 +72,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <?php
     echo $CI->load->view($this->common_view_location."/acres_info",$acres,true);
     ?>
-    <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_target_dealer');?>" method="post">
+    <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_assign_target_dealer');?>" method="post">
         <input type="hidden" name="item[fiscal_year_id]" value="<?php echo $options['fiscal_year_id']; ?>" />
         <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
         <input type="hidden" name="item[crop_id]" value="<?php echo $options['crop_id']; ?>" />
@@ -101,7 +101,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 foreach($dealers as $dealer)
                 {
                     ?>
-                    $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+'][<?php //echo $dealer['farmer_id']?>][quantity_target]" value="'+data[i]['quantity_target_dealer_<?php //echo $dealer['farmer_id']; ?>']+'">');
+                    $('#save_form_jqx  #jqx_inputs').append('<input type="hidden" name="items['+data[i]['variety_id']+'][<?php echo $dealer['farmer_id']?>][quantity_target]" value="'+data[i]['quantity_target_dealer_<?php echo $dealer['farmer_id']; ?>']+'">');
                     <?php
                 }
                 ?>

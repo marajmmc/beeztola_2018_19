@@ -68,7 +68,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
     </div>
     <?php
-    echo $CI->load->view($this->controller_url."/acres_info",$acres,true);
+    echo $CI->load->view($this->common_view_location."/acres_info",$acres,true);
     ?>
     <form id="save_form_jqx" action="<?php echo site_url($CI->controller_url.'/index/save_budget_outlet');?>" method="post">
         <input type="hidden" name="item[fiscal_year_id]" value="<?php echo $options['fiscal_year_id']; ?>" />
@@ -112,7 +112,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php
                 foreach($system_preference_items as $key=>$item)
                 {
-                    if(($key=='id')||($key=='quantity_budget')||($key=='quantity_budget_dealer_total'))
+                    if(($key=='id')||(substr($key, 0, 9)=='quantity_'))
                     {
                         ?>
                         { name: '<?php echo $key ?>', type: 'number' },
@@ -140,7 +140,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 ?>
             ],
-            id: 'id',
             type: 'POST',
             url: url,
             data:JSON.parse('<?php echo json_encode($options);?>')
@@ -177,7 +176,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 element.html('<div class="jqxgrid_input">'+value+'</div>');
             }
-            else if(column.substr(0,14)=='quantity_sale_' || column.substr(0,23)=='quantity_budget_dealer_' || column=='quantity_budget_dealer_total')
+            else if(column.substr(0,9)=='quantity_')
             {
                 if(value==0)
                 {
@@ -207,7 +206,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             return '<div style="position: relative; margin: 0px;padding: 5px;width: 100%;height: 100%; overflow: hidden;background-color:'+system_report_color_grand+';">' +text+'</div>';
         };
 
-
         var dataAdapter = new $.jqx.dataAdapter(source);
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
@@ -235,7 +233,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <?php
                         for($i=sizeof($fiscal_years_previous_sales)-1;$i>=0;$i--)
                             //foreach($fiscal_years_previous_sales as $fy)
-                            {?>{columngroup: 'previous_years',text: '<?php echo $fiscal_years_previous_sales[$i]['name']; ?>', dataField: 'quantity_sale_<?php echo $fiscal_years_previous_sales[$i]['id']; ?>',width:'100',filterable: false,cellsrenderer: cellsrenderer,align:'center',cellsAlign:'right',editable:false,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg},
+                            {?>{columngroup: 'previous_years',text: '<?php echo $fiscal_years_previous_sales[$i]['name']; ?>', dataField: 'quantity_sale_<?php echo $fiscal_years_previous_sales[$i]['id']; ?>',width:'80',filterable: false,cellsrenderer: cellsrenderer,align:'center',cellsAlign:'right',editable:false,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg},
                         <?php
                         }
                     ?>

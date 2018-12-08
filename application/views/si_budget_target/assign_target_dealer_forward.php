@@ -67,7 +67,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
 </div>
 
-<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward_budget');?>" method="post">
+<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_assign_target_dealer_forward');?>" method="post">
     <input type="hidden" name="item[fiscal_year_id]" value="<?php echo $options['fiscal_year_id']; ?>" />
     <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
     <div class="row widget">
@@ -82,7 +82,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right">Forward Budget<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select class="form-control" name="item[status_budget_forward]">
+                <select class="form-control" name="item[status_target_dealer_forward]">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                     <option value="<?php echo $this->config->item('system_status_forwarded')?>">Forward</option>
                 </select>

@@ -87,7 +87,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <?php
                 foreach($system_preference_items as $key => $value)
                 {
-                    if($key=='id' || $key=='number_of_variety_active' || $key=='number_of_variety_budgeted' || $key=='number_of_variety_budget_due')
+                    if($key=='id' ||(substr($key, 0, 10)=='number_of_'))
                     {
                         ?>
                         { name: '<?php echo $key ?>', type: 'number' },
@@ -102,7 +102,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 }
                 ?>
             ],
-            id: 'id',
             type: 'POST',
             url: url,
             data:JSON.parse('<?php echo json_encode($options);?>')
@@ -110,8 +109,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            var number_of_variety_budget_due = 0;
-            if(column=='number_of_variety_active' || column=='number_of_variety_budgeted')
+            if(column.substr(0,10)=='number_of_')
             {
                 if(value==0)
                 {
@@ -122,18 +120,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     element.html(get_string_quantity(value));
                 }
             }
-            /*else if(column=='number_of_variety_budget_due')
-            {
-                number_of_variety_budget_due=(parseFloat(record['number_of_variety_active'])-parseFloat(record['number_of_variety_budgeted']));
-                if(number_of_variety_budget_due==0)
-                {
-                    element.html('');
-                }
-                else if(number_of_variety_budget_due>0)
-                {
-                    element.html(get_string_quantity(number_of_variety_budget_due));
-                }
-            }*/
             element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
             return element[0].outerHTML;
         };
@@ -154,16 +140,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             selectionmode: 'singlerow',
             altrows: true,
             rowsheight: 35,
-            columnsheight: 40,
+            /*columnsheight: 40,*/
             columnsreorder: true,
             enablebrowserselection: true,
             columns:
             [
                 { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'farmer_name', width:200,cellsrenderer: cellsrenderer},
-                { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:150,cellsrenderer: cellsrenderer},
-                { columngroup: 'number_of_variety',text: 'Active', dataField: 'number_of_variety_active',width:'100', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
-                { columngroup: 'number_of_variety',text: 'Budgeted', dataField: 'number_of_variety_budgeted',width:'100', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
-                { columngroup: 'number_of_variety',text: 'Due Budget', dataField: 'number_of_variety_budget_due',width:'100', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer}
+                { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:120,cellsrenderer: cellsrenderer},
+                { columngroup: 'number_of_variety',text: 'Active', dataField: 'number_of_variety_active',width:'70', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
+                { columngroup: 'number_of_variety',text: 'Budgeted', dataField: 'number_of_variety_budgeted',width:'70', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
+                { columngroup: 'number_of_variety',text: 'Due Budget', dataField: 'number_of_variety_budget_due',width:'80', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer}
             ],
             columngroups:
             [
