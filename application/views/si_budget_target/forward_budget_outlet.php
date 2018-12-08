@@ -54,7 +54,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
 
     <?php
-    echo $CI->load->view($this->common_view_location."/acres_info",$acres,true);
+    echo $CI->load->view($this->common_view_location."/acres_info",'',true);
     ?>
     <!--<div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
         <div class="col-xs-4"></div>
@@ -67,7 +67,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
 </div>
 
-<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward_budget');?>" method="post">
+<form id="save_form" action="<?php echo site_url($CI->controller_url.'/index/save_forward_budget_outlet');?>" method="post">
     <input type="hidden" name="item[fiscal_year_id]" value="<?php echo $options['fiscal_year_id']; ?>" />
     <input type="hidden" name="item[outlet_id]" value="<?php echo $options['outlet_id']; ?>" />
     <div class="row widget">
@@ -111,7 +111,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
 
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_budget_forward');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_forward_budget_outlet');?>";
 
         // prepare the data
         var source =

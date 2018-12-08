@@ -150,10 +150,10 @@ $lang['LABEL_SHORT_NAME'] = 'Short Name';
 $lang['LABEL_FULL_NAME'] = 'Full Name';
 $lang['LABEL_CUSTOMER_NAME'] = 'Customer';
 $lang['LABEL_SUPPLIER_NAME']='Supplier Name';
-$lang['LABEL_OUTLET_NAME_SOURCE'] = 'Source Outlet Name';
-$lang['LABEL_OUTLET_NAME_DESTINATION'] = 'Destination Outlet Name';
-$lang['LABEL_OUTLET_NAME'] = 'Outlet';
-$lang['LABEL_OUTLET_CODE'] = 'Outlet Code';
+$lang['LABEL_OUTLET_NAME_SOURCE'] = 'Source Showroom Name';
+$lang['LABEL_OUTLET_NAME_DESTINATION'] = 'Destination Showroom Name';
+$lang['LABEL_OUTLET_NAME'] = 'Showroom';
+$lang['LABEL_OUTLET_CODE'] = 'Showroom Code';
 $lang['LABEL_SHOWROOM_NAME'] = 'Showroom Name';
 
 // office, company, department

@@ -28,7 +28,7 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
         'type'=>'button',
         'label'=>'Forward Budget',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/budget_forward')
+        'data-action-link'=>site_url($CI->controller_url.'/index/forward_budget_outlet')
     );
 }
 if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
@@ -38,7 +38,7 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(is
         'type'=>'button',
         'label'=>'Assign Dealer Target',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/list_assign_target_dealer')
+        'data-action-link'=>site_url($CI->controller_url.'/index/list_target_dealer')
 
     );
 }
@@ -49,7 +49,7 @@ if((isset($CI->permissions['action7']) && ($CI->permissions['action7']==1)))
         'type'=>'button',
         'label'=>'Forward Dealer Target',
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/assign_target_dealer_forward')
+        'data-action-link'=>site_url($CI->controller_url.'/index/forward_target_dealer')
     );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
@@ -200,10 +200,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { columngroup: 'number_of_dealer',text: 'Due Budget', dataField: 'number_of_dealer_budget_due',width:'70', cellsalign:'right', align:'right',renderer: header_render,cellsrenderer: cellsrenderer},
                 { columngroup: 'number_of_dealer',text: 'Targeted', dataField: 'number_of_dealer_targeted',width:'70', cellsalign:'right', align:'right',renderer: header_render,cellsrenderer: cellsrenderer},
                 { columngroup: 'number_of_dealer',text: 'Due Target', dataField: 'number_of_dealer_target_due',width:'70', cellsalign:'right', align:'right',renderer: header_render,cellsrenderer: cellsrenderer},
-                { columngroup: 'status_all',text: 'Budget Forward', dataField: 'status_budget_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer},
-                { columngroup: 'status_all',text: '(Outlet) Target Assign', dataField: 'status_target_outlet_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer},
-                { columngroup: 'status_all',text: 'Dealer Target Assign', dataField: 'status_target_dealer_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer},
-                { columngroup: 'status_all',text: '(SI) 3Y Target Assign', dataField: 'status_target_outlet_next_year_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer}
+                { columngroup: 'status_all',text: 'Showroom Budget', dataField: 'status_budget_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer},
+                { columngroup: 'status_all',text: 'Showroom Target', dataField: 'status_target_outlet_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer},
+                { columngroup: 'status_all',text: 'Dealer Target', dataField: 'status_target_dealer_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer},
+                { columngroup: 'status_all',text: 'Showroom 3Yr Target', dataField: 'status_target_outlet_next_year_forward', width:'80',filtertype: 'list',renderer: header_render,cellsrenderer: cellsrenderer}
             ],
             columngroups:
             [

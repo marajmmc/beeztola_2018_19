@@ -147,9 +147,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             [
                 { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'farmer_name', width:200,cellsrenderer: cellsrenderer},
                 { text: '<?php echo $CI->lang->line('LABEL_MOBILE_NO'); ?>', dataField: 'mobile_no', width:120,cellsrenderer: cellsrenderer},
-                { columngroup: 'number_of_variety',text: 'Active', dataField: 'number_of_variety_active',width:'70', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
+                { columngroup: 'number_of_variety',text: 'Active', dataField: 'number_of_variety_active',width:'50', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
                 { columngroup: 'number_of_variety',text: 'Budgeted', dataField: 'number_of_variety_budgeted',width:'70', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer},
-                { columngroup: 'number_of_variety',text: 'Due Budget', dataField: 'number_of_variety_budget_due',width:'80', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer}
+                { columngroup: 'number_of_variety',text: 'Due', dataField: 'number_of_variety_budget_due',width:'50', cellsalign:'right', align:'right',cellsrenderer: cellsrenderer}
             ],
             columngroups:
             [

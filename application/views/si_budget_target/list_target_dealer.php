@@ -14,7 +14,7 @@ if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1))||(is
         'type'=>'button',
         'label'=>$CI->lang->line('ACTION_EDIT'),
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/assign_target_dealer/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
+        'data-action-link'=>site_url($CI->controller_url.'/index/edit_target_dealer/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
 
     );
 }
@@ -79,7 +79,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_list_assign_target_dealer');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_target_dealer');?>";
 
         // prepare the data
         var source =
