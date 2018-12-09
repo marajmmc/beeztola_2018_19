@@ -36,7 +36,7 @@ if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
 $action_buttons[]=array
 (
     'label'=>$CI->lang->line("ACTION_REFRESH"),
-    'href'=>site_url($CI->controller_url.'/index/details/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
+    'href'=>site_url($CI->controller_url.'/index/details/'.$options['fiscal_year_id'].'/'.$options['area_id'])
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 ?>

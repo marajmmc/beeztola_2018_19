@@ -2187,7 +2187,7 @@ class Si_budget_target extends Root_Controller
             }
             //for jqx grid
             $data['options']['fiscal_year_id']=$fiscal_year_id;
-            $data['options']['outlet_id']=$outlet_id;
+            $data['options']['area_id']=$outlet_id;
 
             $data['title']='Showroom budget and target details';
             $dealers=$this->get_dealers($outlet_id);
@@ -2247,10 +2247,6 @@ class Si_budget_target extends Root_Controller
                 {
                     $user_login_ids[$budget_target_superior['user_target_outlet_next_year_forwarded']]=$budget_target_superior['user_target_outlet_next_year_forwarded'];
                 }
-                if($budget_target_superior['user_target_outlet_next_year_forwarded']>0)
-                {
-                    $user_login_ids[$budget_target_superior['user_target_outlet_next_year_forwarded']]=$budget_target_superior['user_target_outlet_next_year_forwarded'];
-                }
                 $users_login=$this->get_login_users_info($user_login_ids);
             }
 
@@ -2276,7 +2272,7 @@ class Si_budget_target extends Root_Controller
             $result['time']='';
             if($budget_target_superior['status_target_outlet_forward']==$this->config->item('system_status_forwarded'))
             {
-                $result['status']=$budget_target_superior['status_target_outlet_forward'];
+                $result['status']=$this->config->item('system_status_forwarded');
                 $result['by']=$users_login[$budget_target_superior['user_target_outlet_forwarded']]['name'];
                 $result['time']=System_helper::display_date_time($budget_target_superior['date_target_outlet_forwarded']);
             }
@@ -2302,7 +2298,7 @@ class Si_budget_target extends Root_Controller
             $result['time']='';
             if($budget_target_superior['status_target_outlet_next_year_forward']==$this->config->item('system_status_forwarded'))
             {
-                $result['status']=$budget_target_superior['status_target_outlet_next_year_forward'];
+                $result['status']=$this->config->item('system_status_forwarded');
                 $result['by']=$users_login[$budget_target_superior['user_target_outlet_next_year_forwarded']]['name'];
                 $result['time']=System_helper::display_date_time($budget_target_superior['date_target_outlet_next_year_forwarded']);
             }
@@ -2331,7 +2327,7 @@ class Si_budget_target extends Root_Controller
         $items=array();
 
         $fiscal_year_id=$this->input->post('fiscal_year_id');
-        $outlet_id=$this->input->post('outlet_id');
+        $outlet_id=$this->input->post('area_id');
         $dealers=$this->get_dealers($outlet_id);
         $areas=array();
         foreach($dealers as $result)
