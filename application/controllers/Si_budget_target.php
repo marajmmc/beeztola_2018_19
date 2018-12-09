@@ -36,13 +36,31 @@ class Si_budget_target extends Root_Controller
     }
     private function language_labels()
     {
+        // area
+        $this->lang->language['LABEL_AREA']='Showroom';
+        $this->lang->language['LABEL_USER_CREATED_AREA']='Budget Created By';
+        $this->lang->language['LABEL_DATE_CREATED_AREA']='Budget Created Time';
+        $this->lang->language['LABEL_STATUS_BUDGET_FORWARD_AREA']='Showroom Budget Forward Status';
+        $this->lang->language['LABEL_USER_BUDGET_FORWARDED_AREA']='Showroom Budget Forwarded By';
+        $this->lang->language['LABEL_DATE_BUDGET_FORWARDED_AREA']='Showroom Budget Forwarded Time';
+        // area sub
+        $this->lang->language['LABEL_STATUS_TARGET_FORWARD_AREA_SUB']='Dealer Assign Target Forward Status';
+        $this->lang->language['LABEL_USER_TARGET_FORWARDED_AREA_SUB']='Dealer Target Forwarded By';
+        $this->lang->language['LABEL_DATE_TARGET_FORWARDED_AREA_SUB']='Dealer Target Forwarded Time';
+        // superior area
+        $this->lang->language['LABEL_AREA_SUPERIOR']='Zone';
+        $this->lang->language['LABEL_STATUS_TARGET_FORWARD_AREA_SUPERIOR']='Showroom Target Status';
+        $this->lang->language['LABEL_USER_TARGET_FORWARDED_AREA_SUPERIOR']='Target Forwarded By';
+        $this->lang->language['LABEL_DATE_TARGET_FORWARDED_AREA_SUPERIOR']='Target Forwarded Time';
+        $this->lang->language['LABEL_STATUS_TARGET_NEXT_YEAR_FORWARD_AREA_SUPERIOR']='Showroom (Next Year) Target Status';
+        $this->lang->language['LABEL_USER_TARGET_NEXT_YEAR_FORWARDED_AREA_SUPERIOR']='Target (Next Year) Forwarded By';
+        $this->lang->language['LABEL_DATE_TARGET_NEXT_YEAR_FORWARDED_AREA_SUPERIOR']='Target (Next Year) Forwarded Time';
+        // jqx grid
         $this->lang->language['LABEL_BUDGET_SUB_KG']='Dealer Budget (Kg)';
         $this->lang->language['LABEL_BUDGET_SUB_AMOUNT']='Dealer Budget (Amount)';
         $this->lang->language['LABEL_TARGET_SUB_KG']='Dealer Target (Kg)';
         $this->lang->language['LABEL_TARGET_SUB_AMOUNT']='Dealer Target (Amount)';
-        $this->lang->language['LABEL_STATUS_BUDGET_FORWARD']='Showroom Budget Status';
-        $this->lang->language['LABEL_USER_BUDGET_FORWARDED']='Budget Forwarded By';
-        $this->lang->language['LABEL_DATE_BUDGET_FORWARDED']='Budget Forwarded Time';
+
     }
     public function index($action="list", $id=0,$id1=0,$id2=0)
     {
@@ -247,8 +265,8 @@ class Si_budget_target extends Root_Controller
             $data['crop_type_name']= 1;
             $data['variety_name']= 1;
             $data['variety_id']= 1;
-            $data['quantity_budget_dealer_total']= 1;
-            $data['quantity_budget_outlet']= 1;
+            $data['quantity_target_dealer_total']= 1;
+            $data['quantity_target_outlet']= 1;
         }
         else if($method=='search_details')
         {
@@ -1929,7 +1947,7 @@ class Si_budget_target extends Root_Controller
 
             $data['fiscal_year_budget_target']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
             $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
-            $data['title']="Forward/Complete budget";
+            $data['title']="Forward/Complete Target";
             $data['options']['fiscal_year_id']=$fiscal_year_id;
             $data['options']['outlet_id']=$outlet_id;
 
@@ -1958,7 +1976,7 @@ class Si_budget_target extends Root_Controller
         $fiscal_years_previous_sales=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id <'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_PREVIOUS_SALE,0,array('id DESC'));
         $sales_previous=$this->get_sales_previous_years_outlet($fiscal_years_previous_sales,$outlet_id);
 
-        //old items dealer
+        //items dealer target
         $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_dealer'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
         $quantity_dealer_targeted=array();
         $dealer_ids=array();
@@ -1968,7 +1986,7 @@ class Si_budget_target extends Root_Controller
             $quantity_dealer_targeted[$result['dealer_id']][$result['variety_id']]=$result;
         }
 
-        //old items outlet
+        //items outlet target
         $results=Query_helper::get_info($this->config->item('table_pos_si_budget_target_outlet'),'*',array('fiscal_year_id ='.$fiscal_year_id,'outlet_id ='.$outlet_id));
         $quantity_outlet_targeted=array();
         foreach($results as $result)
@@ -2038,18 +2056,18 @@ class Si_budget_target extends Root_Controller
             }
             if(isset($quantity_outlet_targeted[$result['variety_id']]))
             {
-                $info['quantity_budget_outlet']=$quantity_outlet_targeted[$result['variety_id']]['quantity_budget'];
+                $info['quantity_target_outlet']=$quantity_outlet_targeted[$result['variety_id']]['quantity_target'];
             }
-            $quantity_budget_dealer_total=0;
+            $quantity_target_dealer_total=0;
             foreach($dealer_ids as $dealer_id)
             {
                 if(isset($quantity_dealer_targeted[$dealer_id][$result['variety_id']]))
                 {
-                    $info['quantity_budget_dealer_'.$dealer_id]=$quantity_dealer_targeted[$dealer_id][$result['variety_id']]['quantity_budget'];
-                    $quantity_budget_dealer_total+=$info['quantity_budget_dealer_'.$dealer_id];
+                    $info['quantity_target_dealer_'.$dealer_id]=$quantity_dealer_targeted[$dealer_id][$result['variety_id']]['quantity_target'];
+                    $quantity_target_dealer_total+=$info['quantity_target_dealer_'.$dealer_id];
                 }
             }
-            $info['quantity_budget_dealer_total']=$quantity_budget_dealer_total;
+            $info['quantity_target_dealer_total']=$quantity_target_dealer_total;
 
             foreach($info as $key=>$r)
             {
@@ -2086,7 +2104,7 @@ class Si_budget_target extends Root_Controller
         }
         foreach($dealer_ids as $dealer_id)
         {
-            $row['quantity_budget_dealer_'.$dealer_id]= 0;
+            $row['quantity_target_dealer_'.$dealer_id]= 0;
         }
         return $row;
     }
@@ -2191,24 +2209,71 @@ class Si_budget_target extends Root_Controller
 
             }
             $data['sub_column_group_name']='Dealers';
-            $data['budget_target']=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            $info_budget=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            $zone_id=$info_budget['zone_id'];
+            $data['budget_target']=array();//$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            $data['budget_target']['date_created_area']=$info_budget['date_created'];
+            $data['budget_target']['user_created_area']=$info_budget['user_created'];
+            // budget area (outlet & dealer)
+            $data['budget_target']['status_budget_forward_area']=$info_budget['status_budget_forward'];
+            $data['budget_target']['date_budget_forwarded_area']=$info_budget['date_budget_forwarded'];
+            $data['budget_target']['user_budget_forwarded_area']=$info_budget['user_budget_forwarded'];
+            // target for sub area(dealer)
+            $data['budget_target']['status_target_forward_area_sub']=$info_budget['status_target_dealer_forward'];
+            $data['budget_target']['date_target_forwarded_area_sub']=$info_budget['date_target_dealer_forwarded'];
+            $data['budget_target']['user_target_forwarded_area_sub']=$info_budget['user_target_dealer_forwarded'];
+            // target superior area (assign outlet from zsc)
+            $data['budget_target']['status_target_forward_area_superior']=$this->config->item('system_status_pending');
+            $data['budget_target']['date_target_forwarded_area_superior']='';
+            $data['budget_target']['user_target_forwarded_area_superior']='';
+            // next 3 years target superior area (assign outlet from zsc)
+            $data['budget_target']['status_target_next_year_forward_area_superior']=$this->config->item('system_status_pending');
+            $data['budget_target']['date_target_next_year_forwarded_area_superior']='';
+            $data['budget_target']['user_target_next_year_forwarded_area_superior']='';
+
+            // area user info
             $user_ids=array();
-            $user_ids[$data['budget_target']['user_created']]=$data['budget_target']['user_created'];
-            if($data['budget_target']['user_budget_forwarded']>0)
+            $user_ids[$data['budget_target']['user_created_area']]=$data['budget_target']['user_created_area'];
+            if($data['budget_target']['user_budget_forwarded_area']>0)
             {
-                $user_ids[$data['budget_target']['user_budget_forwarded']]=$data['budget_target']['user_budget_forwarded'];
+                $user_ids[$data['budget_target']['user_budget_forwarded_area']]=$data['budget_target']['user_budget_forwarded_area'];
             }
-            if($data['budget_target']['user_target_dealer_forwarded']>0)
+            if($data['budget_target']['user_target_forwarded_area_sub']>0)
             {
-                $user_ids[$data['budget_target']['user_target_dealer_forwarded']]=$data['budget_target']['user_target_dealer_forwarded'];
+                $user_ids[$data['budget_target']['user_target_forwarded_area_sub']]=$data['budget_target']['user_target_forwarded_area_sub'];
             }
             $data['users']=System_helper::get_users_info($user_ids);
 
-            $data['users_login']=array();
+            // superior area target & user info
+            $data['users_area_superior']=array();
+            $info_target=$this->get_info_target_zi($fiscal_year_id,$zone_id);
+            if($info_target)
+            {
+                // target assign outlet from zsc
+                $data['budget_target']['status_target_forward_area_superior']=$info_target['status_target_outlet_forward'];
+                $data['budget_target']['date_target_forwarded_area_superior']=$info_target['date_target_outlet_forwarded'];
+                $data['budget_target']['user_target_forwarded_area_superior']=$info_target['user_target_outlet_forwarded'];
+                // next 3 years target assign outlet from zsc
+                $data['budget_target']['status_target_next_year_forward_area_superior']=$info_target['status_target_outlet_next_year_forward'];
+                $data['budget_target']['date_target_next_year_forwarded_area_superior']=$info_target['date_target_outlet_next_year_forwarded'];
+                $data['budget_target']['user_target_next_year_forwarded_area_superior']=$info_target['user_target_outlet_next_year_forwarded'];
+
+                $user_login_ids[0]=0;
+                if($data['budget_target']['user_target_forwarded_area_superior']>0)
+                {
+                    $user_login_ids[$data['budget_target']['user_target_forwarded_area_superior']]=$data['budget_target']['user_target_forwarded_area_superior'];
+                }
+                if($data['budget_target']['user_target_next_year_forwarded_area_superior']>0)
+                {
+                    $user_login_ids[$data['budget_target']['user_target_next_year_forwarded_area_superior']]=$data['budget_target']['user_target_next_year_forwarded_area_superior'];
+                }
+                $data['users_area_superior']=$this->get_login_users_info($user_login_ids);
+            }
 
             $data['acres']=$this->get_acres($outlet_id);
             $data['fiscal_year_budget_target']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
-            $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
+            $data['area_superior']=Query_helper::get_info($this->config->item('table_login_setup_location_zones'),'*',array('id ='.$zone_id),1);
+            $data['area']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
 
             $data['fiscal_years_next_predictions']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id >'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_NEXT_BUDGET_TARGET,0);
             $data['system_preference_items']= System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
@@ -2559,6 +2624,22 @@ class Si_budget_target extends Root_Controller
             $items[$result['crop_id']][$result['crop_type_id']]['quantity_kg_acre']=$result['quantity_kg_acre'];
         }
         return $items;
+    }
+    private function get_login_users_info($user_ids)
+    {
+        $this->db->from($this->config->item('table_login_setup_user').' user');
+        $this->db->select('user.id,user.employee_id,user.user_name,user.status');
+        $this->db->join($this->config->item('table_login_setup_user_info').' user_info','user.id = user_info.user_id','INNER');
+        $this->db->select('user_info.name,user_info.ordering,user_info.blood_group,user_info.mobile_no');
+        $this->db->where('user_info.revision',1);
+        $this->db->where_in('user.id',$user_ids);
+        $results=$this->db->get()->result_array();
+        $users=array();
+        foreach($results as $result)
+        {
+            $users[$result['id']]=$result;
+        }
+        return $users;
     }
 
 

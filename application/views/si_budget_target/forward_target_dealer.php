@@ -73,13 +73,13 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <div class="row widget">
         <div class="widget-header">
             <div class="title">
-                Forward Budget
+                Forward Target
             </div>
             <div class="clearfix"></div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Forward Budget<span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Forward Target<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select class="form-control" name="item[status_target_dealer_forward]">
@@ -137,7 +137,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 foreach($dealers as $dealer)
                 {
                 ?>
-                    { name: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>', type: 'number' },
+                    { name: 'quantity_target_dealer_<?php echo $dealer['farmer_id']?>', type: 'number' },
                     <?php
                 }
                 foreach($fiscal_years_previous_sales as $fy)
@@ -272,19 +272,19 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         //foreach($fiscal_years_previous_sales as $fy)
                             {
                             ?>
-                        {columngroup: 'previous_years',text: '<?php echo $fiscal_years_previous_sales[$i]['name']; ?>', dataField: 'quantity_sale_<?php echo $fiscal_years_previous_sales[$i]['id']; ?>',width:'80',filterable: false,cellsrenderer: cellsrenderer,align:'center',cellsAlign:'right',editable:false,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                        {columngroup: 'previous_years',text: '<?php echo $fiscal_years_previous_sales[$i]['name']; ?>', dataField: 'quantity_sale_<?php echo $fiscal_years_previous_sales[$i]['id']; ?>',width:'80',filterable: false,align:'center',cellsAlign:'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
                                 <?php
                             }
                         ?>
-                        { text: 'Total</br>Oultet Budget', dataField: 'quantity_budget_outlet',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
-                        { text: 'Total</br>Dealer Budget', dataField: 'quantity_budget_dealer_total',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                        { columngroup: 'target_total',text: 'Outlet', dataField: 'quantity_target_outlet',width:'100',filterable:false,align:'center',cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                        { columngroup: 'target_total',text: 'Dealer', dataField: 'quantity_target_dealer_total',width:'100',filterable:false,align:'center',cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
                         <?php
                     $serial=0;
                     foreach($dealers as $dealer)
                     {
                     ++$serial;
                     ?>
-                        { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_budget_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                        { text: '<?php echo $serial.'. '.$dealer['farmer_name']?>',renderer: header_render, dataField: 'quantity_target_dealer_<?php echo $dealer['farmer_id']?>',width:'100',filterable:false,cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
                         <?php
                         }
                         ?>
@@ -292,7 +292,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ],
                 columngroups:
                     [
-                        { text: '<?php echo $CI->lang->line('LABEL_PREVIOUS_YEARS'); ?> Achieved', align: 'center', name: 'previous_years' }
+                        { text: '<?php echo $CI->lang->line('LABEL_PREVIOUS_YEARS'); ?> Achieved', align: 'center', name: 'previous_years' },
+                        { text: 'Total Target', align: 'center', name: 'target_total' }
                     ]
             });
     });

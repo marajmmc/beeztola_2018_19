@@ -39,7 +39,6 @@ $action_buttons[]=array
     'href'=>site_url($CI->controller_url.'/index/details/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
-
 ?>
 
 <div class="row widget">
@@ -59,10 +58,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
     <div style="" class="row show-grid">
         <div class="col-xs-4">
-            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AREA_SUPERIOR');?></label>
         </div>
         <div class="col-sm-4 col-xs-8">
-            <label class="control-label"><?php echo $outlet['name'];?></label>
+            <label class="control-label"><?php echo $area_superior['name'];?></label>
+        </div>
+    </div>
+    <div style="" class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AREA');?></label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo $area['name'];?></label>
         </div>
     </div>
 
