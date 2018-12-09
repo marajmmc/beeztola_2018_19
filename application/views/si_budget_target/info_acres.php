@@ -5,10 +5,10 @@ $CI=& get_instance();
 <div class="panel panel-default">
     <div class="panel-heading">
         <h4 class="panel-title">
-            <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#collapse3" href="#">+ Acres Information ( Number of crop {<?php echo sizeof($acres)?>})</a></label>
+            <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#accordion_acres" href="#">+ Acres Information ( Number of crop {<?php echo sizeof($acres)?>})</a></label>
         </h4>
     </div>
-    <div id="collapse3" class="panel-collapse  <?php if($acres){ echo 'collapse out';}else{ echo 'collapse in';}?>">
+    <div id="accordion_acres" class="panel-collapse  <?php if($acres){ echo 'collapse out';}else{ echo 'collapse in';}?>">
         <?php
         if(!$acres)
         {

@@ -32,6 +32,17 @@ class Si_budget_target extends Root_Controller
         }
         $this->lang->load('budget');
         $this->load->helper('budget');
+        $this->language_labels();
+    }
+    private function language_labels()
+    {
+        $this->lang->language['LABEL_BUDGET_SUB_KG']='Dealer Budget (Kg)';
+        $this->lang->language['LABEL_BUDGET_SUB_AMOUNT']='Dealer Budget (Amount)';
+        $this->lang->language['LABEL_TARGET_SUB_KG']='Dealer Target (Kg)';
+        $this->lang->language['LABEL_TARGET_SUB_AMOUNT']='Dealer Target (Amount)';
+        $this->lang->language['LABEL_STATUS_BUDGET_FORWARD']='Showroom Budget Status';
+        $this->lang->language['LABEL_USER_BUDGET_FORWARDED']='Budget Forwarded By';
+        $this->lang->language['LABEL_DATE_BUDGET_FORWARDED']='Budget Forwarded Time';
     }
     public function index($action="list", $id=0,$id1=0,$id2=0)
     {
@@ -2180,6 +2191,24 @@ class Si_budget_target extends Root_Controller
 
             }
             $data['sub_column_group_name']='Dealers';
+            $data['budget_target']=$this->get_info_budget_target($fiscal_year_id,$outlet_id);
+            $user_ids=array();
+            $user_ids[$data['budget_target']['user_created']]=$data['budget_target']['user_created'];
+            if($data['budget_target']['user_budget_forwarded']>0)
+            {
+                $user_ids[$data['budget_target']['user_budget_forwarded']]=$data['budget_target']['user_budget_forwarded'];
+            }
+            if($data['budget_target']['user_target_dealer_forwarded']>0)
+            {
+                $user_ids[$data['budget_target']['user_target_dealer_forwarded']]=$data['budget_target']['user_target_dealer_forwarded'];
+            }
+            $data['users']=System_helper::get_users_info($user_ids);
+
+            $data['users_login']=array();
+
+            $data['acres']=$this->get_acres($outlet_id);
+            $data['fiscal_year_budget_target']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id ='.$fiscal_year_id),1);
+            $data['outlet']=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),'*',array('customer_id ='.$outlet_id,'revision =1'),1);
 
             $data['fiscal_years_next_predictions']=Query_helper::get_info($this->config->item('table_login_basic_setup_fiscal_year'),'*',array('id >'.$fiscal_year_id),Budget_helper::$NUM_FISCAL_YEAR_NEXT_BUDGET_TARGET,0);
             $data['system_preference_items']= System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));

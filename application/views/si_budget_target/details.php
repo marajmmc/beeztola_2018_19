@@ -39,9 +39,6 @@ $action_buttons[]=array
     'href'=>site_url($CI->controller_url.'/index/details/'.$options['fiscal_year_id'].'/'.$options['outlet_id'])
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
-$report=$CI->input->post('report');
-$division_id=$report['division_id'];
-$zone_id=$report['zone_id'];
 
 ?>
 
@@ -52,6 +49,27 @@ $zone_id=$report['zone_id'];
         </div>
         <div class="clearfix"></div>
     </div>
+    <div style="" class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FISCAL_YEAR');?></label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo $fiscal_year_budget_target['name'];?></label>
+        </div>
+    </div>
+    <div style="" class="row show-grid">
+        <div class="col-xs-4">
+            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET');?></label>
+        </div>
+        <div class="col-sm-4 col-xs-8">
+            <label class="control-label"><?php echo $outlet['name'];?></label>
+        </div>
+    </div>
+
+    <?php
+    echo $CI->load->view($this->common_view_location."/info_basic",'',true);
+    echo $CI->load->view($this->common_view_location."/info_acres",'',true);
+    ?>
     <?php
     if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
     {

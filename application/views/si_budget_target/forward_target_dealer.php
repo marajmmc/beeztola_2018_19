@@ -54,7 +54,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     </div>
 
     <?php
-    echo $CI->load->view($this->common_view_location."/acres_info",'',true);
+    echo $CI->load->view($this->common_view_location."/info_acres",'',true);
     ?>
     <!--<div style="font-size: 12px;margin-top: -10px;font-style: italic; color: red;" class="row show-grid">
         <div class="col-xs-4"></div>
