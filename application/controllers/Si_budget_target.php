@@ -2254,56 +2254,78 @@ class Si_budget_target extends Root_Controller
             $data['info_basic']=array();
             //budget forward area(outlet)
             $result=array();
-            $result['label_prefix']=$this->lang->line('LABEL_STATUS_BUDGET_FORWARD_AREA');
-            $result['status']=$budget_target['status_budget_forward'];
-            $result['by']='';
-            $result['time']='';
+            $result['label_1']=$this->lang->line('LABEL_STATUS_BUDGET_FORWARD_AREA').' Status';
+            $result['value_1']=$budget_target['status_budget_forward'];
+            $result['label_2']='';
+            $result['value_2']='';
+            $data['info_basic'][]=$result;
             if($budget_target['status_budget_forward']==$this->config->item('system_status_forwarded'))
             {
-                $result['by']=$users[$budget_target['user_budget_forwarded']]['name'];
-                $result['time']=System_helper::display_date_time($budget_target['date_budget_forwarded']);
+                $result=array();
+                $result['label_1']=$this->lang->line('LABEL_STATUS_BUDGET_FORWARD_AREA').' By';
+                $result['value_1']=$users[$budget_target['user_budget_forwarded']]['name'];
+                $result['label_2']=$this->lang->line('LABEL_STATUS_BUDGET_FORWARD_AREA').' Time';
+                $result['value_2']=System_helper::display_date_time($budget_target['date_budget_forwarded']);
+                $data['info_basic'][]=$result;
             }
-            $data['info_basic'][]=$result;
-            //target forward area(to outlets from zsc)
+            //target forward area(to outlet from zone)
             $result=array();
-            $result['label_prefix']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA');
-            $result['status']=$this->config->item('system_status_pending');
-            $result['by']='';
-            $result['time']='';
+            $result['label_1']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA').' Status';
+            $result['value_1']=$this->config->item('system_status_pending');
             if($budget_target_superior['status_target_outlet_forward']==$this->config->item('system_status_forwarded'))
             {
-                $result['status']=$this->config->item('system_status_forwarded');
-                $result['by']=$users_login[$budget_target_superior['user_target_outlet_forwarded']]['name'];
-                $result['time']=System_helper::display_date_time($budget_target_superior['date_target_outlet_forwarded']);
+                $result['value_1']=$this->config->item('system_status_forwarded');
             }
+            $result['label_2']='';
+            $result['value_2']='';
             $data['info_basic'][]=$result;
-            //target forward sub area(to Dealers from SI)
+            if($budget_target_superior['status_target_outlet_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $result=array();
+                $result['label_1']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA').' By';
+                $result['value_1']=$users_login[$budget_target_superior['user_target_outlet_forwarded']]['name'];
+                $result['label_2']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA').' Time';
+                $result['value_2']=System_helper::display_date_time($budget_target_superior['date_target_outlet_forwarded']);
+                $data['info_basic'][]=$result;
+            }
+            //target forward sub area(to Dealer from Outlet)
             $result=array();
-            $result['label_prefix']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_SUB');
-            $result['status']=$budget_target['status_target_dealer_forward'];
-            $result['by']='';
-            $result['time']='';
+            $result['label_1']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_SUB').' Status';
+            $result['value_1']=$budget_target['status_target_dealer_forward'];
+            $result['label_2']='';
+            $result['value_2']='';
+            $data['info_basic'][]=$result;
             if($budget_target['status_target_dealer_forward']==$this->config->item('system_status_forwarded'))
             {
-                $result['by']=$users[$budget_target['user_target_dealer_forwarded']]['name'];
-                $result['time']=System_helper::display_date_time($budget_target['date_target_dealer_forwarded']);
+                $result=array();
+                $result['label_1']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_SUB').' By';
+                $result['value_1']=$users[$budget_target['user_target_dealer_forwarded']]['name'];
+                $result['label_2']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_SUB').' Time';
+                $result['value_2']=System_helper::display_date_time($budget_target['date_target_dealer_forwarded']);
+                $data['info_basic'][]=$result;
             }
-            $data['info_basic'][]=$result;
 
-            //target forward area(to outlets from zsc)
+            //target forward area 3yr(to Outlet from ZI)
             $result=array();
-            $result['label_prefix']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_NEXT_YEAR');
-            $result['status']=$this->config->item('system_status_pending');
-            $result['by']='';
-            $result['time']='';
+            $result['label_1']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_NEXT_YEAR').' Status';
+            $result['value_1']=$this->config->item('system_status_pending');
             if($budget_target_superior['status_target_outlet_next_year_forward']==$this->config->item('system_status_forwarded'))
             {
-                $result['status']=$this->config->item('system_status_forwarded');
-                $result['by']=$users_login[$budget_target_superior['user_target_outlet_next_year_forwarded']]['name'];
-                $result['time']=System_helper::display_date_time($budget_target_superior['date_target_outlet_next_year_forwarded']);
+                $result['value_1']=$this->config->item('system_status_forwarded');
             }
+            $result['label_2']='';
+            $result['value_2']='';
             $data['info_basic'][]=$result;
 
+            if($budget_target_superior['status_target_outlet_next_year_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $result=array();
+                $result['label_1']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_NEXT_YEAR').' By';
+                $result['value_1']=$users_login[$budget_target_superior['user_target_outlet_next_year_forwarded']]['name'];
+                $result['label_2']=$this->lang->line('LABEL_STATUS_TARGET_FORWARD_AREA_NEXT_YEAR').' Time';
+                $result['value_2']=System_helper::display_date_time($budget_target_superior['date_target_outlet_next_year_forwarded']);
+                $data['info_basic'][]=$result;
+            }
 
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->common_view_location."/details",$data,true));
 
@@ -2337,7 +2359,7 @@ class Si_budget_target extends Root_Controller
         }
         //get variety pricing
         $variety_pricing=array();
-        $results=Query_helper::get_info($this->config->item('table_bms_setup_budget_config_variety_pricing'),array('variety_id','amount_price'),array('fiscal_year_id ='.$fiscal_year_id));
+        $results=Query_helper::get_info($this->config->item('table_bms_setup_budget_config_variety_pricing'),array('variety_id','amount_price_net amount_price'),array('fiscal_year_id ='.$fiscal_year_id));
         foreach($results as $result)
         {
             $variety_pricing[$result['variety_id']]=$result['amount_price'];

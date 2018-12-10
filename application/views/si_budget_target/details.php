@@ -73,7 +73,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     ?>
 
     <?php
-    echo $CI->load->view($this->common_view_location."/info_basic",'',true);
+    echo $CI->load->view("info_basic",'',true);
     echo $CI->load->view($this->common_view_location."/info_acres",'',true);
     ?>
     <?php
