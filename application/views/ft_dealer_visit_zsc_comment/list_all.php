@@ -46,6 +46,15 @@ if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
         'href'=>site_url($CI->controller_url.'/index/set_preference')
     );
 }
+if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>'Delete',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/delete')
+    );
+}
 if(isset($CI->permissions['action7']) && ($CI->permissions['action7']==1))
 {
     $action_buttons[]=array

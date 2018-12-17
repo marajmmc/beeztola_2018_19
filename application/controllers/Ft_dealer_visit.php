@@ -410,7 +410,7 @@ class Ft_dealer_visit extends Root_Controller
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
             if($save_and_new==1)
             {
-                $this->system_add();
+                $this->system_search();
             }
             else
             {

@@ -10,22 +10,6 @@ $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_BACK").' to All list',
     'href'=>site_url($CI->controller_url.'/index/list_all')
 );
-if((isset($CI->permissions['action1']) && ($CI->permissions['action1']==1)) || (isset($CI->permissions['action2']) && ($CI->permissions['action2']==1)))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_SAVE"),
-        'id'=>'button_action_save',
-        'data-form'=>'#save_form'
-    );
-}
-$action_buttons[]=array(
-    'type'=>'button',
-    'label'=>$CI->lang->line("ACTION_CLEAR"),
-    'id'=>'button_action_clear',
-    'data-form'=>'#save_form'
-);
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
 ?>
