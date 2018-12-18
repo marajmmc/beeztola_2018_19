@@ -86,12 +86,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="variety_name" <?php if($system_preference_items['variety_name']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="price_unit_kg_amount" <?php if($system_preference_items['price_unit_kg_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_PRICE_UNIT_KG_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="budget_kg" <?php if($system_preference_items['budget_kg']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_BUDGET_KG'); ?></span></label></div></div>
-        <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="budget_amount" <?php if($system_preference_items['budget_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_BUDGET_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="target_kg" <?php if($system_preference_items['target_kg']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_TARGET_KG'); ?></span></label></div></div>
+        <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="budget_amount" <?php if($system_preference_items['budget_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_BUDGET_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column" value="target_amount" <?php if($system_preference_items['target_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_TARGET_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_budget_sub_kg" value="budget_sub_kg" <?php if($system_preference_items['budget_sub_kg']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_BUDGET_SUB_KG'); ?></span></label></div></div>
-        <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_budget_sub_amount" value="budget_sub_amount" <?php if($system_preference_items['budget_sub_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_BUDGET_SUB_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_target_sub_kg" value="target_sub_kg" <?php if($system_preference_items['target_sub_kg']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_TARGET_SUB_KG'); ?></span></label></div></div>
+        <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_budget_sub_amount" value="budget_sub_amount" <?php if($system_preference_items['budget_sub_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_BUDGET_SUB_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_target_sub_amount" value="target_sub_amount" <?php if($system_preference_items['target_sub_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_TARGET_SUB_AMOUNT'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_prediction_kg" value="prediction_kg" <?php if($system_preference_items['prediction_kg']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_PREDICTION_KG'); ?></span></label></div></div>
         <div class="col-xs-2 "><div class="checkbox"><label><input type="checkbox" class="system_jqx_column_prediction_amount" value="prediction_amount" <?php if($system_preference_items['prediction_amount']){echo 'checked';}?>><span class=""><?php echo $CI->lang->line('LABEL_PREDICTION_AMOUNT'); ?></span></label></div></div>
@@ -455,46 +455,39 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 showstatusbar: true,
                 altrows: true,
                 rowsheight: 35,
-                columnsheight: 70,
+                columnsheight: 50,
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_NAME'); ?>', dataField: 'crop_name',pinned:true,width:'100',filtertype: 'list',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['crop_name']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?>', dataField: 'crop_type_name',pinned:true,width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['crop_type_name']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
                     { text: '<?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?>', dataField: 'variety_name',pinned:true,width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['variety_name']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
                     { text: '<?php echo $CI->lang->line('LABEL_PRICE_UNIT_KG_AMOUNT'); ?>', dataField: 'price_unit_kg_amount',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['price_unit_kg_amount']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
                     { text: '<?php echo $CI->lang->line('LABEL_BUDGET_KG'); ?>', dataField: 'budget_kg',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_kg']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
-                    { text: '<?php echo $CI->lang->line('LABEL_BUDGET_AMOUNT'); ?>', dataField: 'budget_amount',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_amount']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
                     { text: '<?php echo $CI->lang->line('LABEL_TARGET_KG'); ?>', dataField: 'target_kg',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['target_kg']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                    { text: '<?php echo $CI->lang->line('LABEL_BUDGET_AMOUNT'); ?>', dataField: 'budget_amount',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_amount']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
                     { text: '<?php echo $CI->lang->line('LABEL_TARGET_AMOUNT'); ?>', dataField: 'target_amount',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['target_amount']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
                     <?php
                     foreach ($areas as $area)
                     {
                         ?>
-                            {  columngroup: 'sub_area_budget',text: '<?php echo $area['text'].'(kg)'; ?> ', dataField: '<?php echo 'budget_sub_'.$area['value'].'_kg'; ?>',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_sub_kg']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
-                            {  columngroup: 'sub_area_budget',text: '<?php echo $area['text'].'(amount)'; ?> ', dataField: '<?php echo 'budget_sub_'.$area['value'].'_amount'; ?>',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_sub_amount']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
-                        <?php
-                    }
-                    foreach ($areas as $area)
-                    {
-                        ?>
-                        {  columngroup: 'sub_area_target',text: '<?php echo $area['text'].'(kg)'; ?> ', dataField: '<?php echo 'target_sub_'.$area['value'].'_kg'; ?>',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['target_sub_kg']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
-                        {  columngroup: 'sub_area_target',text: '<?php echo $area['text'].'(amount)'; ?> ', dataField: '<?php echo 'target_sub_'.$area['value'].'_amount'; ?>',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['target_sub_amount']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
-                        <?php
+                    {  text: '<?php echo 'Budget-kg ('.$area['text'].')'; ?>', dataField: '<?php echo 'budget_sub_'.$area['value'].'_kg'; ?>',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_sub_kg']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                    {  text: '<?php echo 'Target-kg ('.$area['text'].')'; ?>', dataField: '<?php echo 'target_sub_'.$area['value'].'_kg'; ?>',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['target_sub_kg']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                    {  text: '<?php echo 'Budget-Amount ('.$area['text'].')'; ?>', dataField: '<?php echo 'budget_sub_'.$area['value'].'_amount'; ?>',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['budget_sub_amount']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                    {  text: '<?php echo 'Target-Amount ('.$area['text'].')'; ?>', dataField: '<?php echo 'target_sub_'.$area['value'].'_amount'; ?>',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['target_sub_amount']?0:1;?>,renderer: header_render,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                    <?php
                     }
                     $serial=0;
                     foreach ($fiscal_years_next_predictions as $fy)
                     {
                         ++$serial;
                         ?>
-                        {  columngroup: 'next_years_prediction',text: '<?php echo $fy['name'].'(kg)'; ?> ', dataField: '<?php echo 'prediction_'.$serial.'_kg'; ?>',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['prediction_kg']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
-                        {  columngroup: 'next_years_prediction',text: '<?php echo $fy['name'].'(amount)'; ?> ', dataField: '<?php echo 'prediction_'.$serial.'_amount'; ?>',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['prediction_amount']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
-                    <?php
-                    }
+                            {  columngroup: 'next_years_prediction',text: '<?php echo $fy['name'].'(kg)'; ?> ', dataField: '<?php echo 'prediction_'.$serial.'_kg'; ?>',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['prediction_kg']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                            {  columngroup: 'next_years_prediction',text: '<?php echo $fy['name'].'(amount)'; ?> ', dataField: '<?php echo 'prediction_'.$serial.'_amount'; ?>',width:'120',cellsAlign:'right',hidden: <?php echo $system_preference_items['prediction_amount']?0:1;?>,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                        <?php
+                        }
                 ?>
                 ],
                 columngroups:
                     [
-                        { text: '<?php echo $sub_column_group_name.' Budget'; ?>', align: 'center', name: 'sub_area_budget' },
-                        { text: '<?php echo $sub_column_group_name.' Target'; ?>', align: 'center', name: 'sub_area_target' },
                         { text: 'Next Years Prediction', align: 'center', name: 'next_years_prediction' }
                     ]
 
