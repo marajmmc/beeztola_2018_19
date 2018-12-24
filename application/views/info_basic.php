@@ -1,19 +1,23 @@
  <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 $CI=& get_instance();
+$accordion_header=isset($accordion['header'])?$accordion['header']:'+ Basic Information';
+$accordion_id=isset($accordion['div_id'])?$accordion['div_id']:'accordion_basic';
+$accordion_collapse=isset($accordion['collapse'])?$accordion['collapse']:'out';
+$accordion_data=isset($accordion['data'])?$accordion['data']:$info_basic;
 ?>
 <div class="panel panel-default">
     <div class="panel-heading">
         <h4 class="panel-title">
-            <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#accordion_basic" href="#">+ Basic Information</a></label>
+            <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#<?php echo $accordion_id;?>" href="#"><?php echo $accordion_header; ?></a></label>
         </h4>
     </div>
-    <div id="accordion_basic" class="panel-collapse collapse out">
+    <div id="<?php echo $accordion_id;?>" class="panel-collapse collapse <?php echo $accordion_collapse; ?>">
 
         <table class="table table-bordered table-responsive system_table_details_view">
             <tbody>
                 <?php
-                foreach($info_basic as $info)
+                foreach($accordion_data as $info)
                 {
                     if(isset($info['label_1']))
                     {
