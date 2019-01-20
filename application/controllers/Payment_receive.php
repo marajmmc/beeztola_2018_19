@@ -445,7 +445,7 @@ class Payment_receive extends Root_Controller
         elseif($item['status_payment_receive']==$this->config->item('system_status_received'))
         {
             $this->form_validation->set_rules('item[date_receive]',$this->lang->line('LABEL_DATE_RECEIVE'),'required');
-            $this->form_validation->set_rules('item[amount_bank_charge]',$this->lang->line('LABEL_AMOUNT_BANK_CHARGE'),'required');
+            //$this->form_validation->set_rules('item[amount_bank_charge]',$this->lang->line('LABEL_AMOUNT_BANK_CHARGE'),'required');
         }
         if($this->form_validation->run() == FALSE)
         {

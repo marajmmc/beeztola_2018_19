@@ -48,6 +48,9 @@ class Si_budget_target extends Root_Controller
         $this->lang->language['LABEL_BUDGET_SUB_AMOUNT']='Dealer Budget (Amount)';
         $this->lang->language['LABEL_TARGET_SUB_KG']='Dealer Target (Kg)';
         $this->lang->language['LABEL_TARGET_SUB_AMOUNT']='Dealer Target (Amount)';
+        //
+        $this->lang->language['LABEL_OUTLET']='Showroom';
+        $this->lang->language['LABEL_OUTLET_NAME']='Showroom';
 
     }
     public function index($action="list", $id=0,$id1=0,$id2=0)

@@ -276,7 +276,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                                 <?php
                             }
                         ?>
-                        { columngroup: 'target_total',text: 'Outlet', dataField: 'quantity_target_outlet',width:'100',filterable:false,align:'center',cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                        { columngroup: 'target_total',text: '<?php echo $CI->lang->line('LABEL_OUTLET');?>', dataField: 'quantity_target_outlet',width:'100',filterable:false,align:'center',cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
                         { columngroup: 'target_total',text: 'Dealer', dataField: 'quantity_target_dealer_total',width:'100',filterable:false,align:'center',cellsalign: 'right',editable:false,cellsrenderer: cellsrenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
                         <?php
                     $serial=0;

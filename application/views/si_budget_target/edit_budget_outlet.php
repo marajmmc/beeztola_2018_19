@@ -240,6 +240,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: 'Budget</br> Qty (kg)',datafield: 'quantity_budget', width: 100,filterable: false,cellsrenderer: cellsrenderer,cellsalign: 'right',aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_kg,columntype: 'custom',
                         initeditor: function (row, cellvalue, editor, celltext, pressedkey)
                         {
+                            if(!(cellvalue>0))
+                            {
+                                cellvalue='';
+                            }
                             editor.html('<div style="margin: 0px;width: 100%;height: 100%;padding: 5px;"><input style="z-index: 1 !important;" type="text" value="'+cellvalue+'" class="jqxgrid_input float_type_positive"><div>');
                         },
                         geteditorvalue: function (row, cellvalue, editor)
