@@ -162,6 +162,7 @@ class Expense_outlet_daily extends Root_Controller
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->where_not_in('item.id',$checked_ids);
+        $this->db->order_by('item.id','DESC');
         $results=$this->db->get()->result_array();
 
         $items=array();
