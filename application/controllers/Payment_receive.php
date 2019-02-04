@@ -55,6 +55,10 @@ class Payment_receive extends Root_Controller
         {
             $this->system_save();
         }
+        elseif($action=="save_multiple")
+        {
+            $this->system_save_multiple();
+        }
         elseif($action=="details")
         {
             $this->system_details($id);
@@ -122,7 +126,7 @@ class Payment_receive extends Root_Controller
             $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
-            $item['amount_payment']=number_format($item['amount_payment'],2);
+            //$item['amount_payment']=number_format($item['amount_payment'],2);
             $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
         }
         $this->json_return($items);
@@ -431,6 +435,103 @@ class Payment_receive extends Root_Controller
             $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
             $this->json_return($ajax);
         }
+    }
+    private function system_save_multiple()
+    {
+        $user = User_helper::get_user();
+        $time=time();
+
+        $ids=trim($this->input->post('ids'),',');
+        $date_receive=System_helper::get_time($this->input->post('date_receive'));
+        $amount_bank_charge=$this->input->post('amount_bank_charge');
+        if(!($amount_bank_charge>0))
+        {
+            $amount_bank_charge=0;
+        }
+        //date validation
+        if(!($date_receive>0))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']="Invalid Receive Date";
+            $this->json_return($ajax);
+        }
+        //$ids validation
+        $item_ids=explode(',',$ids);
+        $items=array();
+        if((sizeof($item_ids)>0) && (strlen($ids)>0))
+        {
+            //check validation of item ids
+            $this->db->from($this->config->item('table_pos_payment').' payment');
+            $this->db->select('payment.*');
+            $this->db->where_in('payment.id',$item_ids);
+            $items=$this->db->get()->result_array();
+            foreach($items as $result)
+            {
+                if($result['status_deposit_forward']!=$this->config->item('system_status_forwarded'))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']=Barcode_helper::get_barcode_payment($result['id']).' Not forwarded Yet.';
+                    $this->json_return($ajax);
+                }
+                if($result['status_payment_receive']!=$this->config->item('system_status_pending'))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']=Barcode_helper::get_barcode_payment($result['id']).' already received.';
+                    $this->json_return($ajax);
+                }
+                if(!in_array($result['outlet_id'],$this->user_outlet_ids))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']=Barcode_helper::get_barcode_payment($result['id']).' Outlet has no access.';
+                    $this->json_return($ajax);
+                }
+                if($result['date_payment']>$date_receive)
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']=Barcode_helper::get_barcode_payment($result['id']).' Receive Date Must be same or greater than Payment Date';
+                    $this->json_return($ajax);
+                }
+            }
+            if(sizeof($items)!=sizeof($item_ids))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']="Invalid Payment Selection";
+                $this->json_return($ajax);
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']="No Payment Selected";
+            $this->json_return($ajax);
+        }
+        $this->db->trans_start();  //DB Transaction Handle START
+        foreach($items as $item)
+        {
+            $data=array();
+            $data['date_receive']=$date_receive;
+            $data['amount_bank_charge']=$amount_bank_charge;
+            $data['amount_receive']=$item['amount_payment']-$amount_bank_charge;
+            $data['date_payment_received']=$time;
+            $data['user_payment_received']=$user->user_id;
+            $data['status_payment_receive']=$this->config->item('system_status_received');
+            Query_helper::update($this->config->item('table_pos_payment'),$data,array('id='.$item['id']), true);
+        }
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $ajax['status']=true;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_SUCCESS");;
+            $ajax['ids']=$item_ids;
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+
     }
     private function check_validation()
     {
