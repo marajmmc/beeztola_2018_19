@@ -277,6 +277,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                                 $(jqx_grid_id).jqxGrid('deleterow', id);
                             });
                             $(jqx_grid_id).jqxGrid('clearselection');
+                            $('#payment_amount_bank_charge').val('');
                             calculate_total();
                         }
 
