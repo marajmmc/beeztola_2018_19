@@ -20,6 +20,19 @@ if($user)
                         $menu=User_helper::get_html_menu();
                         echo $menu;
                     ?>
+                    <li class="menu-item dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Notice<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <?php
+                            $notification_sub_menus=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'),array('*'),array('status ="'.$this->config->item('system_status_active').'"'));
+                            foreach($notification_sub_menus as $sub_menu)
+                            {
+                                ?>
+                                <li><a href="<?php echo site_url('notification_request/index/list/'.$sub_menu['id'])?>"><?php echo $sub_menu['name']?></a></li>
+                            <?php
+                            }
+                            ?>
+                        </ul>
+                    </li>
                     <li class="menu-item"><a href="<?php echo site_url('home/logout'); ?>">Logout</a></li>
                 </ul>
             </div>

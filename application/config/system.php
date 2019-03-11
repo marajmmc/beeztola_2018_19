@@ -42,3 +42,9 @@ $config['system_purpose_pos_status_mobile_verification']='pos_status_mobile_veri
 $config['system_purpose_pos_menu_odd_color']='pos_menu_odd_color';
 $config['system_purpose_pos_menu_even_color']='pos_menu_even_color';
 $config['system_purpose_status_sms_sales_invoice']='pos_status_sms_sales_invoice';//for sms after new invoice to dealer
+
+//System File Type
+$config['system_file_type_image']='Image';
+$config['system_file_type_video']='Video';
+$config['system_file_type_video_ext']='wmv|mp4|mov|ftv|mkv|3gp|avi';
+$config['system_file_type_video_max_size']=102400;//100mb
