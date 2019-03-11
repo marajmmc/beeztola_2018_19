@@ -307,7 +307,16 @@ class Setup_notice_request extends Root_Controller
             $data['item']['status']=$this->config->item('system_status_active');
             $data['item']['ordering']=99;
             $data['notice_types']=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'),'*',array('status ="'.$this->config->item('system_status_active').'"'));
-            $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $user=User_helper::get_user();
+            if($user->user_group==1)
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+            else
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('id !=1','status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+
             $data['user_group_ids']=array();
             $data['urls']=array();
             $ajax['status']=true;
@@ -361,7 +370,15 @@ class Setup_notice_request extends Root_Controller
             $data['urls']=json_decode($data['item']['url_links'],true);
 
             $data['notice_types']=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'),'*',array('status ="'.$this->config->item('system_status_active').'"'));
-            $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $user=User_helper::get_user();
+            if($user->user_group==1)
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+            else
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('id !=1','status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
 
             $data['title']="Edit Notice Publish :: ". $data['item']['id'];
             $ajax['status']=true;
@@ -548,7 +565,15 @@ class Setup_notice_request extends Root_Controller
             $data['urls']=json_decode($data['item']['url_links'],true);
 
             $data['notice_types']=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'),'*',array('status ="'.$this->config->item('system_status_active').'"'));
-            $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $user=User_helper::get_user();
+            if($user->user_group==1)
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+            else
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('id !=1','status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
 
             $data['title']="Notice Forward :: ". $data['item']['id'];
             $ajax['status']=true;
