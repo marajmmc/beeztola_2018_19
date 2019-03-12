@@ -8,6 +8,10 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'label'=>'Pending List',
         'href'=>site_url($CI->controller_url)
     );
+    $action_buttons[]=array(
+        'label'=>'All List',
+        'href'=>site_url($CI->controller_url.'/index/list_all')
+    );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
@@ -77,7 +81,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_all');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_active');?>";
 
         // prepare the data
         var source =
@@ -135,10 +139,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_TITLE'); ?>', dataField: 'title',width:'500', hidden: <?php echo $system_preference_items['title']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DESCRIPTION'); ?>',dataField: 'description',width:'500',hidden: <?php echo $system_preference_items['description']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT'); ?>',dataField: 'revision_count',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['revision_count']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_ORDERING'); ?>',dataField: 'ordering',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['ordering']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>',dataField: 'status',width:'80',filtertype: 'list',hidden: <?php echo $system_preference_items['status']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS_FORWARD'); ?>',dataField: 'status_forward',width:'80',filtertype: 'list',hidden: <?php echo $system_preference_items['status_forward']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_STATUS_APPROVE'); ?>',dataField: 'status_approve',width:'80',filtertype: 'list',hidden: <?php echo $system_preference_items['status_approve']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_ORDERING'); ?>',dataField: 'ordering',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['ordering']?0:1;?>}
                 ]
             });
     });

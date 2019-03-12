@@ -8,6 +8,10 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'label'=>'Pending List',
         'href'=>site_url($CI->controller_url)
     );
+    $action_buttons[]=array(
+        'label'=>'In-Active List',
+        'href'=>site_url($CI->controller_url.'/index/list_inactive')
+    );
 }
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
