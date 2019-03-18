@@ -27,7 +27,7 @@ if($user)
                             foreach($notification_sub_menus as $sub_menu)
                             {
                                 ?>
-                                <li><a href="<?php echo site_url('notification_request/index/list/'.$sub_menu['id'])?>"><?php echo $sub_menu['name']?></a></li>
+                                <li><a href="<?php echo site_url('notices/index/list/'.$sub_menu['id'])?>"><?php echo $sub_menu['name']?></a></li>
                             <?php
                             }
                             ?>

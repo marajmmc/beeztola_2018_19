@@ -79,6 +79,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[expire_day]" id="expire_day" class="form-control integer_type_positive" value="<?php echo $item['expire_day'];?>" />
+                <span class="bg-info">Remaining Day's: <?php echo $item['expire_day_remaining'];?></span>
             </div>
         </div>
         <div class="row show-grid">

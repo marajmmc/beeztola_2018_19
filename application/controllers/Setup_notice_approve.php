@@ -26,6 +26,7 @@ class Setup_notice_approve extends Root_Controller
         $this->lang->language['LABEL_NOTICE_TYPE']='Notice Type';
         $this->lang->language['LABEL_DATE_PUBLISH']='Notice Publish Date';
         $this->lang->language['LABEL_EXPIRE_DAY']='Number Of Day As New';
+        $this->lang->language['LABEL_REMAINING_DAY']='Number Of Remaining Day';
         $this->lang->language['LABEL_FILE_IMAGE']='File';
         $this->lang->language['LABEL_FILE_VIDEO']='Video';
         $this->lang->language['LABEL_LINK_URL']='External Link (Url)';
@@ -47,14 +48,6 @@ class Setup_notice_approve extends Root_Controller
         elseif($action=="get_items_all")
         {
             $this->system_get_items_all();
-        }
-        elseif($action=="list_inactive")
-        {
-            $this->system_list_inactive();
-        }
-        elseif($action=="get_items_inactive")
-        {
-            $this->system_get_items_inactive();
         }
         elseif($action=="approve")
         {
@@ -94,17 +87,19 @@ class Setup_notice_approve extends Root_Controller
             $data['notice_type']= 1;
             $data['date_publish']= 1;
             $data['expire_day']= 1;
+            $data['remaining_day']= 1;
             $data['title']= 1;
             $data['description']= 1;
             $data['revision_count']= 1;
             $data['ordering']= 1;
         }
-        if($method=='list_all')
+        elseif($method=='list_all')
         {
             $data['id']= 1;
             $data['notice_type']= 1;
             $data['date_publish']= 1;
             $data['expire_day']= 1;
+            $data['remaining_day']= 1;
             $data['title']= 1;
             $data['description']= 1;
             $data['revision_count']= 1;
@@ -112,17 +107,6 @@ class Setup_notice_approve extends Root_Controller
             $data['status']= 1;
             $data['status_forward']= 1;
             $data['status_approve']= 1;
-        }
-        if($method=='list_inactive')
-        {
-            $data['id']= 1;
-            $data['notice_type']= 1;
-            $data['date_publish']= 1;
-            $data['expire_day']= 1;
-            $data['title']= 1;
-            $data['description']= 1;
-            $data['revision_count']= 1;
-            $data['ordering']= 1;
         }
         else
         {
@@ -170,7 +154,7 @@ class Setup_notice_approve extends Root_Controller
         else
         {
             $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_D4 ONT_HAVE_ACCESS");
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
     }
@@ -188,6 +172,7 @@ class Setup_notice_approve extends Root_Controller
         foreach($items as &$item)
         {
             $item['expire_day']=Notice_helper::get_expire_day($item['date_publish'],$item['expire_time']);
+            $item['remaining_day']=Notice_helper::get_expire_day_by_current_time($item['expire_time']);
             $item['date_publish']=$item['date_publish']?System_helper::display_date($item['date_publish']):'';
         }
         $this->json_return($items);
@@ -212,12 +197,26 @@ class Setup_notice_approve extends Root_Controller
         else
         {
             $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_D4 ONT_HAVE_ACCESS");
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
     }
     private function system_get_items_all()
     {
+        $current_records = $this->input->post('total_records');
+        if(!$current_records)
+        {
+            $current_records=0;
+        }
+        $pagesize = $this->input->post('pagesize');
+        if(!$pagesize)
+        {
+            $pagesize=100;
+        }
+        else
+        {
+            $pagesize=$pagesize*2;
+        }
         $time=time();
         $this->db->from($this->config->item('table_pos_setup_notice_request').' item');
         $this->db->select('item.*');
@@ -227,52 +226,12 @@ class Setup_notice_approve extends Root_Controller
         $this->db->where('item.status_forward',$this->config->item('system_status_forwarded'));
         //$this->db->order_by('item.ordering','ASC');
         $this->db->order_by('item.id','DESC');
+        $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
             $item['expire_day']=Notice_helper::get_expire_day($item['date_publish'],$item['expire_time']);
-            $item['date_publish']=$item['date_publish']?System_helper::display_date($item['date_publish']):'';
-        }
-        $this->json_return($items);
-    }
-    private function system_list_inactive()
-    {
-        $user = User_helper::get_user();
-        $method='list_inactive';
-        if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
-        {
-            $data['system_preference_items']= System_helper::get_preference($user->user_id, $this->controller_url, $method, $this->get_preference_headers($method));
-            $data['title']="Notice Publish Approve In-Active List";
-            $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list_inactive",$data,true));
-            if($this->message)
-            {
-                $ajax['system_message']=$this->message;
-            }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/list_inactive/');
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_D4 ONT_HAVE_ACCESS");
-            $this->json_return($ajax);
-        }
-    }
-    private function system_get_items_inactive()
-    {
-        $this->db->from($this->config->item('table_pos_setup_notice_request').' item');
-        $this->db->select('item.*');
-        $this->db->join($this->config->item('table_pos_setup_notice_types').' type','type.id=item.type_id','INNER');
-        $this->db->select('type.name notice_type');
-        $this->db->where('item.status',$this->config->item('system_status_inactive'));
-        $this->db->where('item.status_forward',$this->config->item('system_status_forwarded'));
-        //$this->db->order_by('item.ordering','ASC');
-        $this->db->order_by('item.id','DESC');
-        $items=$this->db->get()->result_array();
-        foreach($items as &$item)
-        {
-            $item['expire_day']=Notice_helper::get_expire_day($item['date_publish'],$item['expire_time']);
+            $item['remaining_day']=Notice_helper::get_expire_day_by_current_time($item['expire_time']);
             $item['date_publish']=$item['date_publish']?System_helper::display_date($item['date_publish']):'';
         }
         $this->json_return($items);
@@ -371,11 +330,38 @@ class Setup_notice_approve extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-            if($item_head['status_approve']!=$this->config->item('system_status_approved'))
+            if(!$item_head['status_approve'])
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Approve field is required.';
+                $ajax['system_message']='Approved/Rollback/Reject field is required.';
                 $this->json_return($ajax);
+            }
+            if($item_head['status_approve']==$this->config->item('system_status_rollback'))
+            {
+                if(!($item_head['remarks_approve']))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Rollback remarks field is required.';
+                    $this->json_return($ajax);
+                }
+            }
+            else if($item_head['status_approve']==$this->config->item('system_status_rejected'))
+            {
+                if(!($item_head['remarks_approve']))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Reject remarks field is required.';
+                    $this->json_return($ajax);
+                }
+            }
+            else
+            {
+                if($item_head['status_approve']!=$this->config->item('system_status_approved'))
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Approved/Rollback/Reject field is required.';
+                    $this->json_return($ajax);
+                }
             }
         }
         else
@@ -387,11 +373,20 @@ class Setup_notice_approve extends Root_Controller
         $this->db->trans_start();  //DB Transaction Handle START
 
         $data=array();
-
-        $data['date_forwarded']=$time;
-        $data['user_forwarded']=$user->user_id;
-        $data['status_approve']=$item_head['status_approve'];
-        $this->db->set('revision_count_approved', 'revision_count_approved+1', FALSE);
+        if($item_head['status_approve']==$this->config->item('system_status_rollback'))
+        {
+            $data['remarks_approve']=$item_head['remarks_approve'];
+            $data['status_forward']=$this->config->item('system_status_pending');
+            $this->db->set('revision_count_rollback', 'revision_count_rollback+1', FALSE);
+        }
+        else
+        {
+            $data['date_approved']=$time;
+            $data['user_approved']=$user->user_id;
+            $data['remarks_approve']=$item_head['remarks_approve'];
+            $data['status_approve']=$item_head['status_approve'];
+            $this->db->set('revision_count_approved', 'revision_count_approved+1', FALSE);
+        }
         Query_helper::update($this->config->item('table_pos_setup_notice_request'),$data,array('id='.$id));
 
         $this->db->trans_complete();   //DB Transaction Handle END
@@ -459,10 +454,6 @@ class Setup_notice_approve extends Root_Controller
             $data['action_buttons'][]=array(
                 'label'=>'Pending List',
                 'href'=>site_url($this->controller_url)
-            );
-            $data['action_buttons'][]=array(
-                'label'=>'In-Active List',
-                'href'=>site_url($this->controller_url.'/index/list_inactive')
             );
             $data['title']="Notice Details :: ". $data['item']['id'];
             $ajax['status']=true;

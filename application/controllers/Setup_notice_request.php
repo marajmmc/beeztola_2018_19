@@ -26,6 +26,7 @@ class Setup_notice_request extends Root_Controller
         $this->lang->language['LABEL_NOTICE_TYPE']='Notice Type';
         $this->lang->language['LABEL_DATE_PUBLISH']='Notice Publish Date';
         $this->lang->language['LABEL_EXPIRE_DAY']='Number Of Day As New';
+        $this->lang->language['LABEL_REMAINING_DAY']='Number Of Remaining Day';
         $this->lang->language['LABEL_FILE_IMAGE']='File';
         $this->lang->language['LABEL_FILE_VIDEO']='Video';
         $this->lang->language['LABEL_LINK_URL']='External Link (Url)';
@@ -67,6 +68,14 @@ class Setup_notice_request extends Root_Controller
         elseif ($action == "save_forward")
         {
             $this->system_save_forward();
+        }
+        elseif($action=="delete")
+        {
+            $this->system_delete($id);
+        }
+        elseif ($action == "save_delete")
+        {
+            $this->system_save_delete();
         }
         elseif($action=="details")
         {
@@ -142,18 +151,20 @@ class Setup_notice_request extends Root_Controller
             $data['notice_type']= 1;
             $data['date_publish']= 1;
             $data['expire_day']= 1;
+            $data['remaining_day']= 1;
             $data['title']= 1;
             $data['description']= 1;
             $data['revision_count']= 1;
             $data['ordering']= 1;
             $data['status']= 1;
         }
-        if($method=='list_all')
+        elseif($method=='list_all')
         {
             $data['id']= 1;
             $data['notice_type']= 1;
             $data['date_publish']= 1;
             $data['expire_day']= 1;
+            $data['remaining_day']= 1;
             $data['title']= 1;
             $data['description']= 1;
             $data['revision_count']= 1;
@@ -162,7 +173,7 @@ class Setup_notice_request extends Root_Controller
             $data['status_forward']= 1;
             $data['status_approve']= 1;
         }
-        if($method=='list_file')
+        elseif($method=='list_file')
         {
             $data['id']= 1;
             $data['file_image_video']= 1;
@@ -218,7 +229,7 @@ class Setup_notice_request extends Root_Controller
         else
         {
             $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_D4 ONT_HAVE_ACCESS");
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
     }
@@ -237,6 +248,7 @@ class Setup_notice_request extends Root_Controller
         foreach($items as &$item)
         {
             $item['expire_day']=Notice_helper::get_expire_day($item['date_publish'],$item['expire_time']);
+            $item['remaining_day']=Notice_helper::get_expire_day_by_current_time($item['expire_time']);
             $item['date_publish']=$item['date_publish']?System_helper::display_date($item['date_publish']):'';
         }
         $this->json_return($items);
@@ -261,12 +273,26 @@ class Setup_notice_request extends Root_Controller
         else
         {
             $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_D4 ONT_HAVE_ACCESS");
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
     }
     private function system_get_items_all()
     {
+        $current_records = $this->input->post('total_records');
+        if(!$current_records)
+        {
+            $current_records=0;
+        }
+        $pagesize = $this->input->post('pagesize');
+        if(!$pagesize)
+        {
+            $pagesize=100;
+        }
+        else
+        {
+            $pagesize=$pagesize*2;
+        }
         $time=time();
         $this->db->from($this->config->item('table_pos_setup_notice_request').' item');
         $this->db->select('item.*');
@@ -275,10 +301,12 @@ class Setup_notice_request extends Root_Controller
         $this->db->where('item.status !=',$this->config->item('system_status_delete'));
         //$this->db->order_by('item.ordering','ASC');
         $this->db->order_by('item.id','DESC');
+        $this->db->limit($pagesize,$current_records);
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
             $item['expire_day']=Notice_helper::get_expire_day($item['date_publish'],$item['expire_time']);
+            $item['remaining_day']=Notice_helper::get_expire_day_by_current_time($item['expire_time']);
             $item['date_publish']=$item['date_publish']?System_helper::display_date($item['date_publish']):'';
         }
         $this->json_return($items);
@@ -292,6 +320,7 @@ class Setup_notice_request extends Root_Controller
             $data['item']['type_id']='';
             $data['item']['date_publish']=time();
             $data['item']['expire_day']=0;
+            $data['item']['expire_day_remaining']=0;
             $data['item']['title']='';
             $data['item']['description']='';
             //$data['item']['user_group_ids'][]=array();
@@ -349,7 +378,14 @@ class Setup_notice_request extends Root_Controller
                 $ajax['system_message']='Invalid Notice.';
                 $this->json_return($ajax);
             }
-            $item['expire_day']=Notice_helper::get_expire_day($data['item']['date_publish'],$data['item']['expire_time']);
+            if($data['item']['status_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Notice Already Forwarded.';
+                $this->json_return($ajax);
+            }
+            //$item['expire_day']=Notice_helper::get_expire_day($data['item']['date_publish'],$data['item']['expire_time']);
+            $data['item']['expire_day_remaining']=Notice_helper::get_expire_day_by_current_time($data['item']['expire_time']);
 
             $data['user_group_ids']=explode(',',trim($data['item']['user_group_ids'],','));
             $data['urls']=json_decode($data['item']['url_links'],true);
@@ -406,6 +442,12 @@ class Setup_notice_request extends Root_Controller
                 $ajax['system_message']='Invalid Notice.';
                 $this->json_return($ajax);
             }
+            if($result['status_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Notice Already Forwarded.';
+                $this->json_return($ajax);
+            }
         }
         else
         {
@@ -444,13 +486,14 @@ class Setup_notice_request extends Root_Controller
         if($item_head['date_publish'])
         {
             $item_head['date_publish']=System_helper::get_time($item_head['date_publish']);
+            $item_head['expire_time']=$item_head['date_publish']+$item_head['expire_day']*3600*24;
         }
 
         //$item_head['expire_time']=$time+$item_head['expire_day']*3600*24;
         if($id>0)
         {
             //$data=array();
-            $item_head['expire_time']=System_helper::get_time($item_head['date_publish'])+$item_head['expire_day']*3600*24; // discussion with abid vi & shaiful vi.
+            //$item_head['expire_time']=System_helper::get_time($item_head['date_publish'])+$item_head['expire_day']*3600*24; // discussion with abid vi & shaiful vi.
             $item_head['date_updated'] = $time;
             $item_head['user_updated'] = $user->user_id;
             $this->db->set('revision_count', 'revision_count+1', FALSE);
@@ -458,7 +501,7 @@ class Setup_notice_request extends Root_Controller
         }
         else
         {
-            $item_head['expire_time']=System_helper::get_time($item_head['date_publish'])+$item_head['expire_day']*3600*24;
+            //$item_head['expire_time']=System_helper::get_time($item_head['date_publish'])+$item_head['expire_day']*3600*24;
             $item_head['date_created']=$time;
             $item_head['user_created']=$user->user_id;
             $item_head['revision_count']=1;
@@ -526,26 +569,9 @@ class Setup_notice_request extends Root_Controller
                 $ajax['system_message']='Notice Already Forwarded.';
                 $this->json_return($ajax);
             }
+
             $data['info_basic']=Notice_helper::get_basic_info($data['item']);
             $data['files']=Query_helper::get_info($this->config->item('table_pos_setup_notice_file_videos'),'*',array('notice_id='.$item_id,'status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
-            /*$data['file_images']=array();
-            $data['videos']=array();
-            foreach($results as $result)
-            {
-                if($result['file_type']==$this->config->item('system_file_type_image'))
-                {
-                    $data['file_images'][]=$result;
-                }
-                else if($result['file_type']==$this->config->item('system_file_type_video'))
-                {
-                    $data['videos'][]=$result;
-                }
-                else
-                {
-                    $data['file_images'][]='';
-                    $data['videos'][]='';
-                }
-            }*/
 
             $data['user_group_ids']=explode(',',trim($data['item']['user_group_ids'],','));
             $data['urls']=json_decode($data['item']['url_links'],true);
@@ -613,6 +639,131 @@ class Setup_notice_request extends Root_Controller
         $data['user_forwarded']=$user->user_id;
         $data['status_forward']=$item_head['status_forward'];
         $this->db->set('revision_count_forwarded', 'revision_count_forwarded+1', FALSE);
+        Query_helper::update($this->config->item('table_pos_setup_notice_request'),$data,array('id='.$id));
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_delete($id)
+    {
+        if(isset($this->permissions['action3'])&&($this->permissions['action3']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+
+            $this->db->from($this->config->item('table_pos_setup_notice_request').' item');
+            $this->db->select('item.*');
+            $this->db->join($this->config->item('table_pos_setup_notice_types').' type','type.id=item.type_id','INNER');
+            $this->db->select('type.name notice_type');
+            $this->db->where('item.id',$item_id);
+            $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+            $this->db->order_by('item.id','DESC');
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Forward Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Notice.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status']==$this->config->item('system_status_inactive'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Notice In-Active.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status_forward']==$this->config->item('system_status_forwarded'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Notice Already Forwarded.';
+                $this->json_return($ajax);
+            }
+
+            $data['info_basic']=Notice_helper::get_basic_info($data['item']);
+            $data['files']=Query_helper::get_info($this->config->item('table_pos_setup_notice_file_videos'),'*',array('notice_id='.$item_id,'status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+
+            $data['user_group_ids']=explode(',',trim($data['item']['user_group_ids'],','));
+            $data['urls']=json_decode($data['item']['url_links'],true);
+
+            $data['notice_types']=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'),'*',array('status ="'.$this->config->item('system_status_active').'"'));
+            $user=User_helper::get_user();
+            if($user->user_group==1)
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+            else
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('id !=1','status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+
+            $data['title']="Notice Delete :: ". $data['item']['id'];
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/delete",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/delete/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_delete()
+    {
+        $id = $this->input->post("id");
+        $user = User_helper::get_user();
+        $time=time();
+        $item_head=$this->input->post('item');
+        if($id>0)
+        {
+            if(!((isset($this->permissions['action3']) && ($this->permissions['action3']==1))))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+            }
+            if($item_head['status']!=$this->config->item('system_status_delete'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Delete Field is required.';
+                $this->json_return($ajax);
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        $this->db->trans_start();  //DB Transaction Handle START
+
+        $data=array();
+
+        $data['date_updated']=$time;
+        $data['user_updated']=$user->user_id;
+        $data['status']=$item_head['status'];
         Query_helper::update($this->config->item('table_pos_setup_notice_request'),$data,array('id='.$id));
 
         $this->db->trans_complete();   //DB Transaction Handle END
@@ -1041,6 +1192,7 @@ class Setup_notice_request extends Root_Controller
     }
     private function check_validation()
     {
+        $id = $this->input->post('item');
         $item_head = $this->input->post('item');
         $time_today=System_helper::get_time(System_helper::display_date(time()));
         $time_publish = System_helper::get_time($item_head['date_publish']);
@@ -1049,10 +1201,13 @@ class Setup_notice_request extends Root_Controller
             $this->message = 'The ' . $this->lang->line('LABEL_DATE_PUBLISH') . ' From field is required.';
             return false;
         }
-        if($time_publish<$time_today)
+        if(!($id>0))
         {
-            $this->message = 'Publish date will be greater than current.';
-            return false;
+            if($time_publish<$time_today)
+            {
+                $this->message = 'Publish date will be greater than current.';
+                return false;
+            }
         }
 
         $this->load->library('form_validation');

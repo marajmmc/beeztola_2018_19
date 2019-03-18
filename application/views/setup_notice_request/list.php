@@ -40,6 +40,15 @@ if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
         'data-action-link'=>site_url($CI->controller_url.'/index/list_video')
     );
 }
+if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>'Delete Notice',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/delete')
+    );
+}
 if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 {
     $action_buttons[]=array
@@ -173,6 +182,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_NOTICE_TYPE'); ?>', dataField: 'notice_type',width:'150', hidden: <?php echo $system_preference_items['notice_type']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DATE_PUBLISH'); ?>', dataField: 'date_publish',width:'100', hidden: <?php echo $system_preference_items['date_publish']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_EXPIRE_DAY'); ?>', dataField: 'expire_day',width:'50', hidden: <?php echo $system_preference_items['expire_day']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_REMAINING_DAY'); ?>', dataField: 'remaining_day',width:'50', hidden: <?php echo $system_preference_items['remaining_day']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_TITLE'); ?>', dataField: 'title',width:'500', hidden: <?php echo $system_preference_items['title']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DESCRIPTION'); ?>',dataField: 'description',width:'500',hidden: <?php echo $system_preference_items['description']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT'); ?>',dataField: 'revision_count',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['revision_count']?0:1;?>},

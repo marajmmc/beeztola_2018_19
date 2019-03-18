@@ -8,19 +8,19 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
         'label'=>'Pending List',
         'href'=>site_url($CI->controller_url)
     );
-    $action_buttons[]=array(
-        'label'=>'All List',
-        'href'=>site_url($CI->controller_url.'/index/list_all')
-    );
 }
-if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
+if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
 {
+    $action_buttons[]=array(
+        'label'=>$CI->lang->line("ACTION_NEW").' '.$file_type,
+        'href'=>site_url($CI->controller_url.'/index/'.strtolower('add_'.$file_type).'/'.$notice_id)
+    );
     $action_buttons[]=array
     (
         'type'=>'button',
-        'label'=>$CI->lang->line('ACTION_DETAILS'),
+        'label'=>$CI->lang->line('ACTION_EDIT').' '.$file_type,
         'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/details')
+        'data-action-link'=>site_url($CI->controller_url.'/index/'.strtolower('edit_'.$file_type).'/'.$notice_id)
     );
 }
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
@@ -42,20 +42,11 @@ if(isset($CI->permissions['action5']) && ($CI->permissions['action5']==1))
         'data-title'=>"Download"
     );
 }
-if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
-{
-    $action_buttons[]=array
-    (
-        'label'=>'Preference',
-        'href'=>site_url($CI->controller_url.'/index/set_preference_all')
-    );
-}
 $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_REFRESH"),
-    'href'=>site_url($CI->controller_url.'/index/list_all')
+    'href'=>site_url($CI->controller_url.'/index/'.strtolower('list_'.$file_type).'/'.$notice_id)
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
-
 ?>
 
 <div class="row widget">
@@ -65,12 +56,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="clearfix"></div>
     </div>
-    <?php
-    if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
-    {
-        $CI->load->view('preference',array('system_preference_items'=>$system_preference_items));
-    }
-    ?>
+    <?php echo $CI->load->view("info_basic", '', true); ?>
     <div class="col-xs-12" id="system_jqx_container">
 
     </div>
@@ -81,7 +67,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_active');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/'.strtolower('get_items_'.$file_type).'/'.$notice_id);?>";
 
         // prepare the data
         var source =
@@ -109,7 +95,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             id: 'id',
             url: url
         };
-
+        var tooltiprenderer = function (element) {
+            $(element).jqxTooltip({position: 'mouse', content: $(element).text() });
+        };
+        var cellsrenderer = function (row, column, value, defaultHtml, columnSettings, record) {
+            var element = $(defaultHtml);
+            element.css({'margin': '0px', 'width': '100%', 'height': '100%', padding: '5px'});
+            return element[0].outerHTML;
+        };
         var dataAdapter = new $.jqx.dataAdapter(source);
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
@@ -128,18 +121,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 altrows: true,
                /* rowsheight: 35,
                 columnsheight: 40,*/
+                rowsheight: 50,
                 columnsreorder: true,
                 enablebrowserselection: true,
                 columns:
                 [
-                    { text: '<?php echo $CI->lang->line('LABEL_NOTICE_ID'); ?>', dataField: 'id',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['id']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_NOTICE_TYPE'); ?>', dataField: 'notice_type',width:'150', hidden: <?php echo $system_preference_items['notice_type']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DATE_PUBLISH'); ?>', dataField: 'date_publish',width:'100', hidden: <?php echo $system_preference_items['date_publish']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_EXPIRE_DAY'); ?>', dataField: 'expire_day',width:'50', hidden: <?php echo $system_preference_items['expire_day']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_TITLE'); ?>', dataField: 'title',width:'500', hidden: <?php echo $system_preference_items['title']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DESCRIPTION'); ?>',dataField: 'description',width:'500',hidden: <?php echo $system_preference_items['description']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT'); ?>',dataField: 'revision_count',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['revision_count']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_ORDERING'); ?>',dataField: 'ordering',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['ordering']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_ID'); ?>', dataField: 'id',width:'50',cellsAlign:'right', cellsrenderer: cellsrenderer, rendered: tooltiprenderer,hidden: <?php echo $system_preference_items['id']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_FILE_IMAGE'); ?>', dataField: 'file_image_video',width:'300', cellsrenderer: cellsrenderer, rendered: tooltiprenderer, hidden: <?php echo $system_preference_items['file_image_video']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_REMARKS'); ?>', dataField: 'remarks',width:'300', cellsrenderer: cellsrenderer, rendered: tooltiprenderer, hidden: <?php echo $system_preference_items['remarks']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_LINK_URL'); ?>',dataField: 'link_url',width:'200', cellsrenderer: cellsrenderer, rendered: tooltiprenderer,hidden: <?php echo $system_preference_items['link_url']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT'); ?>',dataField: 'revision_count',width:'50',cellsAlign:'right', cellsrenderer: cellsrenderer, rendered: tooltiprenderer,hidden: <?php echo $system_preference_items['revision_count']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_ORDERING'); ?>',dataField: 'ordering',width:'50',cellsAlign:'right', cellsrenderer: cellsrenderer, rendered: tooltiprenderer,hidden: <?php echo $system_preference_items['ordering']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_STATUS'); ?>',dataField: 'status',width:'80',filtertype: 'list', cellsrenderer: cellsrenderer, rendered: tooltiprenderer,hidden: <?php echo $system_preference_items['status']?0:1;?>}
                 ]
             });
     });

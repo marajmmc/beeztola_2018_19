@@ -2,63 +2,25 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 $CI=& get_instance();
 $action_buttons=array();
-if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
-{
-    $action_buttons[]=array(
-        'label'=>'All List',
-        'href'=>site_url($CI->controller_url.'/index/list_all')
-    );
-}
-if(isset($CI->permissions['action7']) && ($CI->permissions['action7']==1))
-{
-    $action_buttons[]=array
-    (
-        'type' => 'button',
-        'label' => 'Approve / Reject / Rollback',
-        'class' => 'button_jqx_action',
-        'data-action-link' => site_url($CI->controller_url . '/index/approve')
-    );
-}
-if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
-{
-    $action_buttons[]=array
-    (
-        'type'=>'button',
-        'label'=>$CI->lang->line('ACTION_DETAILS'),
-        'class'=>'button_jqx_action',
-        'data-action-link'=>site_url($CI->controller_url.'/index/details')
-    );
-}
-if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
-{
-    $action_buttons[]=array(
-        'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_PRINT"),
-        'class'=>'button_action_download',
-        'data-title'=>"Print",
-        'data-print'=>true
-    );
-}
-if(isset($CI->permissions['action5']) && ($CI->permissions['action5']==1))
-{
-    $action_buttons[]=array(
-        'type'=>'button',
-        'label'=>$CI->lang->line("ACTION_DOWNLOAD"),
-        'class'=>'button_action_download',
-        'data-title'=>"Download"
-    );
-}
-if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
-{
-    $action_buttons[]=array
-    (
-        'label'=>'Preference',
-        'href'=>site_url($CI->controller_url.'/index/set_preference')
-    );
-}
+$action_buttons[]=array(
+    'label'=>'Pending List',
+    'href'=>site_url($CI->controller_url.'/index/list/'.$id)
+);
+$action_buttons[]=array
+(
+    'type'=>'button',
+    'label'=>$CI->lang->line('ACTION_DETAILS'),
+    'class'=>'button_jqx_action',
+    'data-action-link'=>site_url($CI->controller_url.'/index/details')
+);
 $action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_REFRESH"),
-    'href'=>site_url($CI->controller_url.'/index/list')
+    'href'=>site_url($CI->controller_url.'/index/list_all/'.$id)
+);
+$action_buttons[]=array(
+    'type'=>'button',
+    'label'=>$CI->lang->line("ACTION_LOAD_MORE"),
+    'id'=>'button_jqx_load_more'
 );
 $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
@@ -87,7 +49,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
-        var url = "<?php echo site_url($CI->controller_url.'/index/get_items');?>";
+        var url = "<?php echo site_url($CI->controller_url.'/index/get_items_all/').$id;?>";
 
         // prepare the data
         var source =

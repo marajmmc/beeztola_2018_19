@@ -110,7 +110,7 @@ class Setup_notice_types extends Root_Controller
         else
         {
             $ajax['status']=false;
-            $ajax['system_message']=$this->lang->line("YOU_D4 ONT_HAVE_ACCESS");
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
     }

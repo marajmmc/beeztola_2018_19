@@ -38,21 +38,12 @@ class Notice_helper
             'value_2' => System_helper::display_date($result['date_publish'])
         );
 
-        $time=time();
-        if($result['expire_time']>$time)
-        {
-            $result['expire_day']=ceil(($result['expire_time']-$time)/(3600*24));
-        }
-        else
-        {
-            $result['expire_day']=0;
-        }
         $data[] = array
         (
             'label_1' => $CI->lang->line('LABEL_NOTICE_TYPE'),
             'value_1' => $result['notice_type'],
             'label_2' => $CI->lang->line('LABEL_EXPIRE_DAY'),
-            'value_2' => $result['expire_day']
+            'value_2' => Notice_helper::get_expire_day($result['date_publish'],$result['expire_time']).', <span class="bg-info">Remaining Days: '.Notice_helper::get_expire_day_by_current_time($result['expire_time']).'</span>'
         );
         $data[] = array
         (
@@ -101,21 +92,42 @@ class Notice_helper
                 'value_2' => System_helper::display_date_time($result['date_forwarded'])
             );
         }
+        if($result['status_approve']==$CI->config->item('system_status_approved'))
+        {
+            $label_approve=$CI->config->item('system_status_approved');
+        }
+        else if($result['status_approve']==$CI->config->item('system_status_rejected'))
+        {
+            $label_approve='Reject';
+        }
+        else if($result['status_approve']==$CI->config->item('system_status_rollback'))
+        {
+            $label_approve=$CI->config->item('system_status_approved');
+        }
+        else
+        {
+            $label_approve=$CI->config->item('system_status_approved');
+        }
         $data[] = array
         (
-            'label_1' => $CI->lang->line('LABEL_STATUS_APPROVE'),
+            'label_1' => $label_approve.' Status',
             'value_1' => $result['status_approve'],
-            'label_2' => 'Revision (Approve)',
+            'label_2' => 'Revision ('.$label_approve.')',
             'value_2' => $result['revision_count_approved'],
         );
-        if($result['status_approve']==$CI->config->item('system_status_approved'))
+        if($result['status_approve']!=$CI->config->item('system_status_pending'))
         {
             $data[] = array
             (
-                'label_1' => 'Approved By',
+                'label_1' => $label_approve.' By',
                 'value_1' => $user_info[$result['user_approved']]['name'] . ' ( ' . $user_info[$result['user_approved']]['employee_id'] . ' )',
-                'label_2' => 'Approved Time',
+                'label_2' => $label_approve.' Time',
                 'value_2' => System_helper::display_date_time($result['date_approved'])
+            );
+            $data[] = array
+            (
+                'label_1' => $label_approve.' Remarks',
+                'value_1' => $result['remarks_approve']
             );
         }
         return $data;
@@ -129,6 +141,16 @@ class Notice_helper
             {
                 $expire_day=ceil(($expire_time-$publish_time)/(3600*24));
             }
+        }
+        return $expire_day;
+    }
+    public static function get_expire_day_by_current_time($expire_time)
+    {
+        $expire_day=0;
+        $time=time();
+        if($expire_time>$time)
+        {
+            $expire_day=ceil(($expire_time-$time)/(3600*24));
         }
         return $expire_day;
     }
