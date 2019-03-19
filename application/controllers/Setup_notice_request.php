@@ -750,6 +750,12 @@ class Setup_notice_request extends Root_Controller
                 $ajax['system_message']='Delete Field is required.';
                 $this->json_return($ajax);
             }
+            if(!$item_head['reason_delete'])
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Delete Reason Field is required.';
+                $this->json_return($ajax);
+            }
         }
         else
         {
@@ -763,6 +769,7 @@ class Setup_notice_request extends Root_Controller
 
         $data['date_updated']=$time;
         $data['user_updated']=$user->user_id;
+        $data['reason_delete']=$item_head['reason_delete'];
         $data['status']=$item_head['status'];
         Query_helper::update($this->config->item('table_pos_setup_notice_request'),$data,array('id='.$id));
 
@@ -1236,7 +1243,11 @@ class Setup_notice_request extends Root_Controller
             $label_image_video='';
         }
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('file_name',$label_image_video,'required');
+        $this->form_validation->set_rules('notice_id','Notice ID','required');
+        if (!($_FILES['file_name']['name']))
+        {
+            $this->form_validation->set_rules('file_name',$label_image_video,'required');
+        }
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();

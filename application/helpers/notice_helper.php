@@ -130,6 +130,14 @@ class Notice_helper
                 'value_1' => $result['remarks_approve']
             );
         }
+        if($result['revision_count_rollback']>0)
+        {
+            $data[] = array
+            (
+                'label_1' => 'Revision (Rollback)',
+                'value_1' => $result['revision_count_rollback']
+            );
+        }
         return $data;
     }
     public static function get_expire_day($publish_time,$expire_time)
