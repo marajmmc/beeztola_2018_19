@@ -129,8 +129,9 @@ class Notices extends Root_Controller
         $user = User_helper::get_user();
         $method='list';
         $data['id']=$id;
+        $type=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'), 'name',array('id='.$data['id'],'status="'.$this->config->item('system_status_active').'"'),1);
         $data['system_preference_items']= System_helper::get_preference($user->user_id, $this->controller_url, $method, $this->get_preference_headers($method));
-        $data['title']="Notice List";
+        $data['title']=$type['name']." List";
         $ajax['status']=true;
         $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list",$data,true));
         if($this->message)
@@ -156,6 +157,7 @@ class Notices extends Root_Controller
         $this->db->where('item.type_id',$id);
         $this->db->where('item.status',$this->config->item('system_status_active'));
         $this->db->where('item.status_approve',$this->config->item('system_status_approved'));
+        $this->db->where('item.expire_time >=',time());
         //$this->db->order_by('item.ordering','ASC');
         $this->db->order_by('item.id','DESC');
         $items=$this->db->get()->result_array();
@@ -173,8 +175,9 @@ class Notices extends Root_Controller
         $user = User_helper::get_user();
         $method='list_all';
         $data['id']=$id;
+        $type=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'), 'name',array('id='.$data['id'],'status="'.$this->config->item('system_status_active').'"'),1);
         $data['system_preference_items']= System_helper::get_preference($user->user_id, $this->controller_url, $method, $this->get_preference_headers($method));
-        $data['title']="Notice All List";
+        $data['title']=$type['name']." All List";
         $ajax['status']=true;
         $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/list_all",$data,true));
         if($this->message)
