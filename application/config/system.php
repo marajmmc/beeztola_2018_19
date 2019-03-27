@@ -47,4 +47,4 @@ $config['system_purpose_status_sms_sales_invoice']='pos_status_sms_sales_invoice
 $config['system_file_type_image']='Image';
 $config['system_file_type_video']='Video';
 $config['system_file_type_video_ext']='wmv|mp4|mov|ftv|mkv|3gp|avi';
-$config['system_file_type_video_max_size']=102400;//100mb
+$config['system_file_type_video_max_size']=512000;//100mb

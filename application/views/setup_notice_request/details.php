@@ -50,57 +50,64 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     }
     ?>
     <div class="row show-grid">
-        <div class="col-xs-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title text-center">
-                        <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#accordion_assign_group" href="#">+ User group (<?php echo sizeof($group['assign'])+sizeof($group['un_assign'])?>)</a></label>
-                    </h4>
-                </div>
-                <div id="accordion_assign_group" class="panel-collapse collapse in">
-                    <table class="table table-responsive table-bordered">
-                        <tbody>
-                        <tr>
-                            <th>Assign (<?php echo sizeof($group['assign'])?>)</th>
-                            <td>
-                                <?php
-                                $serial=0;
-                                foreach($group['assign'] as $value)
-                                {
-                                    ++$serial;
+        <?php
+        if($user_groups_show)
+        {
+            ?>
+            <div class="col-xs-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title text-center">
+                            <label class=""><a class="external text-danger" data-toggle="collapse" data-target="#accordion_assign_group" href="#">+ User group (<?php echo sizeof($group['assign'])+sizeof($group['un_assign'])?>)</a></label>
+                        </h4>
+                    </div>
+                    <div id="accordion_assign_group" class="panel-collapse collapse in">
+                        <table class="table table-responsive table-bordered">
+                            <tbody>
+                            <tr>
+                                <th>Assign (<?php echo sizeof($group['assign'])?>)</th>
+                                <td>
+                                    <?php
+                                    $serial=0;
+                                    foreach($group['assign'] as $value)
+                                    {
+                                        ++$serial;
+                                        ?>
+                                        <div class="col-xs-3">
+                                            <button type="button" class="btn btn-secondary btn-sm btn-block bg-success"><?php echo $serial.'. '.$value?></button>
+                                            <br/>
+                                        </div>
+                                    <?php
+                                    }
                                     ?>
-                                    <div class="col-xs-3">
-                                        <button type="button" class="btn btn-secondary btn-sm btn-block bg-success"><?php echo $serial.'. '.$value?></button>
-                                        <br/>
-                                    </div>
-                                <?php
-                                }
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Un Assign (<?php echo sizeof($group['un_assign'])?>)</th>
-                            <td>
-                                <?php
-                                $serial=0;
-                                foreach($group['un_assign'] as $value)
-                                {
-                                    ++$serial;
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Un Assign (<?php echo sizeof($group['un_assign'])?>)</th>
+                                <td>
+                                    <?php
+                                    $serial=0;
+                                    foreach($group['un_assign'] as $value)
+                                    {
+                                        ++$serial;
+                                        ?>
+                                        <div class="col-xs-3">
+                                            <button type="button" class="btn btn-secondary btn-sm btn-block bg-danger"><?php echo $serial.'. '.$value?></button>
+                                            <br/>
+                                        </div>
+                                    <?php
+                                    }
                                     ?>
-                                    <div class="col-xs-3">
-                                        <button type="button" class="btn btn-secondary btn-sm btn-block bg-danger"><?php echo $serial.'. '.$value?></button>
-                                        <br/>
-                                    </div>
-                                <?php
-                                }
-                                ?>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php
+        }
+        ?>
         <div class="col-xs-6">
             <div class="panel panel-default">
                 <div class="panel-heading">

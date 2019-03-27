@@ -11,14 +11,19 @@ if(isset($CI->permissions['action0']) && ($CI->permissions['action0']==1))
 }
 if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
 {
+    $button_label=$CI->lang->line('LABEL_FILE_IMAGE');
+    if($file_type==$CI->config->item('system_file_type_video'))
+    {
+        $button_label=$file_type;
+    }
     $action_buttons[]=array(
-        'label'=>$CI->lang->line("ACTION_NEW").' '.$file_type,
+        'label'=>$CI->lang->line("ACTION_NEW").' '.$button_label,
         'href'=>site_url($CI->controller_url.'/index/'.strtolower('add_'.$file_type).'/'.$notice_id)
     );
     $action_buttons[]=array
     (
         'type'=>'button',
-        'label'=>$CI->lang->line('ACTION_EDIT').' '.$file_type,
+        'label'=>$CI->lang->line('ACTION_EDIT').' '.$button_label,
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/'.strtolower('edit_'.$file_type).'/'.$notice_id)
     );

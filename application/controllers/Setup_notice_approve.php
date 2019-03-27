@@ -445,6 +445,9 @@ class Setup_notice_approve extends Root_Controller
             {
                 $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('id !=1','status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
             }
+
+            /* data show hide parameter*/
+            $data['user_groups_show']=true;
             /*list action button */
             //$data['action_buttons'][]=array();
             $data['action_buttons'][]=array(
