@@ -683,7 +683,7 @@ class Setup_notice_request extends Root_Controller
                 $ajax['system_message']='Invalid Notice.';
                 $this->json_return($ajax);
             }
-            if($data['item']['status']==$this->config->item('system_status_inactive'))
+            /*if($data['item']['status']==$this->config->item('system_status_inactive'))
             {
                 $ajax['status']=false;
                 $ajax['system_message']='Notice In-Active.';
@@ -694,7 +694,7 @@ class Setup_notice_request extends Root_Controller
                 $ajax['status']=false;
                 $ajax['system_message']='Notice Already Forwarded.';
                 $this->json_return($ajax);
-            }
+            }*/
 
             $data['info_basic']=Notice_helper::get_basic_info($data['item']);
             $data['files']=Query_helper::get_info($this->config->item('table_pos_setup_notice_file_videos'),'*',array('notice_id='.$item_id,'status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
@@ -744,16 +744,17 @@ class Setup_notice_request extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-            if($item_head['status']!=$this->config->item('system_status_delete'))
+            //if($item_head['status']!=$this->config->item('system_status_active') || $item_head['status']!=$this->config->item('system_status_inactive') || $item_head['status']!=$this->config->item('system_status_delete'))
+            if(!($item_head['status']))
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Delete Field is required.';
+                $ajax['system_message']='Status Change Field is required.';
                 $this->json_return($ajax);
             }
             if(!$item_head['reason_delete'])
             {
                 $ajax['status']=false;
-                $ajax['system_message']='Delete Reason Field is required.';
+                $ajax['system_message']='Status Change Reason Field is required.';
                 $this->json_return($ajax);
             }
         }

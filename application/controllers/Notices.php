@@ -82,7 +82,6 @@ class Notices extends Root_Controller
             $data['remaining_day']= 1;
             $data['title']= 1;
             $data['description']= 1;
-            $data['revision_count']= 1;
             $data['ordering']= 1;
         }
         elseif($method=='list_all')
@@ -94,7 +93,6 @@ class Notices extends Root_Controller
             $data['remaining_day']= 1;
             $data['title']= 1;
             $data['description']= 1;
-            $data['revision_count']= 1;
             $data['ordering']= 1;
         }
         else

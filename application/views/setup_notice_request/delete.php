@@ -250,18 +250,20 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         <hr/>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right">Delete<span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Status Change<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select id="status" class="form-control" name="item[status]">
                     <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <option value="<?php echo $this->config->item('system_status_active')?>"><?php echo $this->config->item('system_status_active')?></option>
+                    <option value="<?php echo $this->config->item('system_status_inactive')?>"><?php echo $this->config->item('system_status_inactive')?></option>
                     <option value="<?php echo $this->config->item('system_status_delete')?>"><?php echo $this->config->item('system_status_delete')?></option>
                 </select>
             </div>
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><span id="label_remarks">Delete Reason</span> <span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><span id="label_remarks">Status Change Reason</span> <span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <textarea name="item[reason_delete]" id="reason_delete" class="form-control" ></textarea>
@@ -273,7 +275,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="col-sm-4 col-xs-4">
                 <div class="action_button pull-right">
-                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Delete Notice?">Save</button>
+                    <button id="button_action_save" type="button" class="btn" data-form="#save_form" data-message-confirm="Are You Sure Status Change Notice?">Save</button>
                 </div>
             </div>
             <div class="col-sm-4 col-xs-4">

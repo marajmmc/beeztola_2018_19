@@ -107,7 +107,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_REMAINING_DAY'); ?>', dataField: 'remaining_day',width:'50', hidden: <?php echo $system_preference_items['remaining_day']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_TITLE'); ?>', dataField: 'title',width:'500', hidden: <?php echo $system_preference_items['title']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DESCRIPTION'); ?>',dataField: 'description',width:'500',hidden: <?php echo $system_preference_items['description']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_REVISION_COUNT'); ?>',dataField: 'revision_count',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['revision_count']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_ORDERING'); ?>',dataField: 'ordering',width:'50',cellsAlign:'right',hidden: <?php echo $system_preference_items['ordering']?0:1;?>}
                 ]
             });
