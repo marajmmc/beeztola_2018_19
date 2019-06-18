@@ -52,6 +52,10 @@ class Report_sale_farmer extends Root_Controller
         {
             $this->system_get_items_variety();
         }
+        elseif($action=="get_items_invoice_discount")
+        {
+            $this->system_get_items_invoice_discount();
+        }
         elseif($action=="set_preference_amount")
         {
             $this->system_set_preference_amount();
@@ -63,6 +67,10 @@ class Report_sale_farmer extends Root_Controller
         elseif($action=="set_preference_variety")
         {
             $this->system_set_preference_variety();
+        }
+        elseif($action=="set_preference_invoice_discount")
+        {
+            $this->system_set_preference_invoice_discount();
         }
         elseif($action=="save_preference")
         {
@@ -134,6 +142,20 @@ class Report_sale_farmer extends Root_Controller
                 $data['system_preference_items']= $this->get_preference_variety();
                 $data['title']="Customer Variety Wise Sales Report";
                 $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/list_variety",$data,true));
+            }
+
+            else if($reports['report_name']=='invoice_discount')
+            {
+                if(!$reports['farmer_id'])
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='This Select a customer';
+                    $this->json_return($ajax);
+                }
+                $data['customer']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('name','mobile_no'),array('id ='.$reports['farmer_id'],'status ="'.$this->config->item('system_status_active').'"'),1);
+                $data['system_preference_items']= $this->get_preference_invoice_discount();
+                $data['title']="Customer Invoice+discount Sales Report";
+                $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/list_invoice_discount",$data,true));
             }
             else
             {
@@ -864,6 +886,153 @@ class Report_sale_farmer extends Root_Controller
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
             $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference_variety');
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function get_preference_invoice_discount()
+    {
+        $user = User_helper::get_user();
+        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="search_invoice_discount"'),1);
+        //$data['customer_name']= 1;
+        //$data['mobile_no']= 1;
+        $data['invoice_no']= 1;
+        $data['date_sale']= 1;
+        $data['date_cancel']= 1;
+        $data['amount_total']= 1;
+        $data['amount_discount_variety']= 1;
+        $data['discount_self_percentage']= 1;
+        $data['amount_discount_self']= 1;
+        $data['amount_payable']= 1;
+        $data['amount_payable_actual']= 1;
+        $data['amount_actual']= 1;
+        if($result)
+        {
+            if($result['preferences']!=null)
+            {
+                $preferences=json_decode($result['preferences'],true);
+                foreach($data as $key=>$value)
+                {
+                    if(isset($preferences[$key]))
+                    {
+                        $data[$key]=$value;
+                    }
+                    else
+                    {
+                        $data[$key]=0;
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+    private function system_get_items_invoice_discount()
+    {
+        $outlet_id=$this->input->post('outlet_id');
+        $farmer_type_id=$this->input->post('farmer_type_id');
+        $farmer_id=$this->input->post('farmer_id');
+        $date_end=$this->input->post('date_end');
+        $date_start=$this->input->post('date_start');
+
+        $this->db->from($this->config->item('table_pos_sale').' sale');
+        $this->db->select('sale.*');
+        $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale.farmer_id','INNER');
+        $this->db->select('f.name customer_name,f.mobile_no');
+
+        $this->db->where('sale.outlet_id',$outlet_id);
+        if($farmer_type_id>0)
+        {
+            $this->db->where('f.farmer_type_id',$farmer_type_id);
+            if($farmer_id>0)
+            {
+                $this->db->where('f.id',$farmer_id);
+            }
+        }
+        $where='(sale.date_sale >='.$date_start.' AND sale.date_sale <='.$date_end.')';
+        $where.=' OR (sale.date_cancel >='.$date_start.' AND sale.date_cancel <='.$date_end.')';
+        $this->db->where('('.$where.')');
+        $this->db->order_by('f.id','DESC');
+        $this->db->order_by('sale.date_sale','DESC');
+        $results=$this->db->get()->result_array();
+        $items=array();
+        foreach($results as $result)
+        {
+            $info=$this->initialize_row_invoice_discount();
+            //$info['customer_name']=$result['customer_name'];
+            //$info['mobile_no']=$result['mobile_no'];
+            $info['invoice_no']=Barcode_helper::get_barcode_sales($result['id']);
+            $info['date_sale']=System_helper::display_date($result['date_sale']);
+            if($result['date_cancel']>0)
+            {
+                $info['date_cancel']=System_helper::display_date_time($result['date_cancel']);
+            }
+            else
+            {
+                $info['date_cancel']='';
+            }
+            $info['amount_total']=$result['amount_total'];
+            $info['amount_discount_variety']=$result['amount_discount_variety'];
+            $info['discount_self_percentage']=$result['discount_self_percentage'];
+            $info['amount_discount_self']=$result['amount_discount_self'];
+            $info['amount_payable']=$result['amount_payable'];
+            $info['amount_payable_actual']=$result['amount_payable_actual'];
+            if($result['status']==$this->config->item('system_status_active'))
+            {
+                $info['amount_actual']=$result['amount_payable_actual'];
+            }
+            else
+            {
+                if($result['date_sale']<$date_start)
+                {
+                    $info['amount_actual']=0-$result['amount_payable'];
+
+                }
+                elseif($result['date_cancel']>$date_end)
+                {
+                    $info['amount_actual']=$result['amount_payable_actual'];
+                }
+                else
+                {
+                    $info['amount_actual']=0;
+                }
+            }
+            $info['status']=$result['status'];
+            $items[]=$info;
+        }
+        $this->json_return($items);
+    }
+    private function initialize_row_invoice_discount()
+    {
+        $row=array();
+        //$row['customer_name']='';
+        //$row['mobile_no']='';
+        $row['invoice_no']='';
+        $row['date_sale']='';
+        $row['date_cancel']='';
+        $row['amount_total']=0;
+        $row['amount_discount_variety']=0;
+        $row['discount_self_percentage']=0;
+        $row['amount_discount_self']=0;
+        $row['amount_payable']=0;
+        $row['amount_payable_actual']=0;
+        $row['amount_actual']=0;
+        $row['status']=$this->config->item('system_status_active');
+        return $row;
+    }
+    private function system_set_preference_invoice_discount()
+    {
+        if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
+        {
+            $data['system_preference_items']= $this->get_preference_invoice_discount();
+            $data['preference_method_name']='search_invoice_discount';
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference_invoice_discount');
             $this->json_return($ajax);
         }
         else

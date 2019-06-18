@@ -119,6 +119,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                             <option value="amount">Total Sales Wise</option>
                             <option value="invoice">Invoice Wise</option>
                             <option value="variety">Variety Wise</option>
+                            <option value="invoice_discount">Invoice+discount</option>
                         </select>
                     </div>
                     <div class="col-xs-6">
