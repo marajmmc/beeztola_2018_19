@@ -24,6 +24,12 @@ if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
         'class'=>'button_jqx_action',
         'data-action-link'=>site_url($CI->controller_url.'/index/edit_outlet')
     );
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>'Change Credit Limit',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/edit_credit_limit')
+    );
 }
 $action_buttons[]=array(
     'type'=>'button',
@@ -102,7 +108,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'id', type: 'int' },
                 { name: 'barcode', type: 'string' },
                 { name: 'name', type: 'string' },
-                { name: 'name', type: 'string' },
+                { name: 'amount_credit_limit', type: 'number' },
+                { name: 'amount_credit_balance', type: 'number' },
                 { name: 'date_created_time', type: 'string' },
                 { name: 'farmer_type_name', type: 'string' },
                 { name: 'status_card_require', type: 'string' },
@@ -123,6 +130,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         };
 
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
+        {
+            var element = $(defaultHtml);
+
+            var price_net=parseFloat(record['price_net']);
+            if(column.substr(0,6)=='amount')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_amount(value));
+                }
+            }
+            return element[0].outerHTML;
+        };
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
             {
@@ -143,6 +168,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 columns: [
                     { text: '<?php echo $CI->lang->line('LABEL_BARCODE'); ?>', dataField: 'barcode', width:80, hidden: <?php echo $system_preference_items['barcode']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name', width:200, hidden: <?php echo $system_preference_items['name']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_LIMIT'); ?>', dataField: 'amount_credit_limit', width:100,cellsrenderer: cellsrenderer,cellsalign: 'right',hidden: <?php echo $system_preference_items['amount_credit_limit']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_BALANCE'); ?>', dataField: 'amount_credit_balance', width:100,cellsrenderer: cellsrenderer,cellsalign: 'right',hidden: <?php echo $system_preference_items['amount_credit_balance']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DATE_CREATED_TIME'); ?>', dataField: 'date_created_time', width:200, hidden: <?php echo $system_preference_items['date_created_time']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_FARMER_TYPE_NAME'); ?>', dataField: 'farmer_type_name', width:150,filtertype: 'list', hidden: <?php echo $system_preference_items['farmer_type_name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_STATUS_CARD_REQUIRE'); ?>', dataField: 'status_card_require', width:50,filtertype: 'list', hidden: <?php echo $system_preference_items['status_card_require']?0:1;?>},

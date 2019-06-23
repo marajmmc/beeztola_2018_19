@@ -43,7 +43,14 @@ class Setup_farmer_farmer extends Root_Controller
         {
             $this->system_save_outlet();
         }
-
+        elseif($action=="edit_credit_limit")
+        {
+            $this->system_edit_credit_limit($id);
+        }
+        elseif($action=="save_credit_limit")
+        {
+            $this->system_save_credit_limit();
+        }
         elseif($action=="details")
         {
             $this->system_details($id);
@@ -485,7 +492,144 @@ class Setup_farmer_farmer extends Root_Controller
             }
         }
     }
+    private function system_edit_credit_limit($id)
+    {
+        if(isset($this->permissions['action2']) && ($this->permissions['action2']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+            $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
+            $this->db->select('f.*');
+            $this->db->select('ft.name farmer_type_name,ft.discount_self_percentage');
+            $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
+            $this->db->join($this->config->item('table_login_setup_location_unions').' union','union.id = f.union_id','LEFT');
+            $this->db->select('union.name union_name');
+            $this->db->join($this->config->item('table_login_setup_location_upazillas').' u','u.id = union.upazilla_id','LEFT');
+            $this->db->select('u.name upazilla_name');
+            $this->db->join($this->config->item('table_login_setup_location_districts').' d','d.id = u.district_id','LEFT');
+            $this->db->select('d.name district_name');
+            $this->db->join($this->config->item('table_login_setup_location_territories').' t','t.id = d.territory_id','LEFT');
+            $this->db->select('t.name territory_name');
+            $this->db->join($this->config->item('table_login_setup_location_zones').' zone','zone.id = t.zone_id','LEFT');
+            $this->db->select('zone.name zone_name');
+            $this->db->join($this->config->item('table_login_setup_location_divisions').' division','division.id = zone.division_id','LEFT');
+            $this->db->select('division.name division_name');
+            $this->db->where('f.id',$item_id);
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Details Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Farmer.';
+                $this->json_return($ajax);
+            }
 
+            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id = farmer_outlet.outlet_id','INNER');
+            $this->db->select('CONCAT(customer_code," - ",name) text');
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where('farmer_outlet.farmer_id',$item_id);
+            $this->db->where('outlet_info.revision',1);
+            $data['assigned_outlets']=$this->db->get()->result_array();
+
+            $data['title']="Edit Farmer Credit Limit (".$data['item']['name'].')';
+            $data['farmer_types']=Query_helper::get_info($this->config->item('table_pos_setup_farmer_type'),array('id value,name text'),array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/edit_credit_limit",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/edit_credit_limit/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_credit_limit()
+    {
+        $id = $this->input->post("id");//farmer_id
+        $user = User_helper::get_user();
+        $item=$this->input->post('item');
+        $time=time();
+        if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+            die();
+        }
+        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$id, 'status != "'.$this->config->item('system_status_delete').'"'),1);
+        if(!$result)
+        {
+            System_helper::invalid_try(__FUNCTION__,$id,'Update Credit Non Exists');
+            $ajax['status']=false;
+            $ajax['system_message']='Invalid Farmer.';
+            $this->json_return($ajax);
+        }
+
+        if((trim($item['amount_credit_limit'])=='')|| (!($item['amount_credit_limit']>=0)))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='New Credit Limit field is required.';
+            $this->json_return($ajax);
+        }
+        $this->load->helper('farmer_credit');
+        $data_history=array();
+        $data_history['farmer_id']=$id;
+        //$data_history['sale_id']=0;
+        //$data_history['payment_id']=0;
+        $data_history['credit_limit_old']=$result['amount_credit_limit'];
+        $data_history['credit_limit_new']=$item['amount_credit_limit'];
+
+        //$credit_limit_old=$result['amount_credit_limit'];
+        //$credit_limit_new=$item['amount_credit_limit'];
+        $credit_difference=($data_history['credit_limit_new']-$data_history['credit_limit_old']);
+        $data_history['balance_old']=$result['amount_credit_balance'];
+        $data_history['balance_new']=$result['amount_credit_balance']+$credit_difference;
+
+        if($data_history['balance_new']<0)
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='New Balance will be negative.';
+            $this->json_return($ajax);
+        }
+        $data_history['amount_adjust']=$item['amount_credit_limit'];
+        $data_history['remarks_reason']="limit Changed.";
+        //$data_history['reference_no'];
+        $data_history['remarks']=$item['remarks_credit_limit'];
+
+        $item['amount_credit_limit'] = $data_history['credit_limit_new'];
+        $item['amount_credit_balance'] = $data_history['balance_new'];
+
+        $this->db->trans_start();  //DB Transaction Handle START
+        Query_helper::update($this->config->item('table_pos_setup_farmer_farmer'),$item,array("id = ".$id));
+        $remarks_reason='Update Set Credit.';
+        Farmer_Credit_helper::add_credit_history($data_history);
+        $this->db->trans_complete();   //DB Transaction Handle END
+
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
     private function system_details($id)
     {
         if(isset($this->permissions['action0']) && ($this->permissions['action0']==1))
@@ -579,6 +723,8 @@ class Setup_farmer_farmer extends Root_Controller
         $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="list"'),1);
         $data['barcode']= 1;
         $data['name']= 1;
+        $data['amount_credit_limit']= 1;
+        $data['amount_credit_balance']= 1;
         $data['date_created_time']= 1;
         $data['farmer_type_name']= 1;
         $data['status_card_require']= 1;
