@@ -133,8 +133,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-
-            var price_net=parseFloat(record['price_net']);
             if(column.substr(0,6)=='amount')
             {
                 if(value==0)
