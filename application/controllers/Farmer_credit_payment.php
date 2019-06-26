@@ -37,8 +37,8 @@ class Farmer_credit_payment extends Root_Controller
     private function language_labels()
     {
         $this->lang->language['LABEL_REVISION_COUNT']='Revision Count (Edit)';
-        //$this->lang->language['LABEL_DELETE']='Delete';
-        //$this->lang->language['LABEL_REASON_DELETE']='Delete Reason';
+        $this->lang->language['LABEL_DELETE']='Delete';
+        $this->lang->language['LABEL_REASON_DELETE']='Delete Reason';
     }
     public function index($action="list",$id=0,$id1=0)
     {
@@ -343,7 +343,7 @@ class Farmer_credit_payment extends Root_Controller
             $data['item']=Query_helper::get_info($this->config->item('table_pos_farmer_credit_payment'),array('*'),array('id ='.$item_id,'farmer_id ='.$farmer_id),1);
             if(!$data['item'])
             {
-                System_helper::invalid_try(__FUNCTION__,$data['item']['id'],'Non Exists');
+                System_helper::invalid_try(__FUNCTION__,$item_id,'Non Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
@@ -454,6 +454,14 @@ class Farmer_credit_payment extends Root_Controller
 
         $data_history['reference_no']=$item['reference_no'];
         $data_history['remarks']=$item['remarks'];
+
+        if($data_history['balance_new']<0)
+        {
+            $ajax['status'] = false;
+            $ajax['system_message'] = 'New balance ('.$data_history['balance_new'].') cannot be negative';
+            $this->json_return($ajax);
+        }
+
         $this->db->trans_start();  //DB Transaction Handle START
 
         if($id>0)
@@ -514,7 +522,7 @@ class Farmer_credit_payment extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_delete($id, $id1)
+    private function system_delete($farmer_id, $id1)
     {
         if (isset($this->permissions['action3']) && ($this->permissions['action3'] == 1))
         {
@@ -526,77 +534,32 @@ class Farmer_credit_payment extends Root_Controller
             {
                 $item_id = $this->input->post('id');
             }
-            $farmer_id=$id;
-            $get_farmer=$this->get_farmer($farmer_id);
-            $farmer_info=$this->farmer_info($get_farmer);
-            $data = $basic_info = array();
-
-            $this->db->from($this->config->item('table_pos_credit_payment') . ' credit_payment');
-            $this->db->select('credit_payment.*, credit_payment.amount amount_payment');
-
-            $this->db->join($this->config->item('table_login_setup_payment_way') . ' payment_way', 'payment_way.id = credit_payment.payment_way_id', 'INNER');
-            $this->db->select('payment_way.name payment_way');
-
-            $this->db->where('credit_payment.id', $item_id);
-            $this->db->where('credit_payment.status', $this->config->item('system_status_active'));
-            $result = $this->db->get()->row_array();
-            if (!$result)
+            $this->check_validation_farmer($farmer_id,__FUNCTION__);
+            $data=array();
+            $data['info_basic']=$this->get_farmer_info($farmer_id);
+            $data['item']=Query_helper::get_info($this->config->item('table_pos_farmer_credit_payment'),array('*'),array('id ='.$item_id,'farmer_id ='.$farmer_id),1);
+            if(!$data['item'])
             {
-                System_helper::invalid_try(__FUNCTION__, $item_id, 'Payment Not Exists');
-                $ajax['status'] = false;
-                $ajax['system_message'] = 'Invalid Try.';
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try.';
                 $this->json_return($ajax);
             }
-            if ($result['status'] == $this->config->item('system_status_delete'))
+            if ($data['item']['status'] == $this->config->item('system_status_delete'))
             {
                 $ajax['status'] = false;
                 $ajax['system_message'] = 'Payment already deleted.';
                 $this->json_return($ajax);
             }
+            $data['info_payment']=$this->get_payment_info($item_id);
 
-            $basic_info['accordion']['header'] = 'Payment Information';
-            $basic_info['accordion']['div_id'] = 'payment_info';
-            $basic_info['accordion']['collapse'] = 'in';
-            $basic_info['info_basic'][] = array(
-                'label_1' => $this->lang->line('LABEL_DATE_PAYMENT'),
-                'value_1' => System_helper::display_date_time($result['date_payment']),
-                'label_2' => $this->lang->line('LABEL_AMOUNT_PAYMENT'),
-                'value_2' => System_helper::get_string_amount($result['amount'])
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => $this->lang->line('LABEL_PAYMENT_WAY'),
-                'value_1' => $result['payment_way'],
-                'label_2' => $this->lang->line('LABEL_REFERENCE_NO'),
-                'value_2' => $result['reference_no']
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => 'Credit Limit',
-                'value_1' => System_helper::get_string_amount($get_farmer['amount_credit_limit']),
-                'label_2' => 'Old Balance',
-                'value_2' => System_helper::get_string_amount($get_farmer['amount_credit_balance'])
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => 'Deleted Amount',
-                'value_1' => System_helper::get_string_amount($result['amount']),
-                'label_2' => 'New Balance',
-                'value_2' => (System_helper::get_string_amount($get_farmer['amount_credit_balance']-$result['amount']))
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => $this->lang->line('LABEL_REMARKS'),
-                'value_1' => nl2br($result['remarks'])
-            );
-            $data['details'][] = $this->load->view("info_basic", $farmer_info, true);
-            $data['details'][] = $this->load->view("info_basic", $basic_info, true);
-
-            $data['item'] = $result;
-            $data['title'] = "Payment Delete (Payment ID:" . $result['id'] . " )";
-            $ajax['status'] = true;
-            $ajax['system_content'][] = array("id" => "#system_content", "html" => $this->load->view($this->controller_url . "/delete", $data, true));
-            if ($this->message)
+            $data['title'] = "Delete Payment (Payment ID:" . $item_id . " )";
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/delete",$data,true));
+            if($this->message)
             {
-                $ajax['system_message'] = $this->message;
+                $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url'] = site_url($this->controller_url . '/index/delete/'.$farmer_id.'/'. $item_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/delete/'.$farmer_id.'/'. $item_id);
             $this->json_return($ajax);
         }
         else
@@ -613,6 +576,7 @@ class Farmer_credit_payment extends Root_Controller
         $item = $this->input->post('item');
         $user = User_helper::get_user();
         $time = time();
+        $this->load->helper('farmer_credit');
         //Permission Checking
         if (!(isset($this->permissions['action3']) && ($this->permissions['action3'] == 1)))
         {
@@ -633,10 +597,12 @@ class Farmer_credit_payment extends Root_Controller
             $ajax['system_message'] = ($this->lang->line('LABEL_REASON_DELETE')) . ' field is required.';
             $this->json_return($ajax);
         }
-        $result = Query_helper::get_info($this->config->item('table_pos_credit_payment'), array('*'), array('id =' . $item_id), 1);
+
+        $this->check_validation_farmer($farmer_id,__FUNCTION__);
+        $result = Query_helper::get_info($this->config->item('table_pos_farmer_credit_payment'), array('*'), array('id =' . $item_id), 1);
         if (!$result)
         {
-            System_helper::invalid_try(__FUNCTION__, $item_id, 'Payment Delete Not Exists');
+            System_helper::invalid_try(__FUNCTION__, $item_id, 'Delete Not Exists');
             $ajax['status'] = false;
             $ajax['system_message'] = 'Invalid Try.';
             $this->json_return($ajax);
@@ -647,46 +613,49 @@ class Farmer_credit_payment extends Root_Controller
             $ajax['system_message'] = 'Payment already deleted.';
             $this->json_return($ajax);
         }
-        $result_amount=$result['amount'];
-        $reference_no=$result['reference_no'];
+        $amount_old=$result['amount'];
 
-        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('*'),array('id ='.$farmer_id,'status!="'.$this->config->item('system_status_delete').'"'),1,0,array('id ASC'));
-        if(!$result)
-        {
-            System_helper::invalid_try(__FUNCTION__,$farmer_id,'Payment Delete Non Exists');
-            $ajax['status']=false;
-            $ajax['system_message']='Invalid Try.';
-            $this->json_return($ajax);
-        }
-        $credit_limit_old=$result['amount_credit_limit'];
-        $credit_limit_new=$result['amount_credit_limit'];
-        $balance_old=$result['amount_credit_balance'];
-        $balance_new=($result['amount_credit_balance']-$result_amount);
-        $amount_adjust_old=$result_amount;
-        $amount_adjust=0;
-        if($balance_new<0)
+        $farmer_info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('*'),array('id ='.$farmer_id,'status!="'.$this->config->item('system_status_delete').'"'),1);
+
+        $data_history=array();
+        $data_history['farmer_id']=$farmer_id;
+        //$data_history['sale_id']=0;
+        $data_history['payment_id']=$item_id;
+
+        $data_history['credit_limit_old']=$farmer_info['amount_credit_limit'];
+        $data_history['credit_limit_new']=$farmer_info['amount_credit_limit'];
+
+        $data_history['balance_old']=$farmer_info['amount_credit_balance'];
+        $data_history['balance_new']=$farmer_info['amount_credit_balance']-$amount_old;
+        $data_history['amount_adjust']=0;
+        $data_history['remarks_reason']='Delete Payment. Amount Old: '.$amount_old.' Amount New: 0';
+
+        //$data_history['reference_no']
+        $data_history['remarks']=$item['remarks_delete'];
+        if($data_history['balance_new']<0)
         {
             $ajax['status'] = false;
-            $ajax['system_message'] = 'Insufficient balance. Your new balance is: '.$balance_new;
+            $ajax['system_message'] = 'New balance ('.$data_history['balance_new'].') cannot be negative';
             $this->json_return($ajax);
         }
 
         $this->db->trans_start(); //DB Transaction Handle START
 
-        $item['date_deleted'] = $time;
-        $item['user_deleted'] = $user->user_id;
-        $item['amount'] = 0;
-        Query_helper::update($this->config->item('table_pos_credit_payment'), $item, array("id = " . $item_id), FALSE);
-        $payment_id=$item_id;
-        $remarks_reason='Delete Payment. Adjust Amount Old: '.$amount_adjust_old.' Adjust Amount New: '.$amount_adjust;
+        $data=array();
+        $data['amount']= 0;
+        $this->db->set('revision_count', 'revision_count+1', FALSE);
+        $data['status']= $item['status'];
+        $data['remarks_delete']= $item['remarks_delete'];
+        $data['date_deleted'] = $time;
+        $data['user_deleted'] = $user->user_id;
+        Query_helper::update($this->config->item('table_pos_farmer_credit_payment'),$data, array('id='.$item_id), false);
 
+        $data_credit=array();
         $data_credit['date_updated'] = $time;
         $data_credit['user_updated'] = $user->user_id;
-        $data_credit['amount_credit_balance']=$balance_new;
+        $data_credit['amount_credit_balance']=$data_history['balance_new'];
         Query_helper::update($this->config->item('table_pos_setup_farmer_farmer'),$data_credit, array('id='.$farmer_id), false);
-
-        Credit_helper::add_credit_history($farmer_id,$amount_adjust,$credit_limit_old,$credit_limit_new, $balance_old,$balance_new,$remarks_reason,$reference_no,0,$payment_id,$item['remarks_delete']);
-
+        Farmer_Credit_helper::add_credit_history($data_history);
         $this->db->trans_complete(); //DB Transaction Handle END
 
         if ($this->db->trans_status() === TRUE)
@@ -748,84 +717,6 @@ class Farmer_credit_payment extends Root_Controller
                 $data['payment_histories']=Query_helper::get_info($this->config->item('table_pos_farmer_credit_balance_history'),array('*'),array('farmer_id ='.$farmer_id,'payment_id ='.$item_id),0,0,array('id DESC'));
             }
 
-            /*$this->db->from($this->config->item('table_pos_credit_payment') . ' credit_payment');
-            $this->db->select('credit_payment.*, credit_payment.amount amount_payment');
-
-            $this->db->join($this->config->item('table_login_setup_payment_way') . ' payment_way', 'payment_way.id = credit_payment.payment_way_id', 'INNER');
-            $this->db->select('payment_way.name payment_way');
-
-            $this->db->where('credit_payment.id', $item_id);
-            $this->db->where('credit_payment.status', $this->config->item('system_status_active'));
-            $result = $this->db->get()->row_array();
-            if (!$result)
-            {
-                System_helper::invalid_try(__FUNCTION__, $item_id, 'Payment Not Exists');
-                $ajax['status'] = false;
-                $ajax['system_message'] = 'Invalid Try.';
-                $this->json_return($ajax);
-            }
-            if ($result['status'] == $this->config->item('system_status_delete'))
-            {
-                $ajax['status'] = false;
-                $ajax['system_message'] = 'Payment already deleted.';
-                $this->json_return($ajax);
-            }
-            $user_ids = array(
-                $result['user_created'] => $result['user_created'],
-                $result['user_updated'] => $result['user_updated'],
-            );
-            $user_info = System_helper::get_users_info($user_ids);
-
-            $basic_info['accordion']['header'] = 'Payment Information';
-            $basic_info['accordion']['div_id'] = 'payment_info';
-            $basic_info['accordion']['collapse'] = 'in';
-            $basic_info['info_basic'][] = array(
-                'label_1' => $this->lang->line('LABEL_DATE_PAYMENT'),
-                'value_1' => System_helper::display_date_time($result['date_payment']),
-                'label_2' => $this->lang->line('LABEL_AMOUNT_PAYMENT'),
-                'value_2' => System_helper::get_string_amount($result['amount'])
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => $this->lang->line('LABEL_PAYMENT_WAY'),
-                'value_1' => $result['payment_way'],
-                'label_2' => $this->lang->line('LABEL_REFERENCE_NO'),
-                'value_2' => $result['reference_no']
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => 'Credit Limit',
-                'value_1' => System_helper::get_string_amount($get_farmer['amount_credit_limit']),
-                'label_2' => 'Balance',
-                'value_2' => System_helper::get_string_amount($get_farmer['amount_credit_balance'])
-            );
-            $basic_info['info_basic'][] = array
-            (
-                'label_1' => $this->lang->line('LABEL_REMARKS'),
-                'value_1' => nl2br($result['remarks']),
-                'label_2' => $this->lang->line('LABEL_REVISION_COUNT'),
-                'value_2' => $result['revision_count'],
-            );
-            $basic_info['info_basic'][] = array(
-                'label_1' => $this->lang->line('LABEL_CREATED_BY'),
-                'value_1' => $user_info[$result['user_created']]['name'],
-                'label_2' => $this->lang->line('LABEL_DATE_CREATED_TIME'),
-                'value_2' => System_helper::display_date_time($result['date_created'])
-            );
-            if ($result['user_updated'])
-            {
-                $basic_info['info_basic'][] = array(
-                    'label_1' => $this->lang->line('LABEL_UPDATED_BY'),
-                    'value_1' => $user_info[$result['user_updated']]['name'],
-                    'label_2' => $this->lang->line('LABEL_DATE_UPDATED_TIME'),
-                    'value_2' => System_helper::display_date_time($result['date_updated'])
-                );
-            }
-            $data['details'][] = $this->load->view("info_basic", $farmer_info, true);
-            $data['details'][] = $this->load->view("info_basic", $basic_info, true);
-
-
-
-            $data['item'] = $result;*/
-
             $data['title'] = "Payment Details (Payment ID:" . $item_id . " )";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
@@ -835,8 +726,6 @@ class Farmer_credit_payment extends Root_Controller
             }
             $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$farmer_id.'/'. $item_id);
             $this->json_return($ajax);
-
-
         }
         else
         {
