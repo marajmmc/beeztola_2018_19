@@ -250,6 +250,7 @@ $lang['LABEL_NEXT_YEARS'] = 'Next Years';
 $lang['LABEL_PREVIOUS_YEARS'] = 'Previous Years';
 
 // Account
+$lang['LABEL_AMOUNT'] = 'Amount';
 $lang['LABEL_OPENING_BALANCE'] = 'Opening Balance';
 $lang['LABEL_CUSTOMER_CREDIT_LIMIT'] = 'Credit Limit';
 
