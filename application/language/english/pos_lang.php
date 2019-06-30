@@ -434,6 +434,8 @@ $lang['LABEL_INCHARGE'] = 'In-charge';
 /*  farmer type  */
 $lang['LABEL_DISCOUNT_SELF_PERCENTAGE'] = 'Self Discount (Percentage)';
 $lang['LABEL_DISCOUNT_REFERRAL_PERCENTAGE'] = 'Referral Discount (Percentage)';
+$lang['LABEL_DISCOUNT_SLAB_PERCENTAGE'] = 'Slab Discount (Percentage)';
+$lang['LABEL_SALES_PAYMENT_METHOD'] = 'Cash/Credit';
 $lang['LABEL_COMMISSION_DISTRIBUTOR'] = 'Distributor Commission (Percentage)';
 $lang['LABEL_DISCOUNT'] = 'Discount';
 $lang['LABEL_AMOUNT_DISCOUNT'] = 'Discount';
