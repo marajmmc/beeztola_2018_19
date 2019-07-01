@@ -357,26 +357,39 @@ class Sales_sale2 extends Root_Controller
         $data['item']['amount_credit_limit']=$result['amount_credit_limit'];
         $data['item']['amount_credit_balance']=$result['amount_credit_balance'];
 
-        //if farmer buy from other outlet must buy in cash
-        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$farmer_id,'revision =1','outlet_id ='.$outlet_id),1);
-        if(!$result)
+        //if farmer not dealer must buy in cash
+        if(!($data['item']['farmer_type_id']>1))
         {
             $data['item']['amount_credit_limit']=0;
             $data['item']['amount_credit_balance']=0;
         }
-        //discount slabs
-        $data['discounts_slabs']=array();
-        $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id ='.$outlet_id,'revision =1',),1);
-        if($result)
-        {
-            $data['discounts_slabs']=json_decode($result['discount'], true);
-        }
         else
         {
-            $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id =0','revision =1',),1);
+            //if dealer buy from other outlet must buy in cash
+            $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$farmer_id,'revision =1','outlet_id ='.$outlet_id),1);
+            if(!$result)
+            {
+                $data['item']['amount_credit_limit']=0;
+                $data['item']['amount_credit_balance']=0;
+            }
+        }
+        //discount slabs
+        $data['discounts_slabs']=array();
+        //slabs activate if dealer
+        if($data['item']['farmer_type_id']>1)
+        {
+            $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id ='.$outlet_id,'revision =1',),1);
             if($result)
             {
                 $data['discounts_slabs']=json_decode($result['discount'], true);
+            }
+            else
+            {
+                $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id =0','revision =1',),1);
+                if($result)
+                {
+                    $data['discounts_slabs']=json_decode($result['discount'], true);
+                }
             }
         }
 
@@ -502,27 +515,40 @@ class Sales_sale2 extends Root_Controller
         $farmer_info['amount_credit_limit']=$result['amount_credit_limit'];
         $farmer_info['amount_credit_balance']=$result['amount_credit_balance'];
 
-        //if farmer buy from other outlet must buy in cash
-        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$item['farmer_id'],'revision =1','outlet_id ='.$item['outlet_id']),1);
-        if(!$result)
+        //if farmer not dealer must buy in cash
+        if(!($farmer_info['farmer_type_id']>1))
         {
             $farmer_info['amount_credit_limit']=0;
             $farmer_info['amount_credit_balance']=0;
         }
+        else
+        {
+            //if Dealer buy from other outlet must buy in cash
+            $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$item['farmer_id'],'revision =1','outlet_id ='.$item['outlet_id']),1);
+            if(!$result)
+            {
+                $farmer_info['amount_credit_limit']=0;
+                $farmer_info['amount_credit_balance']=0;
+            }
+        }
 
         //discount slabs
         $data['discounts_slabs']=array();
-        $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id ='.$item['outlet_id'],'revision =1',),1);
-        if($result)
+        //slabs activate if dealer
+        if($farmer_info['farmer_type_id']>1)
         {
-            $data['discounts_slabs']=json_decode($result['discount'], true);
-        }
-        else
-        {
-            $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id =0','revision =1',),1);
+            $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id ='.$item['outlet_id'],'revision =1',),1);
             if($result)
             {
                 $data['discounts_slabs']=json_decode($result['discount'], true);
+            }
+            else
+            {
+                $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id =0','revision =1',),1);
+                if($result)
+                {
+                    $data['discounts_slabs']=json_decode($result['discount'], true);
+                }
             }
         }
         //farmer info and discount validation finished
@@ -746,7 +772,7 @@ class Sales_sale2 extends Root_Controller
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
             $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_status_sms_sales_invoice').'"','status ="'.$this->config->item('system_status_active').'"'),1);
             //if sms on and dealer
-            if($result && ($result['config_value']==1))
+            if($result && ($result['config_value']==1) && ($farmer_info['farmer_type_id']>1))
             {
                 $this->load->helper('mobile_sms');
                 $this->lang->load('mobile_sms');
