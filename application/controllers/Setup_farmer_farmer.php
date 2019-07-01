@@ -524,10 +524,17 @@ class Setup_farmer_farmer extends Root_Controller
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('Details Non Exists',$item_id);
+                System_helper::invalid_try(__FUNCTION__,$item_id,'Farmer not Exists');
                 $ajax['status']=false;
                 $ajax['system_message']='Invalid Farmer.';
                 $this->json_return($ajax);
+            }
+            if(!($data['item']['farmer_type_id']>1))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Make the customer Dealer first.';
+                $this->json_return($ajax);
+                die();
             }
 
             $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
@@ -576,6 +583,13 @@ class Setup_farmer_farmer extends Root_Controller
             $ajax['status']=false;
             $ajax['system_message']='Invalid Farmer.';
             $this->json_return($ajax);
+        }
+        if(!($result['farmer_type_id']>1))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Make the customer Dealer first.';
+            $this->json_return($ajax);
+            die();
         }
 
         if((trim($item['amount_credit_limit'])=='')|| (!($item['amount_credit_limit']>=0)))
