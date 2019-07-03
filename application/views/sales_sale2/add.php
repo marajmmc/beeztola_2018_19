@@ -104,6 +104,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label"><?php echo $item['farmer_type_name'];?></label>
             </div>
         </div>
+        <?php
+        if($item['amount_credit_limit']>0)
+        {
+            ?>
+            <div class="row show-grid">
+                <div class="col-xs-4">
+
+                </div>
+                <div class="col-sm-4 col-xs-8">
+
+                        <a class="btn btn-primary" href="<?php echo site_url('farmer_credit_payment/index/list_payment/'.$item['farmer_id']); ?>">Make Payment</a>
+
+                </div>
+
+            </div>
+        <?php
+        }
+        ?>
         <div class="clearfix"></div>
         <div class="widget-header">
             <div class="title">

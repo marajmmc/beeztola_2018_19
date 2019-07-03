@@ -39,6 +39,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <button type="button" class="btn btn-success btn-xs">Credit Limit: <?php echo System_helper::get_string_amount($amount_credit_limit);?></button>
                 <button type="button" class="btn btn-warning btn-xs">Balance: <?php echo System_helper::get_string_amount($amount_credit_balance);?></button>
                 <button type="button" class="btn btn-danger btn-xs">Total Payment: <?php echo System_helper::get_string_amount($amount_total);?></button>
+                <button type="button" class="btn btn-primary btn-xs">Total Due: <?php echo System_helper::get_string_amount($amount_credit_limit-$amount_credit_balance);?></button>
             </div>
         </div>
         <div class="widget-header">

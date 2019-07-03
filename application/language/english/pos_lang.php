@@ -485,3 +485,4 @@ $lang['LABEL_STATUS_ZSC_COMMENT']='ZSC Comment Status';
 
 $lang['LABEL_AMOUNT_CREDIT_LIMIT']='Credit Limit';
 $lang['LABEL_AMOUNT_CREDIT_BALANCE']='Available Credit';
+$lang['LABEL_AMOUNT_CREDIT_DUE']='Due';

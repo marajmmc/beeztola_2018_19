@@ -109,6 +109,7 @@ class Farmer_credit_payment extends Root_Controller
             $data['name']= 1;
             $data['amount_credit_limit']= 1;
             $data['amount_credit_balance']= 1;
+            $data['amount_credit_due']= 1;
             $data['date_created_time']= 1;
             $data['farmer_type_name']= 1;
             //$data['status_card_require']= 1;
@@ -214,6 +215,7 @@ class Farmer_credit_payment extends Root_Controller
         {
             $item['barcode']=Barcode_helper::get_barcode_farmer($item['id']);
             $item['date_created_time']=System_helper::display_date_time($item['date_created']);
+            $item['amount_credit_due']=$item['amount_credit_limit']-$item['amount_credit_balance'];
             /*if($item['time_card_off_end']>$time)
             {
                 $item['status_card_require']=$this->config->item('system_status_no');

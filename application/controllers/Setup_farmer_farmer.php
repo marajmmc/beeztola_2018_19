@@ -150,6 +150,7 @@ class Setup_farmer_farmer extends Root_Controller
                 //echo 'here '.$item['id'];
                 $item['status_card_require']=$this->config->item('system_status_no');
             }
+            $item['amount_credit_due']=$item['amount_credit_limit']-$item['amount_credit_balance'];
         }
         $this->json_return($items);
     }
@@ -739,6 +740,7 @@ class Setup_farmer_farmer extends Root_Controller
         $data['name']= 1;
         $data['amount_credit_limit']= 1;
         $data['amount_credit_balance']= 1;
+        $data['amount_credit_due']= 1;
         $data['date_created_time']= 1;
         $data['farmer_type_name']= 1;
         $data['status_card_require']= 1;
