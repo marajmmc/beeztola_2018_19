@@ -88,6 +88,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'date_cancel', type: 'string'},
                 { name: 'outlet_name', type: 'string'},
                 { name: 'customer_name', type: 'string'},
+                { name: 'sales_payment_method', type: 'string'},
                 { name: 'amount_actual', type: 'string'},
                 { name: 'status_approve', type: 'string'}
             ],
@@ -120,6 +121,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         { text: '<?php echo $CI->lang->line('LABEL_DATE_CANCEL'); ?>', dataField: 'date_cancel',width:'100',hidden: <?php echo $system_preference_items['date_cancel']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_OUTLET_NAME'); ?>', dataField: 'outlet_name',width:'200',filtertype: 'list', hidden: <?php echo $system_preference_items['outlet_name']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_CUSTOMER_NAME'); ?>', dataField: 'customer_name',width:'200', hidden: <?php echo $system_preference_items['customer_name']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_SALES_PAYMENT_METHOD'); ?>', dataField: 'sales_payment_method',filtertype: 'list',width:'80',cellsAlign:'right',hidden: <?php echo $system_preference_items['sales_payment_method']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_ACTUAL'); ?>', dataField: 'amount_actual',width:'100',cellsAlign:'right',hidden: <?php echo $system_preference_items['amount_actual']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_STATUS_APPROVE'); ?>',dataField: 'status_approve',width:'130',filterType:'list',hidden: <?php echo $system_preference_items['status_approve']?0:1;?>}
                     ]

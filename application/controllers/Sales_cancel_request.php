@@ -111,7 +111,7 @@ class Sales_cancel_request extends Root_Controller
         $this->db->select('cancel.*');
 
         $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=cancel.sale_id','INNER');
-        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual');
+        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual,sale.sales_payment_method');
         $this->db->select('cus.name outlet_name');
         $this->db->select('f.name customer_name');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
@@ -467,6 +467,7 @@ class Sales_cancel_request extends Root_Controller
         $data['date_cancel']= 1;
         $data['outlet_name']= 1;
         $data['customer_name']= 1;
+        $data['sales_payment_method']= 1;
         $data['amount_actual']= 1;
         $data['status_approve']= 1;
         if($result)

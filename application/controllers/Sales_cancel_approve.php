@@ -105,7 +105,7 @@ class Sales_cancel_approve extends Root_Controller
         $this->db->select('cancel.*');
 
         $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=cancel.sale_id','INNER');
-        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual');
+        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual,sale.sales_payment_method');
         $this->db->select('cus.name outlet_name');
         $this->db->select('f.name customer_name');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
@@ -165,7 +165,7 @@ class Sales_cancel_approve extends Root_Controller
         $this->db->select('cancel.*');
 
         $this->db->join($this->config->item('table_pos_sale').' sale','sale.id=cancel.sale_id','INNER');
-        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual');
+        $this->db->select('sale.date_sale,sale.amount_payable_actual amount_actual,sale.sales_payment_method');
         $this->db->select('cus.name outlet_name');
         $this->db->select('f.name customer_name');
         $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale.outlet_id AND cus.revision=1','INNER');
@@ -323,7 +323,7 @@ class Sales_cancel_approve extends Root_Controller
         $sale_info=Query_helper::get_info($this->config->item('table_pos_sale'),'*',array('id ='.$sale_id),1);
         if(!$sale_info)
         {
-            System_helper::invalid_try('save',$item['id'],'Trying to access Invalid Sale id');
+            System_helper::invalid_try(__FUNCTION__,$cancel_id,'Invalid Sale id in cancel id');
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
@@ -337,9 +337,17 @@ class Sales_cancel_approve extends Root_Controller
         }
         if(!in_array($sale_info['outlet_id'],$this->user_outlet_ids))
         {
-            System_helper::invalid_try('save',$cancel_id,'Trying to access other Outlets data');
+            System_helper::invalid_try(__FUNCTION__,$cancel_id,'Trying to access other Outlets data');
             $ajax['status']=false;
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+            die();
+        }
+        $farmer_info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),'*',array('id ='.$sale_info['farmer_id']),1);
+        if(!$farmer_info)
+        {
+            $ajax['status']=false;
+            $ajax['system_message']="Invalid Customer";
             $this->json_return($ajax);
             die();
         }
@@ -350,6 +358,7 @@ class Sales_cancel_approve extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
+        $this->load->helper('farmer_credit');
         $this->db->trans_start();  //DB Transaction Handle START
         {
             $data=array();
@@ -379,6 +388,29 @@ class Sales_cancel_approve extends Root_Controller
                     $data_stock['user_updated'] = $user->user_id;
                     Query_helper::update($this->config->item('table_pos_stock_summary_variety'),$data_stock,array('id='.$stocks[$data_details['variety_id']][$data_details['pack_size_id']]['id']));
 
+                }
+                //update farmer credit if credit sale
+                if($sale_info['sales_payment_method']=='Credit')
+                {
+                    $data_history=array();
+                    $data_history['farmer_id']=$farmer_info['id'];
+                    $data_history['sale_id']=$sale_id;
+                    //$data_history['payment_id']=0
+                    $data_history['credit_limit_old']=$farmer_info['amount_credit_limit'];
+                    $data_history['credit_limit_new']=$farmer_info['amount_credit_limit'];
+                    $data_history['balance_old']=$farmer_info['amount_credit_balance'];
+                    $data_history['balance_new']=$farmer_info['amount_credit_balance']+$sale_info['amount_payable_actual'];
+                    $data_history['amount_adjust']=$sale_info['amount_payable_actual'];
+                    $data_history['remarks_reason']='Sale Cancel';
+                    //$data_history['reference_no']
+                    //$data_history['remarks'];
+
+                    $data_credit=array();
+                    $data_credit['date_updated'] = $time;
+                    $data_credit['user_updated'] = $user->user_id;
+                    $data_credit['amount_credit_balance']=$data_history['balance_new'];
+                    Query_helper::update($this->config->item('table_pos_setup_farmer_farmer'),$data_credit, array('id='.$farmer_info['id']), false);
+                    Farmer_Credit_helper::add_credit_history($data_history);
                 }
             }
         }
@@ -539,6 +571,7 @@ class Sales_cancel_approve extends Root_Controller
         $data['date_cancel']= 1;
         $data['outlet_name']= 1;
         $data['customer_name']= 1;
+        $data['sales_payment_method']= 1;
         $data['amount_actual']= 1;
         if($result)
         {
@@ -588,6 +621,7 @@ class Sales_cancel_approve extends Root_Controller
         $data['date_cancel']= 1;
         $data['outlet_name']= 1;
         $data['customer_name']= 1;
+        $data['sales_payment_method']= 1;
         $data['amount_actual']= 1;
         $data['status_approve']= 1;
         if($result)
