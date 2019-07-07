@@ -127,6 +127,7 @@ class Farmer_credit_payment extends Root_Controller
         else if($method=='list_payment')
         {
             $data['id']= 1;
+            $data['outlet_name']= 1;
             $data['date_payment']= 1;
             $data['amount']= 1;
             $data['reference_no']= 1;
@@ -274,9 +275,12 @@ class Farmer_credit_payment extends Root_Controller
     private function system_get_items_payment($item_id)
     {
         $this->db->from($this->config->item('table_pos_farmer_credit_payment').' payment');
+        $this->db->select('payment.*');
         $this->db->where('payment.farmer_id',$item_id);
         $this->db->where('payment.status !=',$this->config->item('system_status_delete'));
         $this->db->order_by('payment.id','DESC');
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = payment.outlet_id AND customer_info.revision =1','LEFT');
+        $this->db->select('customer_info.name outlet_name');
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
@@ -310,7 +314,22 @@ class Farmer_credit_payment extends Root_Controller
             $data['item']['reference_no']='';
             $data['item']['remarks']='';
 
+            
+            $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = farmer_outlet.outlet_id','INNER');
+            $this->db->select('customer_info.customer_id outlet_id,customer_info.name outlet_name');
+            $this->db->where('farmer_outlet.revision',1);
+            $this->db->where('farmer_outlet.farmer_id',$farmer_id);
+            $this->db->where('customer_info.revision',1);
+            $this->db->order_by('customer_info.ordering ASC');
+            $data['farmer_outlets']=$this->db->get()->result_array();
 
+            if(!$data['farmer_outlets'])
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Customer not assigned to any outlet.';
+                $this->json_return($ajax);
+            }
 
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
@@ -361,6 +380,13 @@ class Farmer_credit_payment extends Root_Controller
             {
                 $data['item']['remarks']=$data['item']['remarks_update'];
             }
+            $this->db->from($this->config->item('table_login_csetup_cus_info').' customer_info');
+            $this->db->select('customer_info.customer_id outlet_id,customer_info.name outlet_name');
+            $this->db->where('customer_info.customer_id',$data['item']['outlet_id']);
+            $this->db->where('customer_info.revision',1);
+            $this->db->order_by('customer_info.ordering ASC');
+            $data['farmer_outlets']=$this->db->get()->result_array();
+
             $data['payment_way']=Query_helper::get_info($this->config->item('table_login_setup_payment_way'),array('id value, name text'),array('status ="'.$this->config->item('system_status_active').'"'));
 
             $farmer_info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('*'),array('id ='.$farmer_id,'status!="'.$this->config->item('system_status_delete').'"'),1);
@@ -393,6 +419,7 @@ class Farmer_credit_payment extends Root_Controller
 
         $id = $this->input->post("id");
         $farmer_id = $this->input->post("farmer_id");
+        $outlet_id = $this->input->post("outlet_id");
         $user = User_helper::get_user();
         $time=time();
         $item=$this->input->post('item');
@@ -432,6 +459,14 @@ class Farmer_credit_payment extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
+        }
+        //validate input outlet id
+        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),array('*'),array('outlet_id ='.$outlet_id,'farmer_id ='.$farmer_id,'revision =1'),1);
+        if(!$result)
+        {
+            $ajax['status']=false;
+            $ajax['system_message']='Farmer assigned outlet changed.Please go back and try new.';
+            $this->json_return($ajax);
         }
         if(!$this->check_validation_payment())
         {
@@ -484,6 +519,7 @@ class Farmer_credit_payment extends Root_Controller
         else
         {
             $data=array();
+            $data['outlet_id'] = $outlet_id;
             $data['farmer_id'] = $farmer_id;
             if((isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
             {
@@ -845,6 +881,9 @@ class Farmer_credit_payment extends Root_Controller
         $this->db->join($this->config->item('table_login_setup_payment_way') . ' payment_way', 'payment_way.id = credit_payment.payment_way_id', 'INNER');
         $this->db->select('payment_way.name payment_way');
         $this->db->where('credit_payment.id', $payment_id);
+
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' customer_info','customer_info.customer_id = credit_payment.outlet_id AND customer_info.revision =1','LEFT');
+        $this->db->select('customer_info.name outlet_name');
         $result = $this->db->get()->row_array();
         $user_ids = array(
             $result['user_created'] => $result['user_created'],
@@ -852,6 +891,10 @@ class Farmer_credit_payment extends Root_Controller
         );
         $user_info = System_helper::get_users_info($user_ids);
         $data = array();
+        $data['info_basic'][] = array(
+            'label_1' => $this->lang->line('LABEL_OUTLET_NAME'),
+            'value_1' => $result['outlet_name']
+        );
         $data['info_basic'][] = array(
             'label_1' => $this->lang->line('LABEL_DATE_PAYMENT'),
             'value_1' => System_helper::display_date($result['date_payment']),

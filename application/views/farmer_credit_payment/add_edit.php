@@ -50,6 +50,36 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <?php
+                if(sizeof($farmer_outlets)==1)
+                {
+                    ?>
+                    <input type="hidden" name="outlet_id" value="<?php echo $farmer_outlets[0]['outlet_id'] ?>" />
+                    <label class="control-label"><?php echo $farmer_outlets[0]['outlet_name'] ?></label>
+                <?php
+                }
+                else
+                {
+                    ?>
+                    <select id="outlet_id" class="form-control" name="outlet_id">
+                        <?php
+                        foreach($farmer_outlets as $row)
+                        {?>
+                            <option value="<?php echo $row['outlet_id']?>"><?php echo $row['outlet_name'];?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                <?php
+                }
+                ?>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_PAYMENT');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
