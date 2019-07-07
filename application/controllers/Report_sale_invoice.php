@@ -50,7 +50,7 @@ class Report_sale_invoice extends Root_Controller
         }
         elseif($action=="set_preference")
         {
-            $this->system_set_preference();
+            $this->system_set_preference('list');
         }
         elseif($action=="save_preference")
         {
@@ -60,6 +60,31 @@ class Report_sale_invoice extends Root_Controller
         {
             $this->system_search();
         }
+    }
+    private function get_preference_headers($method)
+    {
+        $data=array();
+        if($method=='list')
+        {
+            $data['id']= 1;
+            $data['sl_no']= 1;
+            $data['invoice_no']= 1;
+            $data['customer_name']= 1;
+            $data['date_sale']= 1;
+            $data['date_cancel']= 1;
+            $data['sales_payment_method']= 1;
+            $data['amount_total']= 1;
+            $data['amount_discount_variety']= 1;
+            $data['discount_slab_percentage']= 1;
+            $data['amount_discount_self']= 1;
+            $data['amount_payable']= 1;
+            $data['amount_payable_actual']= 1;
+            $data['amount_sale_cash']= 1;
+            $data['amount_sale_credit']= 1;
+            $data['amount_actual']= 1;
+            $data['button_details']= 1;
+        }
+        return $data;
     }
     private function system_search()
     {
@@ -85,6 +110,8 @@ class Report_sale_invoice extends Root_Controller
     }
     private function system_list()
     {
+        $user = User_helper::get_user();
+        $method='list';
         if(isset($this->permissions['action0'])&&($this->permissions['action0']==1))
         {
             $reports=$this->input->post('report');
@@ -103,7 +130,7 @@ class Report_sale_invoice extends Root_Controller
                 $this->json_return($ajax);
             }
             $data['options']=$reports;
-            $data['system_preference_items']= $this->get_preference();
+            $data['system_preference_items']= System_helper::get_preference($user->user_id, $this->controller_url, $method, $this->get_preference_headers($method));
             $data['title']="Outlet Payment Report";
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_report_container","html"=>$this->load->view($this->controller_url."/list",$data,true));
@@ -120,42 +147,6 @@ class Report_sale_invoice extends Root_Controller
             $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
             $this->json_return($ajax);
         }
-    }
-    private function get_preference()
-    {
-        $user = User_helper::get_user();
-        $result=Query_helper::get_info($this->config->item('table_system_user_preference'),'*',array('user_id ='.$user->user_id,'controller ="' .$this->controller_url.'"','method ="search"'),1);
-        $data['sl_no']= 1;
-        $data['invoice_no']= 1;
-        $data['customer_name']= 1;
-        $data['date_sale']= 1;
-        $data['date_cancel']= 1;
-        $data['amount_total']= 1;
-        $data['amount_discount_variety']= 1;
-        $data['amount_discount_self']= 1;
-        $data['amount_payable']= 1;
-        $data['amount_payable_actual']= 1;
-        $data['amount_actual']= 1;
-        $data['button_details']= 1;
-        if($result)
-        {
-            if($result['preferences']!=null)
-            {
-                $preferences=json_decode($result['preferences'],true);
-                foreach($data as $key=>$value)
-                {
-                    if(isset($preferences[$key]))
-                    {
-                        $data[$key]=$value;
-                    }
-                    else
-                    {
-                        $data[$key]=0;
-                    }
-                }
-            }
-        }
-        return $data;
     }
     private function system_get_items()
     {
@@ -176,19 +167,6 @@ class Report_sale_invoice extends Root_Controller
         $this->db->order_by('sale.date_sale','DESC');
 
         $items=$this->db->get()->result_array();
-        $grand_total=array();
-        $grand_total['sl_no']='';
-        $grand_total['invoice_no']='Grand Total';
-        $grand_total['customer_name']='';
-        $grand_total['date_sale']='';
-        $grand_total['date_cancel']='';
-        $grand_total['amount_total']=0;
-        $grand_total['amount_discount_variety']=0;
-        $grand_total['amount_discount_self']=0;
-        $grand_total['amount_payable']=0;
-        $grand_total['amount_payable_actual']=0;
-        $grand_total['amount_actual']=0;
-        $grand_total['status']='';
         $i=0;
         foreach($items as &$item)
         {
@@ -225,32 +203,18 @@ class Report_sale_invoice extends Root_Controller
             {
                 $item['date_cancel']='';
             }
-            $grand_total['amount_total']+=$item['amount_total'];
-            $grand_total['amount_discount_variety']+=$item['amount_discount_variety'];
-            $grand_total['amount_discount_self']+=$item['amount_discount_self'];
-            $grand_total['amount_payable']+=$item['amount_payable'];
-            $grand_total['amount_payable_actual']+=$item['amount_payable_actual'];
-            $grand_total['amount_actual']+=$item['amount_actual'];
-
-
-
-            $item['amount_total']=number_format($item['amount_total'],2);
-            $item['amount_discount_variety']=number_format($item['amount_discount_variety'],2);
-            $item['amount_discount_self']=number_format($item['amount_discount_self'],2);
-            $item['amount_payable']=number_format($item['amount_payable'],2);
-            $item['amount_payable_actual']=number_format($item['amount_payable_actual'],2);
-            $item['amount_actual']=number_format($item['amount_actual'],2);
-
+            if($item['sales_payment_method']=='Credit')
+            {
+                $item['amount_sale_cash']=0;
+                $item['amount_sale_credit']=$item['amount_actual'];
+            }
+            else if($item['sales_payment_method']=='Cash')
+            {
+                $item['amount_sale_cash']=$item['amount_actual'];
+                $item['amount_sale_credit']=0;
+            }
+            $item['discount_slab_percentage']=$item['discount_self_percentage'];
         }
-        $grand_total['sl_no']=$i;
-        $grand_total['amount_total']=number_format($grand_total['amount_total'],2);
-        $grand_total['amount_discount_variety']=number_format($grand_total['amount_discount_variety'],2);
-        $grand_total['amount_discount_self']=number_format($grand_total['amount_discount_self'],2);
-        $grand_total['amount_payable']=number_format($grand_total['amount_payable'],2);
-        $grand_total['amount_payable_actual']=number_format($grand_total['amount_payable_actual'],2);
-        $grand_total['amount_actual']=number_format($grand_total['amount_actual'],2);
-
-        $items[]=$grand_total;
 
         $this->json_return($items);
     }
@@ -343,15 +307,16 @@ class Report_sale_invoice extends Root_Controller
             $this->json_return($ajax);
         }
     }
-    private function system_set_preference()
+    private function system_set_preference($method)
     {
+        $user = User_helper::get_user();
         if(isset($this->permissions['action6']) && ($this->permissions['action6']==1))
         {
-            $data['system_preference_items']= $this->get_preference();
-            $data['preference_method_name']='search';
+            $data['system_preference_items']=System_helper::get_preference($user->user_id,$this->controller_url,$method,$this->get_preference_headers($method));
+            $data['preference_method_name']=$method;
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view("preference_add_edit",$data,true));
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference');
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/set_preference_'.$method);
             $this->json_return($ajax);
         }
         else

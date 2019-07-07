@@ -62,20 +62,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             dataType: "json",
             dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'sl_no', type: 'int' },
-                { name: 'invoice_no', type: 'string' },
-                { name: 'customer_name', type: 'string' },
-                { name: 'date_sale', type: 'string'},
-                { name: 'date_cancel', type: 'string'},
-                { name: 'amount_total', type: 'string'},
-                { name: 'amount_discount_variety', type: 'string'},
-                { name: 'amount_discount_self', type: 'string'},
-                { name: 'amount_payable', type: 'string'},
-                { name: 'amount_payable_actual', type: 'string'},
-                { name: 'amount_actual', type: 'string'},
-                { name: 'status', type: 'string'},
-                { name: 'button_details', type: 'string'}
+                <?php
+                foreach($system_preference_items as $key=>$item)
+                {
+                    if(($key=='id') ||($key=='sl_no') || (substr($key,0,6)=='amount') )
+                    {
+                        ?>
+                { name: '<?php echo $key ?>', type: 'number' },
+                <?php
+                    }
+                    else
+                    {
+                        ?>
+                        { name: '<?php echo $key ?>', type: 'string' },
+                        <?php
+                    }
+                }
+                ?>
             ],
             id: 'id',
             type: 'POST',
@@ -90,10 +93,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
             }
-            else if (record.invoice_no=="Grand Total")
-            {
-                element.css({ 'background-color': system_report_color_grand,'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
-            }
             else
             {
                 element.css({'margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
@@ -107,6 +106,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 else
                 {
                     element.html('');
+                }
+            }
+            if(column.substr(0,6)=='amount')
+            {
+                if(value==0)
+                {
+                    element.html('');
+                }
+                else
+                {
+                    element.html(get_string_amount(value));
                 }
             }
 
@@ -132,12 +142,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
 
         };
         var dataAdapter = new $.jqx.dataAdapter(source);
+        var aggregatesrenderer_amount=function (aggregates)
+        {
+            var text='';
+            if(!((aggregates['sum']=='0.00')||(aggregates['sum']=='')))
+            {
+                text=get_string_amount(aggregates['sum']);
+            }
+            return '<div style="position: relative; margin: 0px;padding: 5px;width: 100%;height: 100%; overflow: hidden;background-color:'+system_report_color_grand+';">' +text+'</div>';
+        };
         // create jqxgrid.
         $("#system_jqx_container").jqxGrid(
             {
                 width: '100%',
                 height:'350px',
                 source: dataAdapter,
+                filterable: true,
+                sortable: true,
+                showfilterrow: true,
                 columnsresize: true,
                 columnsreorder: true,
                 altrows: true,
@@ -148,17 +170,30 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 enablebrowserselection:true,
                 columns:
                     [
-                        { text: '<?php echo $CI->lang->line('LABEL_SL_NO'); ?>', dataField: 'sl_no',pinned:true,width:'50',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['sl_no']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_INVOICE_NO'); ?>', dataField: 'invoice_no',pinned:true,width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['invoice_no']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_CUSTOMER_NAME'); ?>', dataField: 'customer_name',pinned:true,width:'200',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['customer_name']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_DATE_SALE'); ?>', dataField: 'date_sale',pinned:true,width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['date_sale']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_DATE_CANCEL'); ?>', dataField: 'date_cancel',width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['date_cancel']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_TOTAL'); ?>', dataField: 'amount_total',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_total']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_DISCOUNT_VARIETY'); ?>', dataField: 'amount_discount_variety',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_discount_variety']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_DISCOUNT_SELF'); ?>', dataField: 'amount_discount_self',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_discount_self']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYABLE'); ?>', dataField: 'amount_payable',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_payable']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYABLE_ACTUAL'); ?>', dataField: 'amount_payable_actual',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_payable_actual']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
-                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_ACTUAL'); ?>', dataField: 'amount_actual',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_actual']?0:1;?>,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer},
+
+                        {
+                            text: '<?php echo $CI->lang->line('LABEL_SL_NO'); ?>',datafield: 'sl_no',pinned:true,width:'50',cellsalign: 'right',hidden: <?php echo $system_preference_items['sl_no']?0:1;?>,
+                            cellsrenderer: function(row, column, value, defaultHtml, columnSettings, record)
+                            {
+                                var element = $(defaultHtml);
+                                element.html(value);
+                                return element[0].outerHTML;
+                            }
+                        },
+                        { text: '<?php echo $CI->lang->line('LABEL_INVOICE_NO'); ?>', dataField: 'invoice_no',pinned:true,width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['invoice_no']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_CUSTOMER_NAME'); ?>', dataField: 'customer_name',pinned:true,width:'200',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['customer_name']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_DATE_SALE'); ?>', dataField: 'date_sale',pinned:true,width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['date_sale']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_DATE_CANCEL'); ?>', dataField: 'date_cancel',width:'100',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['date_cancel']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_SALES_PAYMENT_METHOD'); ?>', dataField: 'sales_payment_method',filtertype: 'list',width:'80',cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['sales_payment_method']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_TOTAL'); ?>', dataField: 'amount_total',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_total']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_DISCOUNT_VARIETY'); ?>', dataField: 'amount_discount_variety',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_discount_variety']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_SLAB_PERCENTAGE'); ?>', dataField: 'discount_slab_percentage',filtertype: 'list',width:'50',cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['discount_slab_percentage']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_DISCOUNT_SELF'); ?>', dataField: 'amount_discount_self',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_discount_self']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYABLE'); ?>', dataField: 'amount_payable',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_payable']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_PAYABLE_ACTUAL'); ?>', dataField: 'amount_payable_actual',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_payable_actual']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_ACTUAL'); ?>', dataField: 'amount_actual',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_actual']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_SALE_CASH'); ?>', dataField: 'amount_sale_cash',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_sale_cash']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
+                        { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_SALE_CREDIT'); ?>', dataField: 'amount_sale_credit',width:'100',cellsAlign:'right',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_sale_credit']?0:1;?>,aggregates: ['sum'],aggregatesrenderer:aggregatesrenderer_amount},
                         { text: '<?php echo $CI->lang->line('LABEL_BUTTON_DETAILS'); ?>', dataField: 'button_details',width: '120',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['button_details']?0:1;?>}
                     ]
             });

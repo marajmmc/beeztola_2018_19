@@ -28,8 +28,8 @@ $user = User_helper::get_user();
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE');?></label></td>
                 <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_sale']);?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT');?></label></td>
-                <td class=""><label class="control-label"><?php echo $item['discount_self_percentage'];?>%</label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_SALES_PAYMENT_METHOD');?></label></td>
+                <td class=""><label class="control-label"><?php echo $item['sales_payment_method'];?></label></td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Created Time</label></td>
@@ -152,7 +152,7 @@ $user = User_helper::get_user();
             </tr>
             <tr>
                 <td colspan="9">&nbsp;</td>
-                <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
+                <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?>(<?php echo $item['discount_self_percentage'];?>%)</label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_discount_self'],2); ?></label></td>
             </tr>
             <tr>
