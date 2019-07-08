@@ -359,6 +359,7 @@ $lang['LABEL_UNION_NAME'] = 'Union';
 
 //crop classification
 $lang['LABEL_CROP_NAME']='Crop';
+$lang['LABEL_CROP_TYPE']='Crop Type';
 $lang['LABEL_CROP_TYPE_NAME']='Crop Type';
 $lang['LABEL_VARIETY_NAME']='Variety';
 $lang['LABEL_PACK_SIZE'] = 'Pack Size(gm)';
@@ -488,3 +489,4 @@ $lang['LABEL_AMOUNT_CREDIT_BALANCE']='Available Credit';
 $lang['LABEL_AMOUNT_CREDIT_DUE']='Due';
 $lang['LABEL_AMOUNT_SALE_CASH']='Cash';
 $lang['LABEL_AMOUNT_SALE_CREDIT']='Credit';
+$lang['LABEL_PRICE']='Price';
