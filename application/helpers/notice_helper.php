@@ -199,8 +199,6 @@ class Notice_helper
         (
             'label_1' => $label_approve.' Status',
             'value_1' => $result['status_approve'],
-            'label_2' => 'Revision ('.$label_approve.')',
-            'value_2' => $result['revision_count_approved'],
         );
         if($result['status_approve']!=$CI->config->item('system_status_pending'))
         {
