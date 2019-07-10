@@ -490,3 +490,4 @@ $lang['LABEL_AMOUNT_CREDIT_DUE']='Due';
 $lang['LABEL_AMOUNT_SALE_CASH']='Cash';
 $lang['LABEL_AMOUNT_SALE_CREDIT']='Credit';
 $lang['LABEL_PRICE']='Price';
+$lang['LABEL_PRICE_NET']='Net Price';

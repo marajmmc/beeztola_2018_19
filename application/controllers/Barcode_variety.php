@@ -84,6 +84,7 @@ class Barcode_variety extends Root_Controller
         foreach($items as &$item)
         {
             $item['price']=number_format($item['price'],2);
+            $item['price_net']=number_format($item['price_net'],2);
             $item['barcode']=Barcode_helper::get_barcode_variety($outlet_id,$item['variety_id'],$item['pack_size_id']);
         }
         $this->json_return($items);
@@ -117,6 +118,7 @@ class Barcode_variety extends Root_Controller
         $data['crop_name']= 1;
         $data['crop_type_name']= 1;
         $data['price']= 1;
+        $data['price_net']= 1;
         $data['barcode']= 1;
         $data['remarks']= 1;
         if($result)
