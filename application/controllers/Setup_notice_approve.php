@@ -57,6 +57,14 @@ class Setup_notice_approve extends Root_Controller
         {
             $this->system_save_approve();
         }
+        elseif($action=="delete")
+        {
+            $this->system_delete($id);
+        }
+        elseif ($action == "save_delete")
+        {
+            $this->system_save_delete();
+        }
         elseif($action=="details")
         {
             $this->system_details($id);
@@ -387,6 +395,133 @@ class Setup_notice_approve extends Root_Controller
             $data['status_approve']=$item_head['status_approve'];
             $this->db->set('revision_count_approved', 'revision_count_approved+1', FALSE);
         }
+        Query_helper::update($this->config->item('table_pos_setup_notice_request'),$data,array('id='.$id));
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+
+        if ($this->db->trans_status() === TRUE)
+        {
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            $this->system_list();
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_delete($id)
+    {
+        if(isset($this->permissions['action3'])&&($this->permissions['action3']==1))
+        {
+            if($id>0)
+            {
+                $item_id=$id;
+            }
+            else
+            {
+                $item_id=$this->input->post('id');
+            }
+
+            $this->db->from($this->config->item('table_pos_setup_notice_request').' item');
+            $this->db->select('item.*');
+            $this->db->join($this->config->item('table_pos_setup_notice_types').' type','type.id=item.type_id','INNER');
+            $this->db->select('type.name notice_type');
+            $this->db->where('item.id',$item_id);
+            $this->db->where('item.status !=',$this->config->item('system_status_delete'));
+            $this->db->order_by('item.id','DESC');
+            $data['item']=$this->db->get()->row_array();
+            if(!$data['item'])
+            {
+                System_helper::invalid_try('Forward Non Exists',$item_id);
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Notice.';
+                $this->json_return($ajax);
+            }
+            if($data['item']['status']==$this->config->item('system_status_inactive'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Notice In-Active.';
+                $this->json_return($ajax);
+            }
+
+            $data['info_basic']=Notice_helper::get_basic_info($data['item']);
+            $data['files']=Query_helper::get_info($this->config->item('table_pos_setup_notice_file_videos'),'*',array('notice_id='.$item_id,'status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+
+            $data['user_group_ids']=explode(',',trim($data['item']['user_group_ids'],','));
+            $data['urls']=json_decode($data['item']['url_links'],true);
+
+            $data['notice_types']=Query_helper::get_info($this->config->item('table_pos_setup_notice_types'),'*',array('status ="'.$this->config->item('system_status_active').'"'));
+            $user=User_helper::get_user();
+            if($user->user_group==1)
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+            else
+            {
+                $data['user_groups']=Query_helper::get_info($this->config->item('table_system_user_group'),'*',array('id !=1','status ="'.$this->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+            }
+
+            $data['title']="Notice Delete :: ". $data['item']['id'];
+            $ajax['status']=true;
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/delete",$data,true));
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message;
+            }
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/delete/'.$item_id);
+            $this->json_return($ajax);
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+    }
+    private function system_save_delete()
+    {
+        $id = $this->input->post("id");
+        $user = User_helper::get_user();
+        $time=time();
+        $item_head=$this->input->post('item');
+        if($id>0)
+        {
+            if(!((isset($this->permissions['action3']) && ($this->permissions['action3']==1))))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+                $this->json_return($ajax);
+            }
+            //if($item_head['status']!=$this->config->item('system_status_active') || $item_head['status']!=$this->config->item('system_status_inactive') || $item_head['status']!=$this->config->item('system_status_delete'))
+            if($item_head['status']!=$this->config->item('system_status_delete'))
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Delete Status Field is required.';
+                $this->json_return($ajax);
+            }
+            if(!$item_head['reason_delete'])
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Delete Status Reason Field is required.';
+                $this->json_return($ajax);
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
+            $this->json_return($ajax);
+        }
+        $this->db->trans_start();  //DB Transaction Handle START
+
+        $data=array();
+
+        $data['date_updated']=$time;
+        $data['user_updated']=$user->user_id;
+        $data['reason_delete']=$item_head['reason_delete'];
+        $data['status']=$item_head['status'];
         Query_helper::update($this->config->item('table_pos_setup_notice_request'),$data,array('id='.$id));
 
         $this->db->trans_complete();   //DB Transaction Handle END

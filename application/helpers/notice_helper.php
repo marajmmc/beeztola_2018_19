@@ -100,10 +100,10 @@ class Notice_helper
         {
             $label_approve='Reject';
         }
-        else if($result['status_approve']==$CI->config->item('system_status_rollback'))
+        /*else if($result['status_approve']==$CI->config->item('system_status_rollback'))
         {
             $label_approve=$CI->config->item('system_status_approved');
-        }
+        }*/
         else
         {
             $label_approve=$CI->config->item('system_status_approved');
@@ -132,10 +132,89 @@ class Notice_helper
         }
         if($result['revision_count_rollback']>0)
         {
+            if($result['status_approve']==$CI->config->item('system_status_pending'))
+            {
+                $data[] = array
+                (
+                    'label_1' => 'Revision (Rollback)',
+                    'value_1' => $result['revision_count_rollback'],
+                    'label_2' => 'Rollback Reason',
+                    'value_2' => $result['remarks_approve']
+                );
+            }
+            else
+            {
+                $data[] = array
+                (
+                    'label_1' => 'Revision (Rollback)',
+                    'value_1' => $result['revision_count_rollback']
+                );
+            }
+
+        }
+        return $data;
+    }
+    public static function get_basic_info_view($result)
+    {
+        $CI = & get_instance();
+        //--------- System User Info ------------
+        $user_ids=array();
+        if($result['user_approved']>0)
+        {
+            $user_ids[$result['user_approved']]=$result['user_approved'];
+        }
+        $user_info = System_helper::get_users_info($user_ids);
+
+        //---------------- Basic Info ----------------
+        $data = array();
+        $data[] = array
+        (
+            'label_1' => $CI->lang->line('LABEL_TITLE'),
+            'value_1' => $result['title']
+        );
+        $data[] = array
+        (
+            'label_1' => $CI->lang->line('LABEL_NOTICE_ID'),
+            'value_1' => $result['id'],
+            'label_2' => $CI->lang->line('LABEL_DATE_PUBLISH'),
+            'value_2' => System_helper::display_date($result['date_publish'])
+        );
+        if($result['status_approve']==$CI->config->item('system_status_approved'))
+        {
+            $label_approve=$CI->config->item('system_status_approved');
+        }
+        else if($result['status_approve']==$CI->config->item('system_status_rejected'))
+        {
+            $label_approve='Reject';
+        }
+        /*else if($result['status_approve']==$CI->config->item('system_status_rollback'))
+        {
+            $label_approve=$CI->config->item('system_status_approved');
+        }*/
+        else
+        {
+            $label_approve=$CI->config->item('system_status_approved');
+        }
+        $data[] = array
+        (
+            'label_1' => $label_approve.' Status',
+            'value_1' => $result['status_approve'],
+            'label_2' => 'Revision ('.$label_approve.')',
+            'value_2' => $result['revision_count_approved'],
+        );
+        if($result['status_approve']!=$CI->config->item('system_status_pending'))
+        {
             $data[] = array
             (
-                'label_1' => 'Revision (Rollback)',
-                'value_1' => $result['revision_count_rollback']
+                'label_1' => $label_approve.' By',
+                'value_1' => $user_info[$result['user_approved']]['name'] . ' ( ' . $user_info[$result['user_approved']]['employee_id'] . ' )',
+                'label_2' => $label_approve.' Time',
+                'value_2' => System_helper::display_date_time($result['date_approved'])
+            );
+            $data[] = array
+            (
+                'label_1' => $label_approve.' Remarks',
+                'value_1' => $result['remarks_approve']
             );
         }
         return $data;
