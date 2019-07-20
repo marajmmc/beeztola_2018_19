@@ -141,4 +141,9 @@ class Barcode_helper
     {
         return 'TS'.str_pad($increment_id,6,0,STR_PAD_LEFT);
     }
+    /* Dealer Payemnt */
+    public static function get_barcode_dealer_payment($increment_id)
+    {
+        return 'DP'.str_pad($increment_id,6,0,STR_PAD_LEFT);
+    }
 }

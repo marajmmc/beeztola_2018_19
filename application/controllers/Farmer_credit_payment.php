@@ -503,8 +503,9 @@ class Farmer_credit_payment extends Root_Controller
 
         if($id>0)
         {
+            $payment_id=$id;
             $data=array();
-            $data['date_payment']= System_helper::get_time($item['date_payment']);
+            $data['date_payment']= System_helper::get_time($item['date_payment'].substr(System_helper::display_date_time($time),11));
             $data['payment_way_id']= $item['payment_way_id'];
             $data['amount']= $item['amount'];
             $this->db->set('revision_count', 'revision_count+1', FALSE);
@@ -523,7 +524,8 @@ class Farmer_credit_payment extends Root_Controller
             $data['farmer_id'] = $farmer_id;
             if((isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
             {
-                $data['date_payment']= System_helper::get_time($item['date_payment']);
+
+                $data['date_payment']= System_helper::get_time($item['date_payment'].substr(System_helper::display_date_time($time),11));
             }
             else
             {
@@ -551,7 +553,8 @@ class Farmer_credit_payment extends Root_Controller
         if ($this->db->trans_status() === TRUE)
         {
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
-            $this->system_list_payment($farmer_id);
+            //TODO send sms
+            $this->system_details($farmer_id,$payment_id);
         }
         else
         {
@@ -748,6 +751,13 @@ class Farmer_credit_payment extends Root_Controller
                 $ajax['system_message'] = 'Payment already deleted.';
                 $this->json_return($ajax);
             }
+            $result=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('name_short outlet_short_name'),array('customer_id ='.$data['item']['outlet_id'],'revision =1'),1);
+            $data['item']['outlet_short_name']=$result['outlet_short_name'];
+
+            $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('name','mobile_no','amount_credit_balance'),array('id ='.$farmer_id),1);
+            $data['item']['farmer_name']=$result['name'];
+            $data['item']['mobile_no']=$result['mobile_no'];
+            $data['item']['amount_credit_balance']=$result['amount_credit_balance'];
             $data['info_payment']=$this->get_payment_info($item_id);
             $data['payment_histories']=array();
             if($data['item']['revision_count']>1)

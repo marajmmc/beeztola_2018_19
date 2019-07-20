@@ -6,11 +6,27 @@ $action_buttons[] = array(
     'label' => $CI->lang->line("ACTION_BACK"),
     'href'=>site_url($CI->controller_url.'/index/list_payment/'.$item['farmer_id'])
 );
-
+$action_buttons[]=array(
+    'label'=>$CI->lang->line("ACTION_REFRESH"),
+    'href'=>site_url($CI->controller_url.'/index/details/'.$item['farmer_id'].'/'.$item['id'])
+);
 $CI->load->view("action_buttons", array('action_buttons' => $action_buttons));
 
 ?>
-<div class="row widget" style="margin-top:0">
+<div style="width: 320px;font-size: 10px;text-align: center; font-weight: bold;line-height: 10px;margin-left:-40px;padding-bottom: 15px; background-color: #F7F7F7;">
+    <div style="font-size:14px;line-height: 16px;">Malik Seeds</div>
+    <div style="font-size:12px;line-height: 14px;"><?php echo $item['outlet_short_name'];?></div>
+    <img src="<?php echo site_url('barcode/index/dealer_payment/'.$item['id']);  ?>">
+    <div style="margin:5px 0;padding: 5px;border-bottom: 2px solid #000000;border-top: 2px solid #000000;text-align: left;">
+        <div><?php echo $CI->lang->line('LABEL_DATE');?> :<?php echo System_helper::display_date_time($item['date_payment']);?></div>
+        <div>Payment No :<?php echo Barcode_helper::get_barcode_dealer_payment($item['id']);?></div>
+        <div><?php echo $CI->lang->line('LABEL_CUSTOMER_NAME');?> :<?php echo $item['farmer_name'];?></div>
+        <div><?php echo $CI->lang->line('LABEL_MOBILE_NO');?> :<?php echo $item['mobile_no'];?></div>
+        <div><?php echo $CI->lang->line('LABEL_AMOUNT');?> :<?php echo System_helper::get_string_amount($item['amount']);?></div>
+        <div>New Credit Balance :<?php echo System_helper::get_string_amount($item['amount_credit_balance']);?></div>
+    </div>
+</div>
+<div class="row widget hidden-print">
     <div class="widget-header">
         <div class="title">
             <?php echo $title; ?>
