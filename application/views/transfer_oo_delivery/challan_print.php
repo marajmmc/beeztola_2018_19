@@ -86,10 +86,30 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-12">
                     <div class="row show-grid">
                         <div class="col-xs-3">
-                            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>:</label>
+                            <label class="control-label pull-right">From <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </label>
                         </div>
                         <div class="col-xs-9">
-                            <?php echo $item['outlet_name']; ?>
+                            <?php echo $item['outlet_source_name']; ?><br/>
+                            <small><?php echo $item['outlet_source_phone']; ?></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="row show-grid">
+                        <div class="col-xs-3">
+                            <label class="control-label pull-right">To <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </label>
+                        </div>
+                        <div class="col-xs-9">
+                            <?php echo $item['outlet_name_destination']; ?><br/>
+                            <small>
+                                <?php
+                                if($item['place_destination'])
+                                {
+                                    echo $item['place_destination'].'<br />';
+                                }
+                                ?>
+                                <?php echo $item['outlet_phone_destination']; ?>
+                            </small>
                         </div>
                     </div>
                 </div>

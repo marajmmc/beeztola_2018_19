@@ -726,20 +726,29 @@ class Transfer_oo_delivery extends Root_Controller
             $this->db->from($this->config->item('table_sms_transfer_oo').' transfer_oo');
             $this->db->select('transfer_oo.*');
 
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' source_outlet_info','source_outlet_info.customer_id=transfer_oo.outlet_id_source AND source_outlet_info.revision=1 AND source_outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-            $this->db->select('source_outlet_info.customer_id outlet_id_source, source_outlet_info.name outlet_name_source, source_outlet_info.customer_code outlet_code_source');
+            $this->db->select(
+                '
+                outlet_info_source.name outlet_source_name,
+                outlet_info_source.phone outlet_source_phone
+                ');
+            /*outlet_info_source.customer_id outlet_id,
+                outlet_info_source.customer_code outlet_code,
+                outlet_info_source.address outlet_address,*/
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info_destination','outlet_info_destination.customer_id=transfer_oo.outlet_id_destination AND outlet_info_destination.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
+            $this->db->select(
+                '
+                outlet_info_destination.name outlet_name_destination,
+                outlet_info_destination.phone outlet_phone_destination
+                ');
 
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' destination_outlet_info','destination_outlet_info.customer_id=transfer_oo.outlet_id_destination AND destination_outlet_info.revision=1 AND destination_outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-            $this->db->select('source_outlet_info.customer_id outlet_id_destination, destination_outlet_info.name outlet_name_destination, destination_outlet_info.customer_code outlet_code_destination');
-
-            $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = source_outlet_info.district_id','INNER');
+            /*$this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = source_outlet_info.district_id','INNER');
             $this->db->select('districts.id district_id, districts.name district_name');
             $this->db->join($this->config->item('table_login_setup_location_territories').' territories','territories.id = districts.territory_id','INNER');
             $this->db->select('territories.id territory_id, territories.name territory_name');
             $this->db->join($this->config->item('table_login_setup_location_zones').' zones','zones.id = territories.zone_id','INNER');
             $this->db->select('zones.id zone_id, zones.name zone_name');
             $this->db->join($this->config->item('table_login_setup_location_divisions').' divisions','divisions.id = zones.division_id','INNER');
-            $this->db->select('divisions.id division_id, divisions.name division_name');
+            $this->db->select('divisions.id division_id, divisions.name division_name');*/
             $this->db->join($this->config->item('table_sms_transfer_oo_courier_details').' wo_courier_details','wo_courier_details.transfer_oo_id=transfer_oo.id','LEFT');
             $this->db->select('
                                 wo_courier_details.date_delivery courier_date_delivery,
@@ -761,6 +770,8 @@ class Transfer_oo_delivery extends Root_Controller
             $this->db->select('ui_updated_approve.name user_updated_approve_full_name');
             $this->db->where('transfer_oo.status !=',$this->config->item('system_status_delete'));
             $this->db->where_in('transfer_oo.outlet_id_source',$this->user_outlet_ids);
+            $this->db->where('outlet_info_source.revision',1);
+            $this->db->where('outlet_info_destination.revision',1);
             $this->db->where('transfer_oo.id',$item_id);
             $this->db->order_by('transfer_oo.id','DESC');
             $data['item']=$this->db->get()->row_array();
