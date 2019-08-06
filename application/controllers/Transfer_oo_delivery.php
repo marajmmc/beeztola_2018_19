@@ -726,6 +726,7 @@ class Transfer_oo_delivery extends Root_Controller
             $this->db->from($this->config->item('table_sms_transfer_oo').' transfer_oo');
             $this->db->select('transfer_oo.*');
 
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info_source','outlet_info_source.customer_id=transfer_oo.outlet_id_source AND outlet_info_source.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->select(
                 '
                 outlet_info_source.name outlet_source_name,
