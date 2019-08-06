@@ -76,10 +76,10 @@ $num_pages=ceil($total_records/$row_per_page);
                     </div>
                     <div class="row show-grid">
                         <div class="col-xs-6">
-                            <label class="control-label pull-right"><?php //echo $CI->lang->line('LABEL_OUTLET_NAME');?></label>
+                            <label class="control-label pull-right">Courier Name: </label>
                         </div>
                         <div class="col-xs-6">
-                            <?php //echo $item['outlet_name']; ?>
+                            <?php echo $item['courier_name']; ?>
                         </div>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ $num_pages=ceil($total_records/$row_per_page);
                             <label class="control-label pull-right">To <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </label>
                         </div>
                         <div class="col-xs-9">
-                            <?php echo $item['outlet_name_destination']; ?><br/>
+                            <?php echo $item['outlet_destination_name']; ?><br/>
                             <small>
                                 <?php
                                 if($item['place_destination'])
@@ -108,21 +108,21 @@ $num_pages=ceil($total_records/$row_per_page);
                                     echo $item['place_destination'].'<br />';
                                 }
                                 ?>
-                                <?php echo $item['outlet_phone_destination']; ?>
+                                <?php echo $item['outlet_destination_phone']; ?>
                             </small>
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12">
+                <!--<div class="col-xs-12">
                     <div class="row show-grid">
                         <div class="col-xs-3">
                             <label class="control-label pull-right">Courier:</label>
                         </div>
                         <div class="col-xs-9">
-                            <?php echo $item['courier_name']; ?>
+                            <?php /*echo $item['courier_name']; */?>
                         </div>
                     </div>
-                </div>
+                </div>-->
             </div>
             <table style="width:<?php echo $width;?>px;" class="system_table_report_container">
                 <thead>

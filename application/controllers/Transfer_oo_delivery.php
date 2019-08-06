@@ -738,8 +738,8 @@ class Transfer_oo_delivery extends Root_Controller
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info_destination','outlet_info_destination.customer_id=transfer_oo.outlet_id_destination AND outlet_info_destination.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
             $this->db->select(
                 '
-                outlet_info_destination.name outlet_name_destination,
-                outlet_info_destination.phone outlet_phone_destination
+                outlet_info_destination.name outlet_destination_name,
+                outlet_info_destination.phone outlet_destination_phone
                 ');
 
             /*$this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = source_outlet_info.district_id','INNER');
@@ -770,7 +770,6 @@ class Transfer_oo_delivery extends Root_Controller
             $this->db->join($this->config->item('table_login_setup_user_info').' ui_updated_approve','ui_updated_approve.user_id = transfer_oo.user_updated_approve','LEFT');
             $this->db->select('ui_updated_approve.name user_updated_approve_full_name');
             $this->db->where('transfer_oo.status !=',$this->config->item('system_status_delete'));
-            $this->db->where_in('transfer_oo.outlet_id_source',$this->user_outlet_ids);
             $this->db->where('outlet_info_source.revision',1);
             $this->db->where('outlet_info_destination.revision',1);
             $this->db->where('transfer_oo.id',$item_id);
@@ -822,7 +821,7 @@ class Transfer_oo_delivery extends Root_Controller
             }
             $data['stocks']='';//Stock_helper::get_variety_stock($variety_ids);
 
-            $data['title']=$data['item']['outlet_name_source']." to ".$data['item']['outlet_name_destination']." Transfer Delivery Challan Print View :: ". Barcode_helper::get_barcode_transfer_outlet_to_outlet($data['item']['id']);
+            $data['title']=$data['item']['outlet_source_name']." to ".$data['item']['outlet_destination_name']." Transfer Delivery Challan Print View :: ". Barcode_helper::get_barcode_transfer_outlet_to_outlet($data['item']['id']);
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/challan_print",$data,true));
             if($this->message)
