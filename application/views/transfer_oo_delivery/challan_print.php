@@ -50,7 +50,7 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-6">
                     <div class="row show-grid">
                         <div class="col-xs-6">
-                            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_ID');?>:</label>
+                            <label class="control-label pull-right"><?php //echo $CI->lang->line('LABEL_ID');?>Challan No:</label>
                         </div>
                         <div class="col-xs-6">
                             <?php echo Barcode_helper::get_barcode_transfer_outlet_to_outlet($item['id']);?>
@@ -68,7 +68,7 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-6">
                     <div class="row show-grid">
                         <div class="col-xs-6">
-                            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CHALLAN');?>:</label>
+                            <label class="control-label pull-right"><?php //echo $CI->lang->line('LABEL_DATE_CHALLAN');?>Challan Date:</label>
                         </div>
                         <div class="col-xs-6">
                             <?php echo System_helper::display_date($item['date_challan']); ?>
@@ -86,7 +86,7 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-12">
                     <div class="row show-grid">
                         <div class="col-xs-3">
-                            <label class="control-label pull-right">From <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </label>
+                            <label class="control-label pull-right"><small>From <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </small></label>
                         </div>
                         <div class="col-xs-9">
                             <?php echo $item['outlet_source_name']; ?><br/>
@@ -97,7 +97,7 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-12">
                     <div class="row show-grid">
                         <div class="col-xs-3">
-                            <label class="control-label pull-right">To <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </label>
+                            <label class="control-label pull-right"><small>To <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </small></label>
                         </div>
                         <div class="col-xs-9">
                             <?php echo $item['outlet_destination_name']; ?><br/>
