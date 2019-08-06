@@ -50,7 +50,7 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-6">
                     <div class="row show-grid">
                         <div class="col-xs-6">
-                            <label class="control-label pull-right">Challan No:</label>
+                            <label class="control-label pull-right"><?php //echo $CI->lang->line('LABEL_ID');?>Challan No:</label>
                         </div>
                         <div class="col-xs-6">
                             <?php echo Barcode_helper::get_barcode_transfer_outlet_to_outlet($item['id']);?>
@@ -68,7 +68,7 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-6">
                     <div class="row show-grid">
                         <div class="col-xs-6">
-                            <label class="control-label pull-right">Challan Date:</label>
+                            <label class="control-label pull-right"><?php //echo $CI->lang->line('LABEL_DATE_CHALLAN');?>Challan Date:</label>
                         </div>
                         <div class="col-xs-6">
                             <?php echo System_helper::display_date($item['date_challan']); ?>
@@ -86,17 +86,30 @@ $num_pages=ceil($total_records/$row_per_page);
                 <div class="col-xs-12">
                     <div class="row show-grid">
                         <div class="col-xs-3">
-                            <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?> Name: </label>
+                            <label class="control-label pull-right"><small>From <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </small></label>
                         </div>
                         <div class="col-xs-9">
-                            <?php echo $item['outlet_name_source']; ?><br/>
-                            <?php
-                            if($item['place_destination'])
-                            {
-                                echo $item['place_destination'].'<br />';
-                            }
-                            ?>
-                            <?php echo $item['outlet_phone_source']; ?>
+                            <?php echo $item['outlet_source_name']; ?><br/>
+                            <small><?php echo $item['outlet_source_phone']; ?></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="row show-grid">
+                        <div class="col-xs-3">
+                            <label class="control-label pull-right"><small>To <?php echo $CI->lang->line('LABEL_OUTLET_NAME');?>: </small></label>
+                        </div>
+                        <div class="col-xs-9">
+                            <?php echo $item['outlet_destination_name']; ?><br/>
+                            <small>
+                                <?php
+                                if($item['place_destination'])
+                                {
+                                    echo $item['place_destination'].'<br />';
+                                }
+                                ?>
+                                <?php echo $item['outlet_destination_phone']; ?>
+                            </small>
                         </div>
                     </div>
                 </div>
