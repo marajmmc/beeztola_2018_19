@@ -149,6 +149,7 @@ class Report_stock_variety_summary extends Root_Controller
         $this->db->order_by('v.id','ASC');
         $this->db->order_by('pack.id');
         $this->db->where('stock_summary_variety.outlet_id',$outlet_id);
+        $this->db->where('v.status',$this->config->item('system_status_active'));
         if($variety_id>0 && is_numeric($variety_id))
         {
             $this->db->where('stock_summary_variety.variety_id',$variety_id);
