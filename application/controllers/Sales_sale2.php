@@ -11,7 +11,7 @@ class Sales_sale2 extends Root_Controller
     {
         parent::__construct();
         $this->message="";
-        $this->permissions=User_helper::get_permission('Sales_sale');
+        $this->permissions=User_helper::get_permission(get_class());
         $this->controller_url=strtolower(get_class());
         $this->user_outlet_ids=array();
         $this->user_outlets=User_helper::get_assigned_outlets();
