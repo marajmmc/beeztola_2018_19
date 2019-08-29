@@ -47,7 +47,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right">Credit Limit</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <label class="control-label"><?php echo $item['amount_credit_limit'];?></label>
+                <label class="control-label"><?php echo System_helper::get_string_amount($item['amount_credit_limit']);?></label>
             </div>
         </div>
         <div class="row show-grid">
@@ -55,7 +55,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right">Credit Balance</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <label class="control-label"><?php echo $item['amount_credit_balance'];?></label>
+                <label class="control-label"><?php echo System_helper::get_string_amount($item['amount_credit_balance']);?></label>
             </div>
         </div>
         <div class="row show-grid">

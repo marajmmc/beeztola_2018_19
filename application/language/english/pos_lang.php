@@ -350,8 +350,8 @@ $lang['LABEL_PERCENTAGE'] = 'Percentage';
 
 //location setup
 //Create zone
-$lang['LABEL_DIVISION_NAME'] = 'Division';
-$lang['LABEL_ZONE_NAME'] = 'Zone';
+$lang['LABEL_DIVISION_NAME'] = 'Region';
+$lang['LABEL_ZONE_NAME'] = 'Area';
 $lang['LABEL_TERRITORY_NAME'] = 'Territory';
 $lang['LABEL_DISTRICT_NAME'] = 'District';
 $lang['LABEL_UPAZILLA_NAME'] = 'Upazila';
