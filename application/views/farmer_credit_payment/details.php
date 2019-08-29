@@ -7,6 +7,11 @@ $action_buttons[] = array(
     'href'=>site_url($CI->controller_url.'/index/list_payment/'.$item['farmer_id'])
 );
 $action_buttons[]=array(
+    'type'=>'button',
+    'label'=>$CI->lang->line("ACTION_PRINT"),
+    'onClick'=>"window.print()"
+);
+$action_buttons[]=array(
     'label'=>$CI->lang->line("ACTION_REFRESH"),
     'href'=>site_url($CI->controller_url.'/index/details/'.$item['farmer_id'].'/'.$item['id'])
 );
