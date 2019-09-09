@@ -327,14 +327,55 @@ class Si_budget_target extends Root_Controller
     private function system_get_items()
     {
         $fiscal_years=Budget_helper::get_fiscal_years();
+
+        /*$this->db->from($this->config->item('table_pos_si_budget_target').' item');
+        $this->db->select('item.status_budget_forward, item.status_target_dealer_forward, item.fiscal_year_id, item.outlet_id');
+        $this->db->join($this->config->item('table_pos_si_budget_target_dealer').' dealer_budget','dealer_budget.fiscal_year_id=item.fiscal_year_id AND dealer_budget.outlet_id=item.outlet_id AND dealer_budget.quantity_budget>0','LEFT');
+        $this->db->select('COUNT(DISTINCT dealer_budget.dealer_id) number_of_dealer_budgeted', false);
+        $this->db->join($this->config->item('table_pos_si_budget_target_dealer').' dealer_target','dealer_target.fiscal_year_id=item.fiscal_year_id AND dealer_target.outlet_id=item.outlet_id AND dealer_target.quantity_target>0','LEFT');
+        $this->db->select('COUNT(DISTINCT dealer_target.dealer_id) number_of_dealer_targeted', false);
+        $this->db->join($this->config->item('table_login_csetup_cus_info').' cus_info','cus_info.customer_id = item.outlet_id AND cus_info.revision = 1','INNER');
+        $this->db->join($this->config->item('table_login_setup_location_districts').' district','district.id = cus_info.district_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_location_territories').' territory','territory.id = district.territory_id','INNER');
+        $this->db->join($this->config->item('table_bms_zi_budget_target').' zi_budget_target','zi_budget_target.fiscal_year_id=item.fiscal_year_id AND zi_budget_target.zone_id=territory.zone_id','LEFT');
+        $this->db->select('zi_budget_target.status_target_outlet_forward, zi_budget_target.status_target_outlet_next_year_forward');
+        $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
+        $this->db->group_by('item.fiscal_year_id, item.outlet_id');
+        $results=$this->db->get()->result_array();*/
+
+        $this->db->from($this->config->item('table_pos_si_budget_target_dealer').' dealer_budget');
+        $this->db->select('COUNT(DISTINCT dealer_budget.dealer_id) number_of_dealer_budgeted, fiscal_year_id, outlet_id', false);
+        $this->db->where('dealer_budget.quantity_budget > ',0);
+        $this->db->where_in('dealer_budget.outlet_id',$this->user_outlet_ids);
+        $this->db->group_by('dealer_budget.fiscal_year_id, dealer_budget.outlet_id');
+        $results=$this->db->get()->result_array();
+        $dealer_budget=array();
+        foreach($results as $result)
+        {
+            $dealer_budget[$result['fiscal_year_id']][$result['outlet_id']]=$result;
+        }
+
+        $this->db->from($this->config->item('table_pos_si_budget_target_dealer').' dealer_target');
+        $this->db->select('COUNT(DISTINCT dealer_target.dealer_id) number_of_dealer_targeted, fiscal_year_id, outlet_id', false);
+        $this->db->where('dealer_target.quantity_target > ',0);
+        $this->db->where_in('dealer_target.outlet_id',$this->user_outlet_ids);
+        $this->db->group_by('dealer_target.fiscal_year_id, dealer_target.outlet_id');
+        $results=$this->db->get()->result_array();
+        $dealer_target=array();
+        foreach($results as $result)
+        {
+            $dealer_target[$result['fiscal_year_id']][$result['outlet_id']]=$result;
+        }
+
+
         $this->db->from($this->config->item('table_pos_si_budget_target').' item');
         $this->db->select('item.status_budget_forward, item.status_target_dealer_forward, item.fiscal_year_id, item.outlet_id');
 
-        $this->db->join($this->config->item('table_pos_si_budget_target_dealer').' dealer_budget','dealer_budget.fiscal_year_id=item.fiscal_year_id AND dealer_budget.outlet_id=item.outlet_id AND dealer_budget.quantity_budget>0','LEFT');
+        /*$this->db->join($this->config->item('table_pos_si_budget_target_dealer').' dealer_budget','dealer_budget.fiscal_year_id=item.fiscal_year_id AND dealer_budget.outlet_id=item.outlet_id AND dealer_budget.quantity_budget>0','LEFT');
         $this->db->select('COUNT(DISTINCT dealer_budget.dealer_id) number_of_dealer_budgeted', false);
 
         $this->db->join($this->config->item('table_pos_si_budget_target_dealer').' dealer_target','dealer_target.fiscal_year_id=item.fiscal_year_id AND dealer_target.outlet_id=item.outlet_id AND dealer_target.quantity_target>0','LEFT');
-        $this->db->select('COUNT(DISTINCT dealer_target.dealer_id) number_of_dealer_targeted', false);
+        $this->db->select('COUNT(DISTINCT dealer_target.dealer_id) number_of_dealer_targeted', false);*/
 
         $this->db->join($this->config->item('table_login_csetup_cus_info').' cus_info','cus_info.customer_id = item.outlet_id AND cus_info.revision = 1','INNER');
         $this->db->join($this->config->item('table_login_setup_location_districts').' district','district.id = cus_info.district_id','INNER');
@@ -345,11 +386,23 @@ class Si_budget_target extends Root_Controller
         $this->db->where_in('item.outlet_id',$this->user_outlet_ids);
         $this->db->group_by('item.fiscal_year_id, item.outlet_id');
         $results=$this->db->get()->result_array();
+
         $budget_target=array();
 
         foreach($results as $result)
         {
             $budget_target[$result['fiscal_year_id']][$result['outlet_id']]=$result;
+            $budget_target[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_budgeted']=0;
+            if(isset($dealer_budget[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_budgeted']))
+            {
+                $budget_target[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_budgeted']=$dealer_budget[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_budgeted'];
+            }
+            $budget_target[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_targeted']=0;
+            if(isset($dealer_target[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_targeted']))
+            {
+                $budget_target[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_targeted']=$dealer_target[$result['fiscal_year_id']][$result['outlet_id']]['number_of_dealer_targeted'];
+            }
+
         }
 
         $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
