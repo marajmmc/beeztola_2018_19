@@ -86,6 +86,18 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td>&nbsp;</td>
             </tr>
             <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CASH_SALE_PAYMENT');?></label></td>
+                <td class=""><label class="control-label"><?php echo number_format($item['amount_payment']-$item['amount_credit_sale_payment'],2);?></label></td>
+                <td class=""><label class="control-label"><?php echo number_format($item_current['amount_payment']-$item_current['amount_credit_sale_payment'],2);?></label></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_SALE_PAYMENT');?></label></td>
+                <td class=""><label class="control-label"><?php echo number_format($item['amount_credit_sale_payment'],2);?></label></td>
+                <td class=""><label class="control-label"><?php echo number_format($item_current['amount_credit_sale_payment'],2);?></label></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?></label></td>
                 <td class=""><label class="control-label"><?php echo number_format($item['amount_bank_charge'],2);?></label></td>
                 <td class=""><label class="control-label"><?php echo number_format($item_current['amount_bank_charge'],2);?></label></td>

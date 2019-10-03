@@ -140,6 +140,24 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CASH_SALE_PAYMENT');?>:</label>
+            </div>
+            <div class="col-xs-4">
+                <label id="amount_cash_sale_payment"><?php echo number_format(($item['amount_payment']-$item['amount_credit_sale_payment']),2);?></label>
+            </div>
+            <label class="control-label"><?php echo number_format($item_current['amount_payment']-$item_current['amount_credit_sale_payment'],2);?></label>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_SALE_PAYMENT');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-xs-4">
+                <input type="text" id="amount_credit_sale_payment" name="item[amount_credit_sale_payment]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_credit_sale_payment'];?>"/>
+            </div>
+            <label class="control-label"><?php echo number_format($item_current['amount_credit_sale_payment'],2);?></label>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_BANK_CHARGE');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-xs-4">
@@ -263,6 +281,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             var amount_bank_charge=$('#amount_bank_charge').val();
             var amount_receive=number_format((amount_payment-amount_bank_charge),2);
             $('#amount_receive').html(amount_receive);
+            var amount_credit_sale_payment=$('#amount_credit_sale_payment').val();
+            var amount_cash_sale_payment=number_format((amount_payment-amount_credit_sale_payment),2);
+            $('#amount_cash_sale_payment').html(amount_cash_sale_payment);
+        });
+        $(document).off('input','#amount_credit_sale_payment');
+        $(document).on('input', '#amount_credit_sale_payment', function()
+        {
+            var amount_payment=$('#amount_payment').val();
+            var amount_credit_sale_payment=$('#amount_credit_sale_payment').val();
+            var amount_cash_sale_payment=number_format((amount_payment-amount_credit_sale_payment),2);
+            $('#amount_cash_sale_payment').html(amount_cash_sale_payment);
         });
         $(":file").filestyle({input: false,buttonText: "<?php echo $CI->lang->line('UPLOAD');?>", buttonName: "btn-danger"});
     });

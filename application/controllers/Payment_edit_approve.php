@@ -28,6 +28,12 @@ class Payment_edit_approve extends Root_Controller
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
         }
+        $this->language_labels();
+    }
+    private function language_labels()
+    {
+        $this->lang->language['LABEL_AMOUNT_CASH_SALE_PAYMENT']='Cash Sale Amount';
+        $this->lang->language['LABEL_AMOUNT_CREDIT_SALE_PAYMENT']='Credit Sale Amount';
     }
     public function index($action="list",$id=0)
     {
@@ -442,6 +448,7 @@ class Payment_edit_approve extends Root_Controller
             $data['payment_way_id']=$item_new['payment_way_id'];
             $data['reference_no']=$item_new['reference_no'];
             $data['amount_payment']=$item_new['amount_payment'];
+            $data['amount_credit_sale_payment']=$item_new['amount_credit_sale_payment'];
             $data['bank_id_source']=$item_new['bank_id_source'];
             $data['bank_branch_source']=$item_new['bank_branch_source'];
             $data['bank_account_id_destination']=$item_new['bank_account_id_destination'];
