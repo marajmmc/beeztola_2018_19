@@ -145,7 +145,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_PAYMENT');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[amount_payment]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_payment'];?>"/>
+                <input type="text" id="amount_payment" name="item[amount_payment]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_payment'];?>"/>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CASH_SALE_PAYMENT');?>:</label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <label id="amount_cash_sale_payment"><?php echo number_format(($item['amount_payment']-$item['amount_credit_sale_payment']),2);?></label>
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_SALE_PAYMENT');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <input type="text" id="amount_credit_sale_payment" name="item[amount_credit_sale_payment]" class="form-control text-right float_type_positive" value="<?php echo $item['amount_credit_sale_payment'];?>"/>
             </div>
         </div>
         <div class="row show-grid">
@@ -223,5 +239,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
         $(".datepicker").datepicker({dateFormat : display_date_format});
         $(":file").filestyle({input: false,buttonText: "<?php echo $CI->lang->line('UPLOAD');?>", buttonName: "btn-danger"});
+        $(document).off('input','#amount_payment');
+        $(document).on('input', '#amount_payment', function()
+        {
+            var amount_payment=$('#amount_payment').val();
+            var amount_credit_sale_payment=$('#amount_credit_sale_payment').val();
+            var amount_cash_sale_payment=number_format((amount_payment-amount_credit_sale_payment),2);
+            $('#amount_cash_sale_payment').html(amount_cash_sale_payment);
+        });
+        $(document).off('input','#amount_credit_sale_payment');
+        $(document).on('input', '#amount_credit_sale_payment', function()
+        {
+            var amount_payment=$('#amount_payment').val();
+            var amount_credit_sale_payment=$('#amount_credit_sale_payment').val();
+            var amount_cash_sale_payment=number_format((amount_payment-amount_credit_sale_payment),2);
+            $('#amount_cash_sale_payment').html(amount_cash_sale_payment);
+        });
     });
 </script>

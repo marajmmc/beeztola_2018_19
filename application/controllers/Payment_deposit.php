@@ -28,6 +28,12 @@ class Payment_deposit extends Root_Controller
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
         }
+        $this->language_labels();
+    }
+    private function language_labels()
+    {
+        $this->lang->language['LABEL_AMOUNT_CASH_SALE_PAYMENT']='Cash Sale Amount';
+        $this->lang->language['LABEL_AMOUNT_CREDIT_SALE_PAYMENT']='Credit Sale Amount';
     }
     public function index($action="list",$id=0)
     {
@@ -294,11 +300,12 @@ class Payment_deposit extends Root_Controller
                 'payment_way_id'=>'',
                 'reference_no'=>'',
                 'amount_payment'=>'',
+                'amount_credit_sale_payment'=>'',
                 'bank_id_source'=>'',
                 'bank_branch_source'=>'',
                 'bank_account_id_destination'=>'',
-                'image_location'=>'',
-                'image_name'=>'',
+                'image_location'=>'images/no_image.jpg',
+                'image_name'=>'no_image.jpg',
                 'remarks_deposit'=>'',
                 'revision_count_receive_reject'=>0
             );
@@ -524,6 +531,7 @@ class Payment_deposit extends Root_Controller
         $this->form_validation->set_rules('item[outlet_id]',$this->lang->line('LABEL_OUTLET'),'required');
         $this->form_validation->set_rules('item[payment_way_id]',$this->lang->line('LABEL_PAYMENT_WAY'),'required');
         $this->form_validation->set_rules('item[amount_payment]',$this->lang->line('LABEL_AMOUNT_PAYMENT'),'required');
+        $this->form_validation->set_rules('item[amount_credit_sale_payment]',$this->lang->line('LABEL_AMOUNT_CREDIT_SALE_PAYMENT'),'required');
         $this->form_validation->set_rules('item[bank_id_source]',$this->lang->line('LABEL_BANK_NAME'),'required');
         $this->form_validation->set_rules('item[bank_account_id_destination]',$this->lang->line('LABEL_BANK_ACCOUNT_NUMBER'),'required');
         if($this->form_validation->run() == FALSE)
@@ -535,6 +543,11 @@ class Payment_deposit extends Root_Controller
         if((System_helper::get_time($item['date_sale']))>(System_helper::get_time($item['date_payment'])))
         {
             $this->message='Sale Date Must be less than Payment Date';
+            return false;
+        }
+        if($item['amount_payment']<$item['amount_credit_sale_payment'])
+        {
+            $this->message='Credit Sale amount cannot be more than total payment';
             return false;
         }
         return true;

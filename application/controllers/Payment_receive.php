@@ -28,6 +28,12 @@ class Payment_receive extends Root_Controller
             $ajax['system_message']=$this->lang->line('MSG_OUTLET_NOT_ASSIGNED');
             $this->json_return($ajax);
         }
+        $this->language_labels();
+    }
+    private function language_labels()
+    {
+        $this->lang->language['LABEL_AMOUNT_CASH_SALE_PAYMENT']='Cash Sale Amount';
+        $this->lang->language['LABEL_AMOUNT_CREDIT_SALE_PAYMENT']='Credit Sale Amount';
     }
     public function index($action="list",$id=0)
     {

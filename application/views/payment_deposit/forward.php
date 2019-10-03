@@ -60,6 +60,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td colspan="2">&nbsp;</td>
             </tr>
             <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CASH_SALE_PAYMENT');?></label></td>
+                <td class="header_value"><label class="control-label"><?php echo number_format($item['amount_payment']-$item['amount_credit_sale_payment'],2);?></label></td>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_SALE_PAYMENT');?></label></td>
+                <td class="header_value"><label class="control-label"><?php echo number_format($item['amount_credit_sale_payment'],2);?></label></td>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE');?></label></td>
                 <td class=" header_value"><label class="control-label"><?php echo $item['bank_payment_source'];?></label></td>
                 <td colspan="2">&nbsp;</td>
