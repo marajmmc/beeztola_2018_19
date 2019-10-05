@@ -132,7 +132,7 @@ class Payment_receive extends Root_Controller
             $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
-            //$item['amount_payment']=number_format($item['amount_payment'],2);
+            $item['amount_cash_sale_payment']=$item['amount_payment']-$item['amount_credit_sale_payment'];
             $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
         }
         $this->json_return($items);
@@ -148,6 +148,8 @@ class Payment_receive extends Root_Controller
         $data['payment_way']= 1;
         $data['reference_no']= 1;
         $data['amount_payment']= 1;
+        $data['amount_cash_sale_payment']= 1;
+        $data['amount_credit_sale_payment']= 1;
         $data['bank_payment_source']= 1;
         $data['bank_branch_source']= 1;
         $data['bank_account_number_destination']= 1;
@@ -231,7 +233,10 @@ class Payment_receive extends Root_Controller
             $item['barcode']=Barcode_helper::get_barcode_payment($item['id']);
             $item['date_payment']=System_helper::display_date($item['date_payment']);
             $item['date_sale']=System_helper::display_date($item['date_sale']);
+            $item['amount_cash_sale_payment']=number_format($item['amount_payment']-$item['amount_credit_sale_payment'],2);
             $item['amount_payment']=number_format($item['amount_payment'],2);
+            $item['amount_credit_sale_payment']=number_format($item['amount_credit_sale_payment'],2);
+
             $item['bank_account_number_destination']=$item['account_number'].'('.$item['bank_destination'].' -'.$item['branch_name'].')';
         }
         $this->json_return($items);
@@ -247,6 +252,8 @@ class Payment_receive extends Root_Controller
         $data['payment_way']= 1;
         $data['reference_no']= 1;
         $data['amount_payment']= 1;
+        $data['amount_cash_sale_payment']= 1;
+        $data['amount_credit_sale_payment']= 1;
         $data['bank_payment_source']= 1;
         $data['bank_branch_source']= 1;
         $data['bank_account_number_destination']= 1;
