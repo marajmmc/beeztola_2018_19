@@ -110,9 +110,17 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         var cellsrenderer = function(row, column, value, defaultHtml, columnSettings, record)
         {
             var element = $(defaultHtml);
-            if ((record.status=='In-Active')&& (column!="outlet_name")&& (column!="date_sale")&& (column!="invoice_no"))
+            if ((record.status=='In-Active')&& (record.amount_actual<0)&& (column!="outlet_name")&& (column!="date_sale")&& (column!="invoice_no"))
+            {
+                element.css({ 'background-color': '#D100C6','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+            }
+            else if ((record.status=='In-Active')&& (column!="outlet_name")&& (column!="date_sale")&& (column!="invoice_no"))
             {
                 element.css({ 'background-color': '#FF0000','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
+            }
+            else if ((record.amount_actual<0)&& (column!="outlet_name")&& (column!="date_sale")&& (column!="invoice_no"))
+            {
+                element.css({ 'background-color': '#00E5DD','margin': '0px','width': '100%', 'height': '100%',padding:'5px','line-height':'25px'});
             }
             else
             {
