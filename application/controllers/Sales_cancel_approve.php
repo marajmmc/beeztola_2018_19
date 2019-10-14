@@ -351,7 +351,33 @@ class Sales_cancel_approve extends Root_Controller
             $this->json_return($ajax);
             die();
         }
-
+        $stocks=Stock_helper::get_variety_stock($sale_info['outlet_id']);
+        $item_head_details=Query_helper::get_info($this->config->item('table_pos_sale_details'),'*',array('sale_id ='.$sale_id));
+        if($item['status_approve']==$this->config->item('system_status_approved'))
+        {
+            foreach($item_head_details as $row)
+            {
+                if(($stocks[$row['variety_id']][$row['pack_size_id']]['current_stock']+$row['quantity'])<0)
+                {
+                    $ajax['status']=false;
+                    $message='Stock Will be negative('.$row['variety_id'].'-'.$row['pack_size_id'].')';
+                    $message.='<br>Current Stock('.$stocks[$row['variety_id']][$row['pack_size_id']]['current_stock'].')';
+                    $ajax['system_message']=$message;
+                    $this->json_return($ajax);
+                    die();
+                }
+            }
+            if($sale_info['sales_payment_method']=='Credit')
+            {
+                if($farmer_info['amount_credit_balance']+$sale_info['amount_payable_actual']<0)
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']="Customer Credit balance will exceed.<br>Please contact with admin";
+                    $this->json_return($ajax);
+                    die();
+                }
+            }
+        }
         if(!$this->check_validation())
         {
             $ajax['status']=false;
@@ -369,8 +395,6 @@ class Sales_cancel_approve extends Root_Controller
             Query_helper::update($this->config->item('table_pos_sale_cancel'),$data,array('id='.$cancel_id));
             if($item['status_approve']==$this->config->item('system_status_approved'))
             {
-                $stocks=Stock_helper::get_variety_stock($sale_info['outlet_id']);
-                $item_head_details=Query_helper::get_info($this->config->item('table_pos_sale_details'),'*',array('sale_id ='.$sale_id));
                 $item_head=array();
                 $item_head['date_cancel']=$cancel_request_info['date_cancel'];
                 $item_head['date_cancel_approved']=$time;
