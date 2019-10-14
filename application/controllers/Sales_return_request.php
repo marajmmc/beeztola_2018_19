@@ -60,10 +60,10 @@ class Sales_return_request extends Root_Controller
         {
             $this->system_save();
         }
-        /*elseif($action=="details")
+        elseif($action=="details")
         {
             $this->system_details($id);
-        }*/
+        }
 
         elseif($action=="set_preference")
         {
@@ -508,24 +508,24 @@ class Sales_return_request extends Root_Controller
         {
             if($id>0)
             {
-                $manual_sale_id=$id;
+                $return_id=$id;
             }
             else
             {
-                $manual_sale_id=$this->input->post('id');
+                $return_id=$this->input->post('id');
             }
 
-            $this->db->from($this->config->item('table_pos_sale_manual').' sale_manual');
-            $this->db->select('sale_manual.*');
-            $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale_manual.outlet_id AND cus.revision=1','INNER');
+            $this->db->from($this->config->item('table_pos_sale_return').' sale_return');
+            $this->db->select('sale_return.*');
+            $this->db->join($this->config->item('table_login_csetup_cus_info').' cus','cus.customer_id =sale_return.outlet_id AND cus.revision=1','INNER');
             $this->db->select('cus.name outlet_name');
-            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale_manual.farmer_id','INNER');
-            $this->db->select('f.name farmer_name,f.mobile_no');
-            $this->db->where('sale_manual.id',$manual_sale_id);
+            $this->db->join($this->config->item('table_pos_setup_farmer_farmer').' f','f.id = sale_return.farmer_id','INNER');
+            $this->db->select('f.name farmer_name,f.mobile_no,f.amount_credit_limit,f.amount_credit_balance');
+            $this->db->where('sale_return.id',$return_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
             {
-                System_helper::invalid_try('edit',$manual_sale_id,'Trying to access Invalid Manual Sale id');
+                System_helper::invalid_try(__FUNCTION__, $return_id,'Trying to access Invalid Return id');
                 $ajax['status']=false;
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
@@ -533,13 +533,13 @@ class Sales_return_request extends Root_Controller
             }
             if(!in_array($data['item']['outlet_id'],$this->user_outlet_ids))
             {
-                System_helper::invalid_try('edit',$manual_sale_id,'Trying to access other Outlets data');
+                System_helper::invalid_try(__FUNCTION__, $return_id,'Trying to access other Outlets data');
                 $ajax['status']=false;
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
                 die();
             }
-            $this->db->from($this->config->item('table_pos_sale_manual_details').' sd');
+            $this->db->from($this->config->item('table_pos_sale_return_details').' sd');
             $this->db->select('sd.*');
 
             $this->db->join($this->config->item('table_login_setup_classification_varieties').' v','v.id = sd.variety_id','INNER');
@@ -548,30 +548,31 @@ class Sales_return_request extends Root_Controller
             $this->db->select('type.name crop_type_name,type.id crop_type_id');
             $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
             $this->db->select('crop.name crop_name,crop.id crop_id');
-            $this->db->where('sd.manual_sale_id',$manual_sale_id);
+            $this->db->where('sd.return_id',$return_id);
             $data['items']=$this->db->get()->result_array();
 
             $user_ids=array();
 
-            $user_ids[$data['item']['user_manual_requested']]=$data['item']['user_manual_requested'];
-            if($data['item']['user_manual_approved']>0)
+            $user_ids[$data['item']['user_return_requested']]=$data['item']['user_return_requested'];
+            if($data['item']['user_return_approved']>0)
             {
-                $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
+                $user_ids[$data['item']['user_return_approved']]=$data['item']['user_return_approved'];
             }
             $data['users']=System_helper::get_users_info($user_ids);
+
             if($data['item']['outlet_id_commission']>0)
             {
                 $result=Query_helper::get_info($this->config->item('table_login_csetup_cus_info'),array('name outlet_name'),array('customer_id ='.$data['item']['outlet_id_commission']),1);
                 $data['item']['outlet_name_commission']=$result['outlet_name'];
             }
-            $data['title']='Details of Request Id('.$manual_sale_id.')';
+            $data['title']='Details of Return Request Id('.$return_id.')';
             $ajax['status']=true;
             $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/details",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
             }
-            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$manual_sale_id);
+            $ajax['system_page_url']=site_url($this->controller_url.'/index/details/'.$return_id);
             $this->json_return($ajax);
         }
         else

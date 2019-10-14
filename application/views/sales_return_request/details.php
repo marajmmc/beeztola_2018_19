@@ -26,44 +26,44 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td class=""><label class="control-label"><?php echo $item['farmer_name'];?></label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Id</label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Return Id</label></td>
                 <td class=""><label class="control-label"><?php echo ($item['id']);?></td>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_MOBILE_NO');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['mobile_no'];?></label></td>
             </tr>
             <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_SALE');?></label></td>
-                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_sale']);?></td>
+                <td class=""><label class="control-label"><?php echo $item['date_sale']>0?System_helper::display_date_time($item['date_sale']):'N/A';?></td>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['discount_self_percentage'];?>%</label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Approval Status</label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Return Approval Status</label></td>
                 <td class=""><label class="control-label"><?php echo $item['status_approve'];?></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Requested Time</label></td>
-                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_manual_requested']);?></td>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Requested By</label></td>
-                <td class=""><label class="control-label"><?php echo $users[$item['user_manual_requested']]['name'];?></label></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Return Requested Time</label></td>
+                <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_return_requested']);?></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Retrun Requested By</label></td>
+                <td class=""><label class="control-label"><?php echo $users[$item['user_return_requested']]['name'];?></label></td>
             </tr>
             <tr>
-                <td class="widget-header header_caption"><label class="control-label pull-right">Manual Sale Request Remarks</label></td>
-                <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_manual_requested']);?></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Return Request Remarks</label></td>
+                <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_return_requested']);?></td>
             </tr>
             <?php
             if($item['status_approve']!=$CI->config->item('system_status_pending'))
             {
                 ?>
                 <tr>
-                    <td class="widget-header header_caption"><label class="control-label pull-right">Sale Approved/Rejected Time</label></td>
-                    <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_manual_approved']);?></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Return Approved/Rejected Time</label></td>
+                    <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_return_approved']);?></td>
                     <td class="widget-header header_caption"><label class="control-label pull-right">Approved/Rejected By</label></td>
-                    <td class=""><label class="control-label"><?php echo $users[$item['user_manual_approved']]['name'];?></label></td>
+                    <td class=""><label class="control-label"><?php echo $users[$item['user_return_approved']]['name'];?></label></td>
                 </tr>
                 <tr>
                     <td class="widget-header header_caption"><label class="control-label pull-right">Approval/Reject Remarks</label></td>
-                    <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_manual_approved']);?></td>
+                    <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_return_approved']);?></td>
                 </tr>
             <?php
             }
@@ -159,16 +159,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td colspan="9">&nbsp;</td>
                 <td><label>Payable(rounded)</label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_payable_actual'],2); ?></label></td>
-            </tr>
-            <tr>
-                <td colspan="9">&nbsp;</td>
-                <td><label>Paid</label></td>
-                <td class="text-right"><label><?php echo number_format($item['amount_cash'],2); ?></label></td>
-            </tr>
-            <tr>
-                <td colspan="9">&nbsp;</td>
-                <td><label>Change</label></td>
-                <td class="text-right"><label><?php echo number_format($item['amount_cash']-$item['amount_payable_actual'],2); ?></label></td>
             </tr>
             </tfoot>
         </table>
