@@ -861,6 +861,10 @@ class Sales_sale2 extends Root_Controller
             {
                 $user_ids[$data['item']['user_manual_approved']]=$data['item']['user_manual_approved'];
             }
+            if($data['item']['user_return_approved']>0)
+            {
+                $user_ids[$data['item']['user_return_approved']]=$data['item']['user_return_approved'];
+            }
 
             $data['users']=System_helper::get_users_info($user_ids);
             $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($item_id).')';

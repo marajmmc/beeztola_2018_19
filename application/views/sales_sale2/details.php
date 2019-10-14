@@ -151,6 +151,12 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <table class="table table-bordered table-responsive system_table_details_view">
         <tbody>
             <tr>
+                <td class="widget-header header_caption"><label class="control-label pull-right">Invoice Type</label></td>
+                <td class=""><label class="control-label"><?php echo $item['invoice_type'];?></td>
+                <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_STATUS');?></label></td>
+                <td class=""><label class="control-label"><?php echo $item['status'];?></label></td>
+            </tr>
+            <tr>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_OUTLET_NAME');?></label></td>
                 <td class=""><label class="control-label"><?php echo $item['outlet_name'];?></td>
                 <td class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CUSTOMER_NAME');?></label></td>
@@ -198,6 +204,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <tr>
                     <td class="widget-header header_caption"><label class="control-label pull-right">Special Approval Remarks</label></td>
                     <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_manual_approved']);?></td>
+                </tr>
+            <?php
+            }
+            ?>
+            <?php
+            if($item['invoice_type']=='Return')
+            {
+                ?>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Return Approved Time</label></td>
+                    <td class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_return_approved']);?></td>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Return Approved By</label></td>
+                    <td class=""><label class="control-label"><?php echo $users[$item['user_return_approved']]['name'];?></label></td>
+                </tr>
+                <tr>
+                    <td class="widget-header header_caption"><label class="control-label pull-right">Return Approval Remarks</label></td>
+                    <td class="" colspan="3"><label class="control-label"><?php echo nl2br($item['remarks_return_approved']);?></td>
                 </tr>
             <?php
             }
