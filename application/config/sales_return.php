@@ -1,2 +1,2 @@
 <?php
-$config['system_purpose_pos_max_product_return_days']='pos_max_product_return_days';
+$config['system_purpose_pos_sale_return_starting_date']='pos_sale_return_starting_date';

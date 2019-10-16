@@ -192,7 +192,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     foreach($outlets as $outlet)
                     {
                         ?>
-                        <option value="<?php echo $outlet['outlet_id'];?>"><?php echo $outlet['outlet_name'];?></option>
+                        <option value="<?php echo $outlet['outlet_id'];?>" <?php if($outlet['outlet_id']==$item['outlet_id']){ echo "selected";}?>><?php echo $outlet['outlet_name'];?></option>
                     <?php
                     }
                     ?>

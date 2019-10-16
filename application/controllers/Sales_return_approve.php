@@ -266,8 +266,8 @@ class Sales_return_approve extends Root_Controller
             }
             $data['users']=System_helper::get_users_info($user_ids);
             //stock_farmer
-            $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_pos_max_product_return_days').'"','status ="'.$this->config->item('system_status_active').'"'),1);
-            $date_start=System_helper::get_time(System_helper::display_date($data['item']['date_return_requested']))-3600*24*$result['config_value'];
+            $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_pos_sale_return_starting_date').'"','status ="'.$this->config->item('system_status_active').'"'),1);
+            $date_start=System_helper::get_time($result['config_value']);
             $data['item']['date_start']=$date_start;
 
             //current stocks--purchase quantity
@@ -372,8 +372,8 @@ class Sales_return_approve extends Root_Controller
         $stocks=Stock_helper::get_variety_stock($return_info['outlet_id']);//outlet stock
 
         //calculate it from config
-        $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_pos_max_product_return_days').'"','status ="'.$this->config->item('system_status_active').'"'),1);
-        $date_start=System_helper::get_time(System_helper::display_date(time()))-3600*24*$result['config_value'];
+        $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_pos_sale_return_starting_date').'"','status ="'.$this->config->item('system_status_active').'"'),1);
+        $date_start=System_helper::get_time($result['config_value']);
 
 
         //current stocks--purchase quantity
@@ -404,6 +404,14 @@ class Sales_return_approve extends Root_Controller
 
             foreach($return_info_details as $row)
             {
+                if(!(isset($stocks_purchase[$row['variety_id']][$row['pack_size_id']])))
+                {
+                    $ajax['status']=false;
+                    $message='Invalid Product('.$row['variety_id'].'-'.$row['pack_size_id'].')';
+                    $ajax['system_message']=$message;
+                    $this->json_return($ajax);
+                    die();
+                }
                 if($row['quantity']>$stocks_purchase[$row['variety_id']][$row['pack_size_id']]['current_stock'])
                 {
                     $ajax['status']=false;
