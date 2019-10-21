@@ -699,7 +699,7 @@ class Transfer_ow_return_delivery extends Root_Controller
             $this->db->from($this->config->item('table_sms_transfer_ow').' transfer_ow');
             $this->db->select('transfer_ow.*');
             $this->db->join($this->config->item('table_login_csetup_cus_info').' outlet_info','outlet_info.customer_id=transfer_ow.outlet_id AND outlet_info.type="'.$this->config->item('system_customer_type_outlet_id').'"','INNER');
-            $this->db->select('outlet_info.customer_id outlet_id, outlet_info.name outlet_name, outlet_info.customer_code outlet_code');
+            $this->db->select('outlet_info.customer_id outlet_id, outlet_info.name outlet_name, outlet_info.phone outlet_phone, outlet_info.customer_code outlet_code');
             $this->db->join($this->config->item('table_login_setup_location_districts').' districts','districts.id = outlet_info.district_id','INNER');
             $this->db->select('districts.id district_id, districts.name district_name');
             $this->db->join($this->config->item('table_login_setup_location_territories').' territories','territories.id = districts.territory_id','INNER');
