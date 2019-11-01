@@ -162,7 +162,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'amount_credit_sale_payment', type: 'string'},
                 { name: 'bank_payment_source', type: 'string'},
                 { name: 'bank_branch_source', type: 'string'},
-                { name: 'bank_account_number_destination', type: 'string'}
+                { name: 'bank_account_number_destination', type: 'string'},
+                { name: 'remarks_deposit', type: 'string'}
             ],
             deleterow: function (rowid, commit)
             {
@@ -214,7 +215,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_CREDIT_SALE_PAYMENT'); ?>',dataField: 'amount_credit_sale_payment',width:'150',cellsAlign:'right',cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['amount_credit_sale_payment']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_BANK_PAYMENT_SOURCE'); ?>',dataField: 'bank_payment_source',filterType:'list',width:'150',hidden: <?php echo $system_preference_items['bank_payment_source']?0:1;?>},
                         { text: '<?php echo $CI->lang->line('LABEL_BANK_BRANCH_SOURCE'); ?>',dataField: 'bank_branch_source',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_branch_source']?0:1;?>},
-                        { text: '<?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'); ?>',dataField: 'bank_account_number_destination',filterType:'list',hidden: <?php echo $system_preference_items['bank_account_number_destination']?0:1;?>}
+                        { text: '<?php echo $CI->lang->line('LABEL_BANK_ACCOUNT_NUMBER_DESTINATION'); ?>',dataField: 'bank_account_number_destination',width:'150',filterType:'list',hidden: <?php echo $system_preference_items['bank_account_number_destination']?0:1;?>},
+                        { text: '<?php echo $CI->lang->line('LABEL_REMARKS_DEPOSIT'); ?>',dataField: 'remarks_deposit',filterType:'list',hidden: <?php echo $system_preference_items['remarks_deposit']?0:1;?>}
                     ]
             });
         $(document).off('input','#payment_amount_bank_charge');

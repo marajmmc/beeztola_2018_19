@@ -34,6 +34,7 @@ class Payment_receive extends Root_Controller
     {
         $this->lang->language['LABEL_AMOUNT_CASH_SALE_PAYMENT']='Cash Sale Amount';
         $this->lang->language['LABEL_AMOUNT_CREDIT_SALE_PAYMENT']='Credit Sale Amount';
+        $this->lang->language['LABEL_REMARKS_DEPOSIT']='Deposit Remarks';
     }
     public function index($action="list",$id=0)
     {
@@ -153,6 +154,7 @@ class Payment_receive extends Root_Controller
         $data['bank_payment_source']= 1;
         $data['bank_branch_source']= 1;
         $data['bank_account_number_destination']= 1;
+        $data['remarks_deposit']= 1;
         if($result)
         {
             if($result['preferences']!=null)
