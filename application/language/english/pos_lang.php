@@ -58,6 +58,7 @@ $lang['ACTION_PRINT'] = 'Print';
 $lang['ACTION_DETAILS_PRINT'] = 'Print View';
 $lang['ACTION_DOWNLOAD'] = 'Download';
 $lang['ACTION_DOCUMENT'] = 'Documents';
+$lang['ACTION_CSV'] = 'Download Csv';
 $lang['ACTION_CLEAR'] = 'Clear';
 $lang['ACTION_REFRESH'] = 'Refresh';
 $lang['ACTION_BACK'] = 'Back';

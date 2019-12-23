@@ -21,6 +21,12 @@ if(isset($CI->permissions['action5'])&&($CI->permissions['action5']==1))
         'class'=>'button_action_download',
         'data-title'=>"Download"
     );
+    $action_buttons[]=array(
+        'label'=>$CI->lang->line("ACTION_CSV"),
+        'href'=>site_url($CI->controller_url.'_csv/system_list_farmer_balance_notification/'.urlencode(json_encode($options))),
+        'class'=>'external',
+        'target'=>'_blank'
+    );
 }
 if(isset($CI->permissions['action6']) && ($CI->permissions['action6']==1))
 {
