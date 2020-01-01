@@ -60,7 +60,6 @@ $CI = & get_instance();
                         {
                         ?>
                             <select id="outlet_id" name="report[outlet_id]" class="form-control">
-                                <option value=""><?php echo $CI->lang->line('SELECT');?></option>
                                 <?php foreach($outlets as $outlet){ ?>
                                     <option value="<?php echo $outlet['customer_id']?>"><?php echo $outlet['name'];?></option>
                                 <?php } ?>
@@ -155,9 +154,7 @@ $CI = & get_instance();
             yearRange: "c-2:c+2"
         });
 
-        <?php if(sizeof($outlets) == 1){ ?>
-            get_dealer_by_outlet_dropdown(<?php echo $outlets[0]['customer_id']?>);
-        <?php } ?>
+        get_dealer_by_outlet_dropdown($('#outlet_id').val());
 
         $(document).on("change","#fiscal_year_id",function()
         {

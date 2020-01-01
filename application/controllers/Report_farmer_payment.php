@@ -123,9 +123,19 @@ class Report_farmer_payment extends Root_Controller
         if (isset($this->permissions['action0']) && ($this->permissions['action0'] == 1)) {
             $user = User_helper::get_user();
             $method = 'search_list';
-
             $data = array();
-            $data['options'] = $this->input->post('report');
+
+            $reports=$this->input->post('report');
+            $reports['date_end']=System_helper::get_time($reports['date_end']);
+            $reports['date_end']=$reports['date_end']+3600*24-1;
+            $reports['date_start']=System_helper::get_time($reports['date_start']);
+            if($reports['date_start']>=$reports['date_end'])
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Starting Date should be less than End date';
+                $this->json_return($ajax);
+            }
+            $data['options']=$reports;
 
             $data['title'] = "Dealers Payment Report";
             $ajax['status'] = true;
@@ -147,8 +157,8 @@ class Report_farmer_payment extends Root_Controller
     {
         // Post Input
         // $fiscal_year_id = $this->input->post('fiscal_year_id');
-        $date_start = System_helper::get_time($this->input->post('date_start'));
-        $date_end = System_helper::get_time($this->input->post('date_end'));
+        $date_end=$this->input->post('date_end');
+        $date_start=$this->input->post('date_start');
 
         $outlet_id = $this->input->post('outlet_id');
         $farmer_id = $this->input->post('farmer_id');
@@ -163,9 +173,7 @@ class Report_farmer_payment extends Root_Controller
         $this->db->where('outlet_info.revision', 1);
         $this->db->where('outlet_info.type', $this->config->item('system_customer_type_outlet_id'));
 
-        if ($outlet_id > 0) {
-            $this->db->where('outlet_info.customer_id', $outlet_id);
-        }
+        $this->db->where('outlet_info.customer_id', $outlet_id);
         $this->db->order_by('outlet_info.customer_id');
         $results = $this->db->get()->result_array();
 
