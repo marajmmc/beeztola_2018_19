@@ -36,7 +36,7 @@ $CI = & get_instance();
                         <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_START');?></label>
                     </div>
                     <div class="col-xs-6">
-                        <input type="text" id="date_start" name="report[date_start]" class="form-control date_large" value="">
+                        <input type="text" id="date_start" name="report[date_start]" class="form-control date_large" value="<?php echo System_helper::display_date(time()); ?>">
                     </div>
 
                 </div>
@@ -45,7 +45,7 @@ $CI = & get_instance();
                         <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_END');?></label>
                     </div>
                     <div class="col-xs-6">
-                        <input type="text" id="date_end" name="report[date_end]" class="form-control date_large" value="">
+                        <input type="text" id="date_end" name="report[date_end]" class="form-control date_large" value="<?php echo System_helper::display_date(time()); ?>">
                     </div>
 
                 </div>
