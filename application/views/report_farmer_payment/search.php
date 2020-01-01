@@ -154,7 +154,13 @@ $CI = & get_instance();
             yearRange: "c-2:c+2"
         });
 
-        get_dealer_by_outlet_dropdown($('#outlet_id').val());
+        <?php
+        $outlets_count = sizeof($outlets);
+        if($outlets_count == 1){ ?>
+            get_dealer_by_outlet_dropdown(<?php echo $outlets[0]['customer_id']?>);
+        <?php } elseif ($outlets_count > 1) ?>
+            get_dealer_by_outlet_dropdown($('#outlet_id').val());
+        <?php ?>
 
         $(document).on("change","#fiscal_year_id",function()
         {
