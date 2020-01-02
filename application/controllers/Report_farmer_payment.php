@@ -273,7 +273,7 @@ class Report_farmer_payment extends Root_Controller
                 $this->json_return($ajax);
             }
 
-            //--------- System User Info ------------
+            //--------- POS User Info ------------
             $user_ids = array();
             $user_ids[$result['user_created']] = $result['user_created'];
             if ($result['user_updated'] > 0) {
@@ -282,7 +282,22 @@ class Report_farmer_payment extends Root_Controller
             if ($result['user_deleted'] > 0) {
                 $user_ids[$result['user_deleted']] = $result['user_deleted'];
             }
-            $user_info = System_helper::get_users_info($user_ids);
+
+            $this->db->from($this->config->item('table_pos_setup_user').' user');
+            $this->db->select('user.id,user.employee_id,user.user_name,user.status');
+            $this->db->join($this->config->item('table_pos_setup_user_info').' user_info','user.id = user_info.user_id','INNER');
+            $this->db->select('user_info.name,user_info.ordering,user_info.blood_group,user_info.mobile_no');
+            $this->db->where('user_info.revision',1);
+            if(sizeof($user_ids)>0)
+            {
+                $this->db->where_in('user.id',$user_ids);
+            }
+            $result_pos_users=$this->db->get()->result_array();
+            $user_info=array();
+            foreach($result_pos_users as $result_pos_user)
+            {
+                $user_info[$result_pos_user['id']]=$result_pos_user;
+            }
 
             //---------------- Basic Info ----------------
             $data = $item = array();
