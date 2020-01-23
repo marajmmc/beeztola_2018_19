@@ -313,6 +313,9 @@ class Farmer_credit_payment extends Root_Controller
             $data['item']['amount']='';
             $data['item']['reference_no']='';
             $data['item']['remarks']='';
+            $data['item']['image_location']='images/no_image.jpg';
+            $data['item']['image_name']='images/no_image.jpg';
+
 
             
             $this->db->from($this->config->item('table_pos_setup_farmer_outlet').' farmer_outlet');
@@ -474,6 +477,30 @@ class Farmer_credit_payment extends Root_Controller
             $ajax['system_message']=$this->message;
             $this->json_return($ajax);
         }
+        //Uploading attachment
+        $date_payment=str_replace('-','_',strtolower($item['date_payment']));
+        $path='images/dealer_payment/'.$date_payment;
+        $uploaded_images = System_helper::upload_file($path);
+        $item['image_location']='images/no_image.jpg';
+        $item['image_name']='images/no_image.jpg';
+        if(array_key_exists('image_payment',$uploaded_images))
+        {
+            if($uploaded_images['image_payment']['status'])
+            {
+                $item['image_name']=$uploaded_images['image_payment']['info']['file_name'];
+                $item['image_location']=$path.'/'.$uploaded_images['image_payment']['info']['file_name'];
+            }
+            else
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$uploaded_images['image_payment']['message'];
+                $this->json_return($ajax);
+            }
+        }
+        else
+        {
+            //Todo check if it is mandatory
+        }
         $farmer_info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('*'),array('id ='.$farmer_id,'status!="'.$this->config->item('system_status_delete').'"'),1);
 
         $data_history=array();
@@ -513,6 +540,8 @@ class Farmer_credit_payment extends Root_Controller
             $data['remarks_update']= $item['remarks'];
             $data['date_updated'] = $time;
             $data['user_updated'] = $user->user_id;
+            $data['image_name']= $item['image_name'];
+            $data['image_location']= $item['image_location'];
             Query_helper::update($this->config->item('table_pos_farmer_credit_payment'),$data, array('id='.$id), false);
             $data_history['payment_id']=$id;
             $data_history['remarks_reason']='Edit Payment. Amount Old: '.$amount_old.' Amount New: '.$data['amount'];
@@ -538,6 +567,8 @@ class Farmer_credit_payment extends Root_Controller
             $data['remarks']= $item['remarks'];
             $data['date_created'] = $time;
             $data['user_created'] = $user->user_id;
+            $data['image_name']= $item['image_name'];
+            $data['image_location']= $item['image_location'];
             $payment_id=Query_helper::add($this->config->item('table_pos_farmer_credit_payment'),$data, false);
             $data_history['payment_id']=$payment_id;
             $data_history['remarks_reason']='Add Payment';
@@ -716,6 +747,7 @@ class Farmer_credit_payment extends Root_Controller
     {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('item[amount]',$this->lang->line('LABEL_AMOUNT'),'required');
+        $this->form_validation->set_rules('item[reference_no]',$this->lang->line('LABEL_REFERENCE_NO'),'required');
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();

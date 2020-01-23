@@ -125,10 +125,25 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?> </label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_REFERENCE_NO');?><span style="color:#FF0000">*</span> </label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[reference_no]" id="reference_no" class="form-control " value="<?php echo $item['reference_no'];?>" />
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right">Attachment(Document)<span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-xs-4">
+                <input type="file" class="browse_button" data-resize-width="800" data-resize-height="600" data-resize-size="1372022" data-preview-container="#image_payment" data-preview-width="300" name="image_payment">
+            </div>
+        </div>
+        <div class="row show-grid">
+            <div class="col-xs-4">
+            </div>
+            <div class="col-xs-4" id="image_payment">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
             </div>
         </div>
         <div class="row show-grid">
@@ -147,6 +162,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
+        $(":file").filestyle({input: false,buttonText: "<?php echo $CI->lang->line('UPLOAD');?>", buttonName: "btn-danger"});
         $(".datepicker").datepicker({dateFormat : display_date_format});
     });
 </script>
