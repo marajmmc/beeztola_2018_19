@@ -321,9 +321,9 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { columngroup: 'Total',text: 'Amount', dataField: '<?php echo 'amount_total';?>',align:'center',cellsalign: 'right',width:'120',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount_total']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
                     <?php
                         foreach($dealers as $dealer)
-                        {   ?>{ columngroup: '<?php echo $dealer['farmer_name']; ?>',text: 'pkt',dataField: '<?php echo 'quantity_'.$dealer['farmer_id'].'_pkt';?>',align:'center',cellsalign: 'right',width:'80',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['quantity_pkt']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_pkt},
-                            { columngroup: '<?php echo $dealer['farmer_name']; ?>',text: 'kg', dataField: '<?php echo 'quantity_'.$dealer['farmer_id'].'_kg';?>',align:'center',cellsalign: 'right',width:'80',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['quantity_kg']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
-                            { columngroup: '<?php echo $dealer['farmer_name']; ?>',text: 'Amount', dataField: '<?php echo 'amount_'.$dealer['farmer_id'];?>',align:'center',cellsalign: 'right',width:'120',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
+                        {   ?>{ columngroup: '<?php echo $dealer['farmer_id']; ?>',text: 'pkt',dataField: '<?php echo 'quantity_'.$dealer['farmer_id'].'_pkt';?>',align:'center',cellsalign: 'right',width:'80',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['quantity_pkt']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_pkt},
+                            { columngroup: '<?php echo $dealer['farmer_id']; ?>',text: 'kg', dataField: '<?php echo 'quantity_'.$dealer['farmer_id'].'_kg';?>',align:'center',cellsalign: 'right',width:'80',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['quantity_kg']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_kg},
+                            { columngroup: '<?php echo $dealer['farmer_id']; ?>',text: 'Amount', dataField: '<?php echo 'amount_'.$dealer['farmer_id'];?>',align:'center',cellsalign: 'right',width:'120',cellsrenderer: cellsrenderer,hidden: <?php echo $system_preference_items['amount']?0:1;?>,rendered: tooltiprenderer,aggregates: [{ 'total':aggregates}],aggregatesrenderer:aggregatesrenderer_amount},
                             <?php
                         }
                     ?>
@@ -333,7 +333,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     [
                             <?php
                                 foreach($dealers as $dealer)
-                                {?>{ text: '<?php echo $dealer['farmer_name']; ?>', align: 'center', name: '<?php echo $dealer['farmer_name']; ?>' },
+                                {?>{ text: '<?php echo $dealer['farmer_name']; ?>', align: 'center', name: '<?php echo $dealer['farmer_id']; ?>' },
                         <?php
                             }
                         ?>
