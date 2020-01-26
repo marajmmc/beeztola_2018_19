@@ -499,7 +499,9 @@ class Farmer_credit_payment extends Root_Controller
         }
         else
         {
-            //Todo check if it is mandatory
+            $ajax['status']=false;
+            $ajax['system_message']='Please Upload Attachment(Document)';
+            $this->json_return($ajax);
         }
         $farmer_info=Query_helper::get_info($this->config->item('table_pos_setup_farmer_farmer'),array('*'),array('id ='.$farmer_id,'status!="'.$this->config->item('system_status_delete').'"'),1);
 
@@ -747,7 +749,7 @@ class Farmer_credit_payment extends Root_Controller
     {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('item[amount]',$this->lang->line('LABEL_AMOUNT'),'required');
-        $this->form_validation->set_rules('item[reference_no]',$this->lang->line('LABEL_REFERENCE_NO'),'required');
+        //$this->form_validation->set_rules('item[reference_no]',$this->lang->line('LABEL_REFERENCE_NO'),'required');
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();

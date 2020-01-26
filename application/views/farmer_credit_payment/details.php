@@ -50,7 +50,9 @@ $CI->load->view("action_buttons", array('action_buttons' => $action_buttons));
             <label class="control-label pull-right">Attachment(Document)</label>
         </div>
         <div class="col-xs-4">
-            <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+            <a href="<?php echo $CI->config->item('system_base_url_picture').$item['image_location']; ?>" target="_blank" class="external">
+                <img style="max-width: 250px;" src="<?php echo $CI->config->item('system_base_url_picture').$item['image_location']; ?>" alt="<?php echo $item['image_name']; ?>">
+            </a>
         </div>
     </div>
     <?php
