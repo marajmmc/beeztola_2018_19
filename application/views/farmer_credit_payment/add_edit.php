@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 $CI=& get_instance();
+$user=User_helper::get_user();
 $action_buttons=array();
 $action_buttons[]=array
 (
@@ -30,6 +31,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <input type="hidden" id="id" name="id" value="<?php echo $item['id']?>" />
     <input type="hidden" id="farmer_id" name="farmer_id" value="<?php echo $item['farmer_id']?>" />
     <input type="hidden" id="system_save_new_status" name="system_save_new_status" value="0" />
+    <input type="hidden" id="system_form_token" name="system_form_token" value="<?php echo time().'_'.$user->user_id; ?>" />
     <div class="row widget">
         <?php
         echo $CI->load->view("info_basic", $info_basic, true);

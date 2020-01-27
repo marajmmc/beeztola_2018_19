@@ -419,7 +419,7 @@ class Farmer_credit_payment extends Root_Controller
     }
     private function system_save()
     {
-
+        $system_form_token = $this->input->post("system_form_token");
         $id = $this->input->post("id");
         $farmer_id = $this->input->post("farmer_id");
         $outlet_id = $this->input->post("outlet_id");
@@ -428,6 +428,15 @@ class Farmer_credit_payment extends Root_Controller
         $item=$this->input->post('item');
         $this->check_validation_farmer($farmer_id,__FUNCTION__);
         $this->load->helper('farmer_credit');
+
+        $result=Query_helper::get_info($this->config->item('table_pos_farmer_credit_payment'),'*',array('form_token ="'.$system_form_token.'"'),1);
+        if($result||(!$system_form_token))
+        {
+            $this->message="This Payment already saved.";
+            //TODO send sms
+            $this->system_list_payment($farmer_id);
+
+        }
 
         $amount_old=0;
         if($id>0)
@@ -544,6 +553,7 @@ class Farmer_credit_payment extends Root_Controller
             $data['user_updated'] = $user->user_id;
             $data['image_name']= $item['image_name'];
             $data['image_location']= $item['image_location'];
+            $data['form_token']= $system_form_token;
             Query_helper::update($this->config->item('table_pos_farmer_credit_payment'),$data, array('id='.$id), false);
             $data_history['payment_id']=$id;
             $data_history['remarks_reason']='Edit Payment. Amount Old: '.$amount_old.' Amount New: '.$data['amount'];
@@ -571,6 +581,7 @@ class Farmer_credit_payment extends Root_Controller
             $data['user_created'] = $user->user_id;
             $data['image_name']= $item['image_name'];
             $data['image_location']= $item['image_location'];
+            $data['form_token']= $system_form_token;
             $payment_id=Query_helper::add($this->config->item('table_pos_farmer_credit_payment'),$data, false);
             $data_history['payment_id']=$payment_id;
             $data_history['remarks_reason']='Add Payment';
