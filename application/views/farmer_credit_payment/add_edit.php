@@ -90,6 +90,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 {
                     ?>
                     <label class="control-label"><?php echo System_helper::display_date($item['date_payment']);?></label>
+                    <input type="hidden" name="item[date_payment]" value="<?php echo System_helper::display_date($item['date_payment']);?>"/>
                     <?php
                 }
                 else
