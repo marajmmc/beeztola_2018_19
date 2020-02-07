@@ -205,8 +205,16 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_DAY_LAST_PAYMENT'); ?>', dataField: 'day_last_payment', width:140, cellsrenderer: cellsrenderer, cellsalign: 'center', hidden: <?php echo $system_preference_items['day_last_payment']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_AMOUNT_LAST_SALE'); ?>', dataField: 'amount_last_sale', width:120, cellsrenderer: cellsrenderer, cellsalign: 'right', hidden: <?php echo $system_preference_items['amount_last_sale']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DATE_LAST_SALE'); ?>', dataField: 'date_last_sale', width:140, cellsrenderer: cellsrenderer, cellsalign: 'center', hidden: <?php echo $system_preference_items['date_last_sale']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_DAY_LAST_SALE'); ?>', dataField: 'day_last_sale', width:140, cellsrenderer: cellsrenderer, cellsalign: 'center', hidden: <?php echo $system_preference_items['day_last_sale']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_DAY_LAST_SALE'); ?>', dataField: 'day_last_sale', width:140, cellsrenderer: cellsrenderer, cellsalign: 'center', hidden: <?php echo $system_preference_items['day_last_sale']?0:1;?>}
+                    <?php
+                     if(isset($CI->permissions['action7']) && ($CI->permissions['action7']==1))
+                        {
+                        ?>
+                    ,
                     { text: '<?php echo $CI->lang->line('LABEL_SALE_DUE_STATUS'); ?>', dataField: 'sale_due_status', width:200, filtertype: 'list', cellsrenderer: cellsrenderer, hidden: <?php echo $system_preference_items['sale_due_status']?0:1;?>}
+                    <?php
+                    }
+                ?>
                 ]
             });
     });

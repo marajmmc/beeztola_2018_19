@@ -11,6 +11,7 @@ class Report_farmer_balance_notification_csv extends CI_Controller
         parent::__construct();
         $this->controller_url = strtolower(get_class($this));
         $this->controller_main_url = strtolower(str_replace("_csv", "", $this->controller_url));
+        $this->permissions = User_helper::get_permission('Report_farmer_balance_notification');
         $user = User_helper::get_user();
         if (!$user) {
             echo 'Please Login and Try Again';
@@ -58,7 +59,10 @@ class Report_farmer_balance_notification_csv extends CI_Controller
         $data['amount_last_sale'] = 0;
         $data['date_last_sale'] = 1;
         $data['day_last_sale'] = 1;
-        $data['sale_due_status'] = 1;
+        if(isset($this->permissions['action7']) && ($this->permissions['action7']==1))
+        {
+            $data['sale_due_status'] = 1;
+        }
         return $data;
     }
 

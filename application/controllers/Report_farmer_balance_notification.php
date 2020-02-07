@@ -89,7 +89,10 @@ class Report_farmer_balance_notification extends Root_Controller
             $data['amount_last_sale'] = 0;
             $data['date_last_sale'] = 1;
             $data['day_last_sale'] = 1;
-            $data['sale_due_status'] = 1;
+            if(isset($this->permissions['action7']) && ($this->permissions['action7']==1))
+            {
+                $data['sale_due_status'] = 1;
+            }
         }
         return $data;
     }
