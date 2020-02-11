@@ -99,6 +99,7 @@ class Report_farmer_balance_notification_csv extends CI_Controller
         $this->db->select('payment.farmer_id');
         $this->db->where_in('payment.outlet_id', $outlet_ids);
         $this->db->group_by('payment.farmer_id');
+        $this->db->where('payment.status', $this->config->item('system_status_active'));
         $sub_query = $this->db->get_compiled_select();
 
         $this->db->from($this->config->item('table_pos_farmer_credit_payment') . ' payment');
@@ -106,6 +107,7 @@ class Report_farmer_balance_notification_csv extends CI_Controller
         $this->db->select('payment.amount amount_last_payment');
         $this->db->select('payment.date_payment date_last_payment');
         $this->db->join('(' . $sub_query . ') payment_max', 'payment_max.farmer_id = payment.farmer_id AND payment_max.date_last_payment= payment.date_payment', 'INNER');
+        $this->db->where('payment.status', $this->config->item('system_status_active'));
         $results = $this->db->get()->result_array();
         $payment = array();
         foreach ($results as $result) {
