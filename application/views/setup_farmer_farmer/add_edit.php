@@ -192,18 +192,6 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_off_events();
         $(document).off("change", "#farmer_type_id");
-        $(document).on("change","#farmer_type_id",function()
-        {
-            var farmer_type_id=$('#farmer_type_id').val();
-            if(farmer_type_id>1)
-            {
-                $('#status_card_require').val('<?php echo $CI->config->item('system_status_yes');?>');
-            }
-            else
-            {
-                $('#status_card_require').val('<?php echo $CI->config->item('system_status_no');?>');
-            }
-        });
         $(document).on("change","#district_id",function()
         {
             $("#upazilla_id").val("");
