@@ -115,7 +115,7 @@ if($result)
             <img alt="Logo" height="40" class="site_logo pull-left" src="<?php echo str_replace('beeztola_2018_19','login_2018_19',base_url('images/logo.png'));?>">
             <div class="site_title pull-left">
                 <div style="font-size: 25px;line-height: 40px;">
-                    A R. MALIKSEEDS (PVT) LTD.
+                    A R MALIK SEEDS PVT. LTD.
                 </div>
                 <div style="font-size: 15px;line-height: 15px;">
                     ( ..:: Beeztola POS System ::..)
