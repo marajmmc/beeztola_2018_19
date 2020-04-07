@@ -129,6 +129,26 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
             <div class="clearfix"></div>
         </div>
+        <div style="" class="row show-grid" id="crop_id_container">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_NAME');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-4">
+                <select id="crop_id" class="form-control">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                </select>
+            </div>
+        </div>
+        <div style="display: none;" class="row show-grid" id="variety_id_container">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_VARIETY_NAME');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-4">
+                <select id="variety_id" class="form-control">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                </select>
+            </div>
+        </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right"><?php echo 'Variety '.$CI->lang->line('LABEL_BARCODE');?></label>
@@ -437,6 +457,40 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     }
     jQuery(document).ready(function()
     {
+        $('#crop_id').html(get_dropdown_with_select(system_crops));
+        $(document).off('change','#crop_id');
+        $(document).on("change","#crop_id",function()
+        {
+
+            $('#variety_id').val('');
+            $('#variety_barcode').val('');
+            var crop_id=$('#crop_id').val();
+            $('#variety_id_container').hide();
+            if(crop_id>0)
+            {
+                var items=[];
+                $.each( sale_varieties_info, function( key, value )
+                {
+                    if(value['crop_id']==crop_id)
+                    {
+                        items.push({'value':key, 'text':value['variety_name'].concat('- ',value['pack_size'],'gm')})
+                    }
+
+                });
+                if(items.length>0)
+                {
+                    $('#variety_id_container').show();
+                    $('#variety_id').html(get_dropdown_with_select(items));
+                }
+
+            }
+        });
+        $(document).off('change','#variety_id');
+        $(document).on("change","#variety_id",function()
+        {
+            $('#variety_barcode').val($('#variety_id').val());
+
+        });
         $(document).off("keypress", "#variety_barcode");
         $(document).on("keypress","#variety_barcode",function(event)
         {

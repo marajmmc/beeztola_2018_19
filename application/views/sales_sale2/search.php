@@ -47,6 +47,33 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
             </div>
         </div>
+        <div class="row show-grid" id="container_farmer_type">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CUSTOMER_TYPE');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="farmer_type_id" class="form-control">
+                    <option value=""><?php echo $CI->lang->line('SELECT');?></option>
+                    <?php
+                    foreach($farmer_types as $row)
+                    {?>
+                        <option value="<?php echo $row['value']?>"><?php echo $row['text'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div style="display: none;" class="row show-grid" id="farmer_id_container">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CUSTOMER_NAME');?></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="farmer_id" class="form-control">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                </select>
+            </div>
+        </div>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label class="control-label pull-right">
@@ -195,8 +222,50 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         $(document).on("change","#outlet_id",function()
         {
             $('#container_farmer_new').hide();
+            $("#farmer_type_id").val("");
+            $("#farmer_id").val("");
+            $('#farmer_id_container').hide();
 
         });
+        $(document).off("change", "#farmer_type_id");
+        $(document).on("change","#farmer_type_id",function()
+        {
+            $('#container_farmer_new').hide();
+            $("#farmer_id").val("");
+            var farmer_type_id=$('#farmer_type_id').val();
+            var outlet_id=$('#outlet_id').val();
+            if((outlet_id>0)&&farmer_type_id>0)
+            {
+                $('#farmer_id_container').show();
+                $.ajax({
+                    url:'<?php echo site_url($CI->controller_url.'/get_dropdown_farmers_by_outlet_farmer_type_id') ?>',
+                    type: 'POST',
+                    datatype: "JSON",
+                    data:{outlet_id:outlet_id,farmer_type_id:farmer_type_id},
+                    success: function (data, status)
+                    {
+
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+
+                    }
+                });
+
+            }
+            else
+            {
+                $('#farmer_id_container').hide();
+
+            }
+        });
+        $(document).off("change", "#farmer_id");
+        $(document).on("change","#farmer_id",function()
+        {
+            $('#code').val($('#farmer_id').val());
+        });
+
         $(document).on("change","#district_id",function()
         {
             $("#upazilla_id").val("");
