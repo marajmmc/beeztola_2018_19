@@ -407,6 +407,7 @@ class Sales_sale2 extends Root_Controller
         $this->db->select('pack.name pack_size');
 
         $this->db->where('ssv.outlet_id',$outlet_id);
+        $this->db->where('v.status',$this->config->item('system_status_active'));
         $results=$this->db->get()->result_array();
         $varieties=array();
         foreach($results as $result)
