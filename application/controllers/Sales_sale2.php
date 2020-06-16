@@ -869,6 +869,14 @@ class Sales_sale2 extends Root_Controller
             }
 
             $data['users']=System_helper::get_users_info($user_ids);
+
+            $data['variety_pricing']=array();
+            $results=Query_helper::get_info($this->config->item('table_login_setup_classification_variety_price'),'*',array());
+            foreach($results as $result)
+            {
+                    $data['variety_pricing'][$result['variety_id']][$result['pack_size_id']]=$result;
+            }
+
             $data['title']='Sale Details of ('.Barcode_helper::get_barcode_sales($item_id).')';
 
             $ajax['status']=true;

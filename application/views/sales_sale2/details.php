@@ -53,7 +53,21 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             ?>
             <tr>
-                <td style="padding: 0 5px;"><label><?php echo $row['variety_name'].'('.$row['pack_size'].'g)'; ?></label></td>
+                <td style="padding: 0 5px;">
+                    <label>
+                        <?php
+                        if($variety_pricing[$row['variety_id']][$row['pack_size_id']]['number_of_seeds']>0)
+                        {
+                            echo $row['variety_name'].' ('.$variety_pricing[$row['variety_id']][$row['pack_size_id']]['number_of_seeds'].' seeds)';
+                        }
+                        else
+                        {
+                            echo $row['variety_name'].'('.$row['pack_size'].'g)';
+                        }
+
+                        ?>
+                    </label>
+                </td>
                 <td style="padding: 0 5px;"><label><?php echo number_format($row['price_unit_pack'],2); ?></label></td>
                 <td style="padding: 0 5px;"><label><?php echo $row['quantity']; ?></label></td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>" class="text-right" ><label><?php echo number_format($row['amount_total'],2);?></label>
