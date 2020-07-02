@@ -195,7 +195,7 @@ echo '</pre>';*/
                     <tr>
                         <td><label><?php echo $row['crop_name'];?></label></td>
                         <td><label><?php echo $row['crop_type_name'];?></label></td>
-                        <td><label><?php echo $row['variety_name'];?> <?php echo $row['variety_id'];?></label></td>
+                        <td><label><?php echo $row['variety_name'];?> </label></td>
                         <td class="text-right"><label><?php echo $amount_offer?number_format($amount_offer,2,'.',','):'';?></label></td>
                         <td class="text-center">
                         <label>
@@ -227,7 +227,7 @@ echo '</pre>';*/
                     <td colspan="2">&nbsp;</td>
                     <td><label><?php echo $CI->lang->line('LABEL_TOTAL'); ?></label></td>
                     <td class="text-right"><label><?php echo $total_amount_offer?number_format($total_amount_offer,2,'.',','):'';?></label></td>
-                    <td colspan="2">&nbsp;</td>
+                    <td colspan="3">&nbsp;</td>
                     <td class="text-right"><label><?php echo $total_quantity; ?></label></td>
                     <td class="text-right"><label><?php echo number_format($total_weight_kg/1000,3,'.','');?></label></td>
                     <td class="text-right"><label><?php echo number_format($item['amount_total'],2); ?></label></td>
