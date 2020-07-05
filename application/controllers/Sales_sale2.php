@@ -358,6 +358,22 @@ class Sales_sale2 extends Root_Controller
         $data['item']['amount_credit_limit']=$result['amount_credit_limit'];
         $data['item']['amount_credit_balance']=$result['amount_credit_balance'];
 
+        //unregistered cannot buy product
+        if(!($data['item']['farmer_type_id']>1))
+        {
+            $ajax['status']=false;
+            if($this->message)
+            {
+                $ajax['system_message']=$this->message.'<br>'.$this->lang->line("MSG_NOT_DEALER_CANNOT_BUY");
+            }
+            else
+            {
+                $ajax['system_message']=$this->lang->line("MSG_NOT_DEALER_CANNOT_BUY");
+            }
+
+            $this->json_return($ajax);
+        }
+
         //if farmer not dealer must buy in cash
         if(!($data['item']['farmer_type_id']>1))
         {
