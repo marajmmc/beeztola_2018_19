@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
+$user=User_helper::get_user();
 $CI=& get_instance();
 $action_buttons=array();
 $action_buttons[]=array(
@@ -18,6 +18,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     <input type="hidden" name="item[outlet_id]" id="outlet_id" value="<?php echo $item['outlet_id']; ?>" />
     <input type="hidden" name="item[farmer_id]" value="<?php echo $item['farmer_id']; ?>" />
     <input type="hidden" name="item[code_scan_type]" id="code_scan_type" value="<?php echo $item['code_scan_type'];?>">
+    <input type="hidden" id="system_user_token" name="system_user_token" value="<?php echo time().'_'.$user->id; ?>" />
     <div class="row widget">
         <div class="widget-header">
             <div class="title">

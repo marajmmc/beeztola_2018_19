@@ -449,12 +449,16 @@ class Sales_sale3 extends Root_Controller
     }
     private function system_save()
     {
-        echo '<pre>';
-        print_r($this->input->post());
-        echo '</pre>';
-        die();
         $user = User_helper::get_user();
         $time=time();
+        $system_user_token = $this->input->post("system_user_token");
+        $system_user_token_info = Token_helper::get_token($system_user_token);
+        if($system_user_token_info['status'])
+        {
+            $this->message=$this->lang->line('MSG_SAVE_ALREADY');
+            $this->system_list();
+        }
+
         $item=$this->input->post('item');
         $items=$this->input->post('items');
         if(!(isset($this->permissions['action1']) && ($this->permissions['action1']==1)))
@@ -476,6 +480,13 @@ class Sales_sale3 extends Root_Controller
         {
             $ajax['status']=false;
             $ajax['system_message']="No Item Added For Sale";
+            $this->json_return($ajax);
+            die();
+        }
+        if(!(strlen($item['amount_discount_self'])>0))
+        {
+            $ajax['status']=false;
+            $ajax['system_message']="Please Enter discount amount.<br>Enter 0 if no discount";
             $this->json_return($ajax);
             die();
         }
@@ -503,42 +514,31 @@ class Sales_sale3 extends Root_Controller
         $farmer_info['amount_credit_limit']=$result['amount_credit_limit'];
         $farmer_info['amount_credit_balance']=$result['amount_credit_balance'];
 
-        //if farmer not dealer must buy in cash
+
+        //Unregistered farmer cannot buy
         if(!($farmer_info['farmer_type_id']>1))
         {
             $farmer_info['amount_credit_limit']=0;
             $farmer_info['amount_credit_balance']=0;
-        }
-        else
-        {
-            //if Dealer buy from other outlet must buy in cash
-            $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$item['farmer_id'],'revision =1','outlet_id ='.$item['outlet_id']),1);
-            if(!$result)
-            {
-                $farmer_info['amount_credit_limit']=0;
-                $farmer_info['amount_credit_balance']=0;
-            }
+
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_NOT_DEALER_CANNOT_BUY");
+            $this->json_return($ajax);
+
         }
 
-        //discount slabs
-        $data['discounts_slabs']=array();
-        //slabs activate if dealer
-        if($farmer_info['farmer_type_id']>1)
+        //dealer cannot buy from other show room
+        $result=Query_helper::get_info($this->config->item('table_pos_setup_farmer_outlet'),'*',array('farmer_id ='.$item['farmer_id'],'revision =1','outlet_id ='.$item['outlet_id']),1);
+        if(!$result)
         {
-            $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id ='.$item['outlet_id'],'revision =1',),1);
-            if($result)
-            {
-                $data['discounts_slabs']=json_decode($result['discount'], true);
-            }
-            else
-            {
-                $result=Query_helper::get_info($this->config->item('table_login_setup_discount_customer'),'*',array('outlet_id =0','revision =1',),1);
-                if($result)
-                {
-                    $data['discounts_slabs']=json_decode($result['discount'], true);
-                }
-            }
+            $farmer_info['amount_credit_limit']=0;
+            $farmer_info['amount_credit_balance']=0;
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_NOT_DEALER_CANNOT_BUY_OTHER_OUTLET");
+            $this->json_return($ajax);
         }
+        //discount slabs deleted
+
         //farmer info and discount validation finished
 
         //getting current stock,price,discount of outlet and preparing item head
@@ -562,28 +562,32 @@ class Sales_sale3 extends Root_Controller
             $result['discount_percentage_variety']=0;
             $varieties[$result['variety_id']][$result['pack_size_id']]=$result;
         }
-        $results=Query_helper::get_info($this->config->item('table_login_setup_classification_variety_price'),'*',array());
+        $this->db->from($this->config->item('table_login_setup_classification_variety_price').' price');
+        $this->db->select('price.id,price.variety_id,price.pack_size_id,price.price price_unit_pack');
+        $this->db->join($this->config->item('table_login_offer_setup_variety').' offer','offer.variety_id=price.variety_id AND offer.pack_size_id=price.pack_size_id AND offer.revision=1 AND offer.status="'.$this->config->item('system_status_active').'"','LEFT');
+        $this->db->select('offer.status,offer.quantity_minimum,offer.amount_per_kg');
+
+        $results=$this->db->get()->result_array();
         foreach($results as $result)
         {
             if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
             {
-                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=$result['price'];
-            }
-        }
-        //discount setups
-        $results=Query_helper::get_info($this->config->item('table_login_setup_discount_variety'),array('variety_id','pack_size_id','discount'),array('revision =1'));
-        foreach($results as $result)
-        {
-            if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
-            {
-                $discounts=json_decode($result['discount'], true);
-                if(isset($discounts[$item['outlet_id']]))
+                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=$result['price_unit_pack'];
+                if($result['quantity_minimum']>0)
                 {
-                    $varieties[$result['variety_id']][$result['pack_size_id']]['discount_percentage_variety']=$discounts[$item['outlet_id']];
+                    $varieties[$result['variety_id']][$result['pack_size_id']]['offer_quantity_minimum']=$result['quantity_minimum'];
                 }
-                elseif(isset($discounts[0]))
+                else
                 {
-                    $varieties[$result['variety_id']][$result['pack_size_id']]['discount_percentage_variety']=$discounts[0];
+                    $varieties[$result['variety_id']][$result['pack_size_id']]['offer_quantity_minimum']=0;
+                }
+                if($result['amount_per_kg']>0)
+                {
+                    $varieties[$result['variety_id']][$result['pack_size_id']]['offer_amount_per_kg']=$result['amount_per_kg'];
+                }
+                else
+                {
+                    $varieties[$result['variety_id']][$result['pack_size_id']]['offer_amount_per_kg']=0;
                 }
             }
         }
@@ -593,10 +597,13 @@ class Sales_sale3 extends Root_Controller
         $item_head['outlet_id']=$item['outlet_id'];
         $item_head['outlet_id_commission']=$item['outlet_id'];
         $item_head['farmer_id']=$item['farmer_id'];
-        $item_head['discount_self_percentage']=$item['discount_self_percentage'];
+        $item_head['amount_discount_self']=$item['amount_discount_self'];
+        //$item_head['discount_self_percentage']=$item['discount_self_percentage'];//calculate latter
         $item_head['amount_total']=0;
         $item_head['amount_discount_variety']=0;
-        $item_head['code_scan_type']=$item['code_scan_type'];;
+        $item_head['code_scan_type']=$item['code_scan_type'];
+        $item_head['offer_earned']=0;
+        $item_head['offer_given']=$item['amount_discount_self'];
         foreach($items as $variety_id=>$packs)
         {
             foreach($packs as $pack_size_id=>$pack)
@@ -606,15 +613,6 @@ class Sales_sale3 extends Root_Controller
                     $ajax['status']=false;
                     $message='Not Enough Stock('.$varieties[$variety_id][$pack_size_id]['variety_name'].'-'.$varieties[$variety_id][$pack_size_id]['pack_size'].')';
                     $message.='<br>Current Stock('.$varieties[$variety_id][$pack_size_id]['current_stock'].')';
-                    $ajax['system_message']=$message;
-                    $this->json_return($ajax);
-                    die();
-                }
-                if($pack['discount_percentage_variety']!=$varieties[$variety_id][$pack_size_id]['discount_percentage_variety'])
-                {
-                    $ajax['status']=false;
-                    $message='Discount changed/expired('.$varieties[$variety_id][$pack_size_id]['variety_name'].'-'.$varieties[$variety_id][$pack_size_id]['pack_size'].')';
-                    $message.='<br>New Discount('.$varieties[$variety_id][$pack_size_id]['discount_percentage_variety'].'%)';
                     $ajax['system_message']=$message;
                     $this->json_return($ajax);
                     die();
@@ -635,32 +633,31 @@ class Sales_sale3 extends Root_Controller
                 $info['price_unit_pack']=$pack['price_unit_pack'];
                 $info['quantity']=$pack['quantity'];
                 $info['amount_total']=$pack['quantity']*$pack['price_unit_pack'];
-                $info['discount_percentage_variety']=$pack['discount_percentage_variety'];
-                $info['amount_discount_variety']=($info['amount_total']*$pack['discount_percentage_variety']/100);
+                //$info['discount_percentage_variety']=$pack['discount_percentage_variety'];//removed discount to offer
+                $info['discount_percentage_variety']=0;
+                $info['amount_discount_variety']=($info['amount_total']*$info['discount_percentage_variety']/100);
                 $info['amount_payable_actual']=($info['amount_total']-$info['amount_discount_variety']);
+
+                $info['offer_quantity_minimum']=$varieties[$variety_id][$pack_size_id]['offer_quantity_minimum'];
+                $info['offer_amount_per_kg']=$varieties[$variety_id][$pack_size_id]['offer_amount_per_kg'];
+                $info['offer_earned']=0;
+                if(($info['quantity']*$info['pack_size']/1000)>=$info['offer_quantity_minimum'])
+                {
+                    $info['offer_earned']=$info['quantity']*$info['pack_size']*$info['offer_amount_per_kg']/1000;
+                }
+
                 $item_head_details[]=$info;
 
-                $item_head['amount_total']+=($pack['price_unit_pack']*$pack['quantity']);
-                $item_head['amount_discount_variety']+=($pack['price_unit_pack']*$pack['quantity']*$pack['discount_percentage_variety']/100);
+                $item_head['amount_total']+=$info['amount_total'];
+                $item_head['amount_discount_variety']+=($info['amount_total']*$info['discount_percentage_variety']/100);
+                $item_head['offer_earned']+=$info['offer_earned'];
             }
         }
-        $discount_customer=0;
-        foreach($data['discounts_slabs'] as $slab=>$percentage)
+        $item_head['discount_self_percentage']=0;
+        if($item_head['amount_total']>0)
         {
-            if($item_head['amount_total']>=$slab)
-            {
-                $discount_customer=$percentage;
-            }
+            $item_head['discount_self_percentage']=($item_head['amount_discount_self']*100/$item_head['amount_total']);
         }
-        if($discount_customer!=$item['discount_self_percentage'])
-        {
-            $ajax['status']=false;
-            $ajax['system_message']='Farmer Discount changed/expired.<br>Please try again';
-            $this->json_return($ajax);
-            die();
-        }
-
-        $item_head['amount_discount_self']=(($item_head['amount_total']-$item_head['amount_discount_variety'])*$item_head['discount_self_percentage']/100);
         $item_head['amount_payable']=($item_head['amount_total']-$item_head['amount_discount_variety']-$item_head['amount_discount_self']);
         $item_head['amount_payable_actual']=ceil($item_head['amount_payable']);
 
@@ -753,7 +750,7 @@ class Sales_sale3 extends Root_Controller
             Query_helper::update($this->config->item('table_pos_setup_farmer_farmer'),$data_credit, array('id='.$farmer_info['farmer_id']), false);
             Farmer_Credit_helper::add_credit_history($data_history);
         }
-
+        Token_helper::update_token($system_user_token_info['id'], $system_user_token);
         $this->db->trans_complete();   //DB Transaction Handle END
         if ($this->db->trans_status() === TRUE)
         {
