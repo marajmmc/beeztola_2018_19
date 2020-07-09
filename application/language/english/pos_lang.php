@@ -22,6 +22,7 @@ $lang['MSG_FILE_SIZE_ERROR']='File Size Error';
 $lang['MSG_FILE_TYPE_ERROR']='File Type Error';
 $lang['MSG_NO_FILE_UPLOADED'] = 'No file uploaded';
 $lang['MSG_NOT_DEALER_CANNOT_BUY'] = 'This Customer is not dealer.<br>Plase Conatcat with admin(01713090956)';
+$lang['MSG_NOT_DEALER_CANNOT_BUY_OTHER_OUTLET'] = 'This Customer Cannot Buy from this showroom.<br>Plase Conatcat with admin(01713090956)';
 
 $lang['MSG_ALREADY_FORWARDED'] = 'Already Forwarded.';
 $lang['MSG_SUCCESSFULLY_FORWARDED'] = 'Forwarded Successfully.';
