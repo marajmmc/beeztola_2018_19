@@ -602,7 +602,7 @@ class Sales_sale3 extends Root_Controller
         $item_head['amount_total']=0;
         $item_head['amount_discount_variety']=0;
         $item_head['code_scan_type']=$item['code_scan_type'];
-        $item_head['offer_earned']=0;
+        $item_head['offer_offered']=0;
         $item_head['offer_given']=$item['amount_discount_self'];
         foreach($items as $variety_id=>$packs)
         {
@@ -640,17 +640,17 @@ class Sales_sale3 extends Root_Controller
 
                 $info['offer_quantity_minimum']=$varieties[$variety_id][$pack_size_id]['offer_quantity_minimum'];
                 $info['offer_amount_per_kg']=$varieties[$variety_id][$pack_size_id]['offer_amount_per_kg'];
-                $info['offer_earned']=0;
+                $info['offer_offered']=0;
                 if(($info['quantity']*$info['pack_size']/1000)>=$info['offer_quantity_minimum'])
                 {
-                    $info['offer_earned']=$info['quantity']*$info['pack_size']*$info['offer_amount_per_kg']/1000;
+                    $info['offer_offered']=$info['quantity']*$info['pack_size']*$info['offer_amount_per_kg']/1000;
                 }
 
                 $item_head_details[]=$info;
 
                 $item_head['amount_total']+=$info['amount_total'];
                 $item_head['amount_discount_variety']+=($info['amount_total']*$info['discount_percentage_variety']/100);
-                $item_head['offer_earned']+=$info['offer_earned'];
+                $item_head['offer_offered']+=$info['offer_offered'];
             }
         }
         $item_head['discount_self_percentage']=0;
@@ -660,6 +660,24 @@ class Sales_sale3 extends Root_Controller
         }
         $item_head['amount_payable']=($item_head['amount_total']-$item_head['amount_discount_variety']-$item_head['amount_discount_self']);
         $item_head['amount_payable_actual']=ceil($item_head['amount_payable']);
+
+        //offer validation
+        if($item_head['offer_given']>$item_head['amount_total'])
+        {
+            $ajax['status']=false;
+            $ajax['system_message']="Discount amount cannot be higher than invoice amount.";
+            $this->json_return($ajax);
+            die();
+        }
+        $this->load->helper('offer');
+        $offer_stat=Offer_helper::get_offer_stats(array($farmer_info['farmer_id']));
+        if(($offer_stat[$farmer_info['farmer_id']]['offer_balance']+$item_head['offer_offered'])<$item_head['offer_given'])
+        {
+            $ajax['status']=false;
+            $ajax['system_message']="Discount amount is not valid.";
+            $this->json_return($ajax);
+        }
+
 
         if($farmer_info['amount_credit_limit']>0)
         {

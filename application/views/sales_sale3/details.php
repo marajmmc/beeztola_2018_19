@@ -95,7 +95,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td style="padding: 0 5px;" colspan="2">&nbsp;</td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>">&nbsp;</td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>">&nbsp;</td>
-                <td style="padding: 0 5px;"><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?> (<?php echo $item['discount_self_percentage'];?>%)</label></td>
+                <td style="padding: 0 5px;"><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
                 <td style="padding: 0 5px;" class="text-right"><label><?php echo number_format($item['amount_discount_self'],2); ?></label></td>
             </tr>
             <tr>
@@ -326,7 +326,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </tr>
             <tr>
                 <td colspan="9">&nbsp;</td>
-                <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?>(<?php echo $item['discount_self_percentage'];?>%)</label></td>
+                <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
                 <td class="text-right"><label><?php echo number_format($item['amount_discount_self'],2); ?></label></td>
             </tr>
             <tr>
