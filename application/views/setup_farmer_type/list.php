@@ -93,11 +93,23 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         {
             dataType: "json",
             dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'name', type: 'string' },
-                { name: 'discount_self_percentage', type: 'string'},
-                { name: 'discount_referral_percentage', type: 'string'},
-                { name: 'commission_distributor', type: 'string'}
+                <?php
+                 foreach($system_preference_items as $key=>$item)
+                 {
+                     if(($key=='name'))
+                     {
+                         ?>
+                    { name: '<?php echo $key ?>', type: 'string' },
+                    <?php
+                 }
+                 else
+                 {
+                    ?>
+                    { name: '<?php echo $key ?>', type: 'number' },
+                    <?php
+                    }
+                }
+                ?>
             ],
             id: 'id',
             url: url
@@ -126,7 +138,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_NAME'); ?>', dataField: 'name', hidden: <?php echo $system_preference_items['name']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_SELF_PERCENTAGE'); ?>',dataField: 'discount_self_percentage',filterType:'list',width:'100', cellsAlign:'right',hidden: <?php echo $system_preference_items['discount_self_percentage']?0:1;?>},
                     { text: '<?php echo $CI->lang->line('LABEL_DISCOUNT_REFERRAL_PERCENTAGE'); ?>',dataField: 'discount_referral_percentage',filterType:'list',width:'100', cellsAlign:'right',hidden: <?php echo $system_preference_items['discount_referral_percentage']?0:1;?>},
-                    { text: '<?php echo $CI->lang->line('LABEL_COMMISSION_DISTRIBUTOR'); ?>',dataField: 'commission_distributor',filterType:'list',width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['commission_distributor']?0:1;?>}
+                    { text: '<?php echo $CI->lang->line('LABEL_COMMISSION_DISTRIBUTOR'); ?>',dataField: 'commission_distributor',filterType:'list',width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['commission_distributor']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_PRICE_MULTIPLIER'); ?>',dataField: 'price_multiplier',width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['price_multiplier']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_ALLOW_OFFER'); ?>',dataField: 'allow_offer',filterType:'list',width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['allow_offer']?0:1;?>},
+                    { text: '<?php echo $CI->lang->line('LABEL_ALLOW_DISCOUNT'); ?>',dataField: 'allow_discount',filterType:'list',width:'100', cellsAlign:'right', hidden: <?php echo $system_preference_items['allow_discount']?0:1;?>}
                 ]
             });
     });
