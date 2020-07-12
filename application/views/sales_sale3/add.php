@@ -190,7 +190,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <td class="text-right"><label id="total_price_actual">0.00</label></td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr>
+                <tr <?php if($item['allow_discount']!=$CI->config->item('system_status_yes')){echo 'style="display: none;"';}?>>
                     <td colspan="7">&nbsp;</td>
                     <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
                     <td class="text-right"><input id="amount_discount_self" name="item[amount_discount_self]" type="text"class="form-control text-right float_type_positive" value=""/></td>
