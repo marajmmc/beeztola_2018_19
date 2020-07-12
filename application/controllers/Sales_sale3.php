@@ -86,7 +86,7 @@ class Sales_sale3 extends Root_Controller
             $data['customer_name']= 1;
             $data['sales_payment_method']= 1;
             $data['amount_total']= 1;
-            $data['discount_slab_percentage']= 1;
+            //$data['discount_slab_percentage']= 1;
             $data['amount_discount']= 1;
             $data['amount_actual']= 1;
         }
