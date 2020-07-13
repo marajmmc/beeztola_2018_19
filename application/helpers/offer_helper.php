@@ -16,6 +16,7 @@ class Offer_helper
             $offer['offer_balance']=0;
             $offers[$dealer_id]=$offer;
         }
+        //offer offered and given from sales
         $CI->db->from($CI->config->item('table_pos_sale').' sale');
         $CI->db->select('sale.farmer_id');
         $CI->db->select('SUM(sale.offer_offered) offer_offered');
@@ -30,7 +31,22 @@ class Offer_helper
             $offers[$result['farmer_id']]['offer_given']+=$result['offer_given'];
             $offers[$result['farmer_id']]['offer_balance']+=($result['offer_offered']-$result['offer_given']);
         }
-        
+
+        //offer adjusted
+        $CI->db->from($CI->config->item('table_login_offer_adjust_farmer').' offer_adjust');
+        $CI->db->select('offer_adjust.farmer_id');
+        $CI->db->select('SUM(offer_adjust.amount) offer_adjusted');
+        $CI->db->where('offer_adjust.status !=',$CI->config->item('system_status_delete'));
+        $CI->db->where_in('offer_adjust.farmer_id',$dealer_ids);
+        $CI->db->group_by('offer_adjust.farmer_id');
+        $results=$CI->db->get()->result_array();
+        foreach($results as $result)
+        {
+
+            $offers[$result['farmer_id']]['offer_adjusted']+=$result['offer_adjusted'];
+            $offers[$result['farmer_id']]['offer_balance']-=($result['offer_adjusted']);
+        }
+
         return $offers;
     }
 
