@@ -115,7 +115,6 @@ class Setup_farmer_type extends Root_Controller
             $data['item']['discount_self_percentage']='';
             $data['item']['discount_referral_percentage']='';
             $data['item']['commission_distributor']='';
-            $data['item']['price_multiplier']=1;
             $data['item']['allow_offer']=$this->config->item('system_status_no');
             $data['item']['allow_discount']=$this->config->item('system_status_no');
             $data['item']['remarks']='';
@@ -555,7 +554,6 @@ class Setup_farmer_type extends Root_Controller
         $data['discount_self_percentage']= 1;
         $data['discount_referral_percentage']= 1;
         $data['commission_distributor']= 1;
-        $data['price_multiplier']= 1;
         $data['allow_offer']= 1;
         $data['allow_discount']= 1;
         if($result)

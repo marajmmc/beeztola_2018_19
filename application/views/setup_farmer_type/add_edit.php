@@ -53,7 +53,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT_SELF_PERCENTAGE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT_SELF_PERCENTAGE');?><span style="color:#FF0000">*</span><br><small>For Sales 1</small></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[discount_self_percentage]" id="discount_self_percentage" class="form-control float_type_positive " value="<?php echo $item['discount_self_percentage'];?>"/>
@@ -61,7 +61,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DISCOUNT_REFERRAL_PERCENTAGE');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right">Unused <?php echo $CI->lang->line('LABEL_DISCOUNT_REFERRAL_PERCENTAGE');?><span style="color:#FF0000">*</span><br><small>Unused</small></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[discount_referral_percentage]" id="discount_referral_percentage" class="form-control float_type_positive " value="<?php echo $item['discount_referral_percentage'];?>"/>
@@ -69,7 +69,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_COMMISSION_DISTRIBUTOR');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_COMMISSION_DISTRIBUTOR');?><span style="color:#FF0000">*</span><br><small>For Sales 1</small></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[commission_distributor]" id="commission_distributor" class="form-control float_type_positive " value="<?php echo $item['commission_distributor'];?>"/>
@@ -77,15 +77,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_PRICE_MULTIPLIER');?><span style="color:#FF0000">*</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <input type="text" name="item[price_multiplier]" id="price_multiplier" class="form-control float_type_positive " value="<?php echo $item['price_multiplier'];?>"/>
-            </div>
-        </div>
-        <div class="row show-grid">
-            <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_ALLOW_OFFER');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_ALLOW_OFFER');?><span style="color:#FF0000">*</span><br><small>For Sales 3</small></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[allow_offer]" id="allow_offer" class="form-control">
@@ -96,7 +88,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
         </div>
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_ALLOW_DISCOUNT');?><span style="color:#FF0000">*</span></label>
+                <label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_ALLOW_DISCOUNT');?><span style="color:#FF0000">*</span><br><small>For Sales 3</small></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <select name="item[allow_discount]" id="allow_discount" class="form-control">
