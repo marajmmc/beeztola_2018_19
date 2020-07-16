@@ -345,7 +345,7 @@ class Sales_sale3 extends Root_Controller
         $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
         $this->db->select('f.*');
         $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
-        $this->db->select('ft.name farmer_type_name,ft.price_multiplier,ft.allow_offer,ft.allow_discount');
+        $this->db->select('ft.name farmer_type_name,ft.allow_offer,ft.allow_discount');
         $this->db->where('f.id',$farmer_id);
         $result=$this->db->get()->row_array();
         $data['item']['farmer_name']=$result['name'];
@@ -358,7 +358,6 @@ class Sales_sale3 extends Root_Controller
         $data['item']['amount_credit_limit']=$result['amount_credit_limit'];
         $data['item']['amount_credit_balance']=$result['amount_credit_balance'];
 
-        $data['item']['price_multiplier']=$result['price_multiplier'];
         $data['item']['allow_offer']=$result['allow_offer'];
         $data['item']['allow_discount']=$result['allow_discount'];
 
@@ -423,8 +422,13 @@ class Sales_sale3 extends Root_Controller
         {
             if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
             {
+                $price_farmers=(json_decode($result['price_farmers'],true));
+                if(isset($price_farmers[$data['item']['farmer_type_id']]))
+                {
+                    $result['price']=$price_farmers[$data['item']['farmer_type_id']];
+                }
+                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=$result['price'];
 
-                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=round($result['price']*$data['item']['price_multiplier'],2);
             }
         }
         //discount setups //Ignored
@@ -494,7 +498,7 @@ class Sales_sale3 extends Root_Controller
         $this->db->from($this->config->item('table_pos_setup_farmer_farmer').' f');
         $this->db->select('f.*');
         $this->db->join($this->config->item('table_pos_setup_farmer_type').' ft','ft.id = f.farmer_type_id','INNER');
-        $this->db->select('ft.name farmer_type_name,ft.price_multiplier,ft.allow_offer,ft.allow_discount');
+        $this->db->select('ft.name farmer_type_name,ft.allow_offer,ft.allow_discount');
         $this->db->where('f.id',$item['farmer_id']);
         $result=$this->db->get()->row_array();
 
@@ -514,7 +518,7 @@ class Sales_sale3 extends Root_Controller
         $farmer_info['address']=$result['address'];
         $farmer_info['amount_credit_limit']=$result['amount_credit_limit'];
         $farmer_info['amount_credit_balance']=$result['amount_credit_balance'];
-        $farmer_info['price_multiplier']=$result['price_multiplier'];
+
         $farmer_info['allow_offer']=$result['allow_offer'];
         $farmer_info['allow_discount']=$result['allow_discount'];
         if($farmer_info['allow_discount']==$this->config->item('system_status_yes'))
@@ -575,7 +579,7 @@ class Sales_sale3 extends Root_Controller
             $varieties[$result['variety_id']][$result['pack_size_id']]=$result;
         }
         $this->db->from($this->config->item('table_login_setup_classification_variety_price').' price');
-        $this->db->select('price.id,price.variety_id,price.pack_size_id,price.price price_unit_pack');
+        $this->db->select('price.id,price.variety_id,price.pack_size_id,price.price price,price.price_farmers');
         $this->db->join($this->config->item('table_login_offer_setup_variety').' offer','offer.variety_id=price.variety_id AND offer.pack_size_id=price.pack_size_id AND offer.revision=1 AND offer.status="'.$this->config->item('system_status_active').'"','LEFT');
         $this->db->select('offer.status,offer.quantity_minimum,offer.amount_per_kg');
 
@@ -584,7 +588,13 @@ class Sales_sale3 extends Root_Controller
         {
             if(isset($varieties[$result['variety_id']][$result['pack_size_id']]))
             {
-                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=round($result['price_unit_pack']*$farmer_info['price_multiplier'],2);
+                $price_farmers=(json_decode($result['price_farmers'],true));
+                if(isset($price_farmers[$farmer_info['farmer_type_id']]))
+                {
+                    $result['price']=$price_farmers[$farmer_info['farmer_type_id']];
+                }
+
+                $varieties[$result['variety_id']][$result['pack_size_id']]['price_unit_pack']=$result['price'];
                 if($result['quantity_minimum']>0)
                 {
                     $varieties[$result['variety_id']][$result['pack_size_id']]['offer_quantity_minimum']=$result['quantity_minimum'];
