@@ -705,7 +705,7 @@ class Sales_sale3 extends Root_Controller
             if(($offer_stat[$farmer_info['farmer_id']]['offer_balance']+$item_head['offer_offered'])<$item_head['offer_given'])
             {
                 $ajax['status']=false;
-                $ajax['system_message']="Discount amount is not valid.";
+                $ajax['system_message']="Reward Point amount is not valid.";
                 $this->json_return($ajax);
             }
         }

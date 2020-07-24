@@ -7,7 +7,8 @@ class Mobile_sms_helper
     public static $API_KEY='C20023045bb88951db45b5.36134381';
     public static $API_SENDER_ID_NON_MASKING='8804445629106';
     public static $API_SENDER_ID_MALIK_SEEDS='Malik Seeds';
-    public static $API_SENDER_ID_BEEZTOLA='Beejtala';
+    //public static $API_SENDER_ID_BEEZTOLA='Beejtala';
+    public static $API_SENDER_ID_BEEZTOLA='Malik Seeds';//changed to malikseeds
     //$type= text for normal SMS/unicode for Bangla SMS
     public static function send_sms($sender_id,$contacts,$msg,$type='unicode')
     {

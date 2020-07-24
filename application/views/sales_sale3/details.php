@@ -95,10 +95,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <td style="padding: 0 5px;" colspan="2">&nbsp;</td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>">&nbsp;</td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>">&nbsp;</td>
-                <td style="padding: 0 5px;"><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
+                <td style="padding: 0 5px;"><label>Reward Point</label></td>
                 <td style="padding: 0 5px;" class="text-right"><label><?php echo number_format($item['amount_discount_self'],2); ?></label></td>
             </tr>
-            <tr>
+            <tr style="display: none;">
                 <td style="padding: 0 5px;" colspan="2">&nbsp;</td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>">&nbsp;</td>
                 <td style="padding: 0 5px;<?php if(!$has_variety_discount){echo 'display:none;';} ?>">&nbsp;</td>

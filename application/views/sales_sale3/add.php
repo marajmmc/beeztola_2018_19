@@ -167,9 +167,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <thead>
                 <tr>
                     <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_CROP_NAME'); ?></th>
-                    <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_CROP_TYPE_NAME'); ?></th>
-                    <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_VARIETY_NAME'); ?></th>
-                    <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_PACK_SIZE_NAME'); ?></th>
+                    <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_VARIETY_NAME').' - '.$CI->lang->line('LABEL_PACK_SIZE_NAME'); ?></th>
                     <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_PRICE_PER_PACK'); ?></th>
                     <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_CURRENT_STOCK_PKT'); ?></th>
                     <th style="min-width: 100px;"><?php echo $CI->lang->line('LABEL_QUANTITY'); ?>(Packets)</th>
@@ -183,7 +181,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td colspan="5">&nbsp;</td>
+                    <td colspan="3">&nbsp;</td>
                     <td><label><?php echo $CI->lang->line('LABEL_TOTAL'); ?></label></td>
                     <td class="text-right"><label id="total_quantity">0</label></td>
                     <td class="text-right"><label id="total_weight_kg">0.000</label></td>
@@ -191,31 +189,31 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <td>&nbsp;</td>
                 </tr>
                 <tr <?php if($item['allow_discount']!=$CI->config->item('system_status_yes')){echo 'style="display: none;"';}?>>
-                    <td colspan="7">&nbsp;</td>
-                    <td><label><?php echo $CI->lang->line('LABEL_DISCOUNT'); ?></label></td>
+                    <td colspan="5">&nbsp;</td>
+                    <td><label>Reward Point</label></td>
                     <td class="text-right"><input id="amount_discount_self" name="item[amount_discount_self]" type="text"class="form-control text-right float_type_positive" value=""/></td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr>
-                    <td colspan="7">&nbsp;</td>
+                <tr style="display: none;">
+                    <td colspan="5" >&nbsp;</td>
                     <td><label>Payable</label></td>
                     <td class="text-right"><label id="total_payable">0.00</label></td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td colspan="7">&nbsp;</td>
+                    <td colspan="5">&nbsp;</td>
                     <td><label>Payable(rounded)</label></td>
                     <td class="text-right"><label id="total_payable_celling">0.00</label></td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr <?php if($item['amount_credit_limit']>0){echo 'style="display: none;"';}?>>
-                    <td colspan="7">&nbsp;</td>
+                    <td colspan="5">&nbsp;</td>
                     <td><label>Paid</label></td>
                     <td class="text-right"><input id="amount_paid" name="item[amount_paid]" type="text"class="form-control text-right float_type_positive" value=""/></td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr <?php if($item['amount_credit_limit']>0){echo 'style="display: none;"';}?>>
-                    <td colspan="7">&nbsp;</td>
+                    <td colspan="5">&nbsp;</td>
                     <td><label>Change</label></td>
                     <td class="text-right"><label id="amount_change">&nbsp;</label></td>
                     <td>&nbsp;</td>
@@ -246,13 +244,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="crop_name">&nbsp;</label>
             </td>
             <td>
-                <label class="crop_type_name">&nbsp;</label>
-            </td>
-            <td>
                 <label class="variety_name">&nbsp;</label>
-            </td>
-            <td>
-                <label class="pack_size">&nbsp;</label>
             </td>
             <td class="text-right">
                 <label class="price_unit_pack_label">&nbsp;</label>
@@ -262,7 +254,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="current_stock_pkt">&nbsp;</label>
             </td>
             <td class="text-right">
-                <input type="text"class="form-control text-right quantity integer_type_positive" value="1"/>
+                <input type="text"class="form-control text-right quantity integer_type_positive" value="0"/>
             </td>
             <td class="text-right">
                 <label class="weight_kg">&nbsp;</label>
@@ -361,16 +353,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 var cur_quantity=parseFloat($('#'+'quantity_'+variety_barcode).val());
                 cur_quantity=cur_quantity+1;
+                $('#quantity_'+variety_barcode).focus();
                 $('#'+'quantity_'+variety_barcode).val(cur_quantity);
             }
             else
             {
                 var content_id='#system_content_add_more table tbody';
                 $(content_id+' .crop_name').html(sale_varieties_info[variety_barcode]['crop_name']);
-                $(content_id+' .crop_type_name').html(sale_varieties_info[variety_barcode]['crop_type_name']);
-                $(content_id+' .variety_name').html(sale_varieties_info[variety_barcode]['variety_name']);
-
-                $(content_id+' .pack_size').html(sale_varieties_info[variety_barcode]['pack_size']);
+                $(content_id+' .variety_name').html(sale_varieties_info[variety_barcode]['variety_name']+' - '+sale_varieties_info[variety_barcode]['pack_size']+'gm');
 
                 $(content_id+' .price_unit_pack_label').html(sale_varieties_info[variety_barcode]['price_unit_pack']);
                 $(content_id+' .price_unit_pack').val(sale_varieties_info[variety_barcode]['price_unit_pack']);
@@ -395,6 +385,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 $(content_id+' .price_unit_pack').removeAttr('name');
                 $(content_id+' .weight_kg').removeAttr('id');
                 $(content_id+' .price_actual').removeAttr('id');
+                $('#quantity_'+variety_barcode).focus();
+                $('#quantity_'+variety_barcode).val(1);
             }
             calculate_sale_total();
             $('#variety_barcode').val('');
