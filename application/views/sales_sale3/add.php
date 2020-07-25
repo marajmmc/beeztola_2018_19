@@ -190,7 +190,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </tr>
                 <tr <?php if($item['allow_discount']!=$CI->config->item('system_status_yes')){echo 'style="display: none;"';}?>>
                     <td colspan="5">&nbsp;</td>
-                    <td><label>Reward Point</label></td>
+                    <td><label>Reward Points</label></td>
                     <td class="text-right"><input id="amount_discount_self" name="item[amount_discount_self]" type="text"class="form-control text-right float_type_positive" value=""/></td>
                     <td>&nbsp;</td>
                 </tr>
@@ -202,7 +202,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </tr>
                 <tr>
                     <td colspan="5">&nbsp;</td>
-                    <td><label>Payable(rounded)</label></td>
+                    <td><label>Payable Amount</label></td>
                     <td class="text-right"><label id="total_payable_celling">0.00</label></td>
                     <td>&nbsp;</td>
                 </tr>

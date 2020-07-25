@@ -156,9 +156,9 @@ $lang['LABEL_CUSTOMER_NAME'] = 'Customer';
 $lang['LABEL_SUPPLIER_NAME']='Supplier Name';
 $lang['LABEL_OUTLET_NAME_SOURCE'] = 'Source Showroom Name';
 $lang['LABEL_OUTLET_NAME_DESTINATION'] = 'Destination Showroom Name';
-$lang['LABEL_OUTLET_NAME'] = 'Showroom';
+$lang['LABEL_OUTLET_NAME'] = 'Sales Point';
 $lang['LABEL_OUTLET_CODE'] = 'Showroom Code';
-$lang['LABEL_SHOWROOM_NAME'] = 'Showroom Name';
+$lang['LABEL_SHOWROOM_NAME'] = 'Sales Point';
 
 // office, company, department
 $lang['LABEL_COMPANY_NAME'] = 'Company';
