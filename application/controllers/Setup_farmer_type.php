@@ -222,9 +222,9 @@ class Setup_farmer_type extends Root_Controller
             $data=array();
             $data['date_updated'] = $time;
             $data['user_updated'] = $user->user_id;
-            Query_helper::update($this->config->item('table_pos_setup_farmer_type_histories'),$data, array('id='.$id,'revision=1'), false);
+            Query_helper::update($this->config->item('table_pos_setup_farmer_type_histories'),$data, array('farmer_type_id='.$id,'revision=1'), false);
 
-            $this->db->where('id',$id);
+            $this->db->where('farmer_type_id',$id);
             $this->db->set('revision', 'revision+1', FALSE);
             $this->db->update($this->config->item('table_pos_setup_farmer_type_histories'));
 
@@ -234,6 +234,7 @@ class Setup_farmer_type extends Root_Controller
             Query_helper::update($this->config->item('table_pos_setup_farmer_type'),$item,array('id='.$id), false);
 
             $item['revision']=1;
+            $item['farmer_type_id']=$id;
             $item['date_created']=$time;
             $item['user_created']=$user->user_id;
             Query_helper::add($this->config->item('table_pos_setup_farmer_type_histories'),$item, false);
