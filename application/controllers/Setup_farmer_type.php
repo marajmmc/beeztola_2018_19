@@ -556,6 +556,7 @@ class Setup_farmer_type extends Root_Controller
         $data['commission_distributor']= 1;
         $data['allow_offer']= 1;
         $data['allow_discount']= 1;
+        $data['status']= 1;
         if($result)
         {
             if($result['preferences']!=null)
