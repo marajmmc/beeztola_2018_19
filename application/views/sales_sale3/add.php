@@ -188,10 +188,10 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     <td class="text-right"><label id="total_price_actual">0.00</label></td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr <?php if($item['allow_discount']!=$CI->config->item('system_status_yes')){echo 'style="display: none;"';}?>>
+                <tr <?php if($item['allow_discount']!=$CI->config->item('system_status_yes')){echo 'style="display: none;"';} else{ echo 'style="display: none;"';}?>>
                     <td colspan="5">&nbsp;</td>
                     <td><label>Reward Points</label></td>
-                    <td class="text-right"><input id="amount_discount_self" name="item[amount_discount_self]" type="text"class="form-control text-right float_type_positive" value=""/></td>
+                    <td class="text-right"><input id="amount_discount_self" name="item[amount_discount_self]" type="text"class="form-control text-right float_type_positive" value="0"/></td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr style="display: none;">
