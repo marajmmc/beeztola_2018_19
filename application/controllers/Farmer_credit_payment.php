@@ -538,12 +538,14 @@ class Farmer_credit_payment extends Root_Controller
         }
 
         $this->db->trans_start();  //DB Transaction Handle START
+        $sms_date='';
 
         if($id>0)
         {
             $payment_id=$id;
             $data=array();
             $data['date_payment']= System_helper::get_time($item['date_payment'].substr(System_helper::display_date_time($time),11));
+            $sms_date=System_helper::display_date($data['date_payment']);
             $data['payment_way_id']= $item['payment_way_id'];
             $data['amount']= $item['amount'];
             $this->db->set('revision_count', 'revision_count+1', FALSE);
@@ -572,6 +574,7 @@ class Farmer_credit_payment extends Root_Controller
             {
                 $data['date_payment']=$time;
             }
+            $sms_date=System_helper::display_date($data['date_payment']);
             $data['payment_way_id']= $item['payment_way_id'];
             $data['amount']= $item['amount'];
             $item['revision_count']=1;
@@ -598,6 +601,14 @@ class Farmer_credit_payment extends Root_Controller
         {
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
             //TODO send sms
+            $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_status_sms_sales_invoice').'"','status ="'.$this->config->item('system_status_active').'"'),1);
+            //if sms on and dealer
+            if($result && ($result['config_value']==1))
+            {
+                $this->load->helper('mobile_sms');
+                $this->lang->load('mobile_sms');
+                Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$farmer_info['mobile_no'],sprintf($this->lang->line('SMS_PAYMENT_DEALER'),$sms_date,System_helper::get_string_amount($data_history['amount_adjust']),System_helper::get_string_amount($data_history['credit_limit_new']-$data_history['balance_new'])));
+            }
             $this->system_details($farmer_id,$payment_id);
         }
         else
