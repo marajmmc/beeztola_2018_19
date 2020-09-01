@@ -607,7 +607,8 @@ class Farmer_credit_payment extends Root_Controller
             {
                 $this->load->helper('mobile_sms');
                 $this->lang->load('mobile_sms');
-                Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$farmer_info['mobile_no'],sprintf($this->lang->line('SMS_PAYMENT_DEALER'),$sms_date,System_helper::get_string_amount($data_history['amount_adjust']),System_helper::get_string_amount($data_history['credit_limit_new']-$data_history['balance_new'])));
+                //Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$farmer_info['mobile_no'],sprintf($this->lang->line('SMS_PAYMENT_DEALER'),$sms_date,System_helper::get_string_amount($data_history['amount_adjust']),System_helper::get_string_amount($data_history['credit_limit_new']-$data_history['balance_new'])));
+                Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$farmer_info['mobile_no'],sprintf($this->lang->line('SMS_PAYMENT_DEALER'),System_helper::get_string_amount($data_history['amount_adjust']),System_helper::get_string_amount($data_history['credit_limit_new']-$data_history['balance_new'])));
             }
             $this->system_details($farmer_id,$payment_id);
         }
