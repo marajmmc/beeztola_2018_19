@@ -601,7 +601,7 @@ class Farmer_credit_payment extends Root_Controller
         {
             $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
             //TODO send sms
-            $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="' .$this->config->item('system_purpose_status_sms_sales_invoice').'"','status ="'.$this->config->item('system_status_active').'"'),1);
+            $result=Query_helper::get_info($this->config->item('table_login_setup_system_configures'),array('config_value'),array('purpose ="pos_status_sms_dealer_payment"','status ="'.$this->config->item('system_status_active').'"'),1);
             //if sms on and dealer
             if($result && ($result['config_value']==1))
             {
