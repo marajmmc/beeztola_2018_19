@@ -816,7 +816,15 @@ class Sales_sale3 extends Root_Controller
                 $mobile_no=$farmer_info['mobile_no'];
                 $invoice=Barcode_helper::get_barcode_sales($sale_id);
                 $amount=System_helper::get_string_amount($item_head['amount_payable_actual']);
-                Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$mobile_no,sprintf($this->lang->line('SMS_SALES_INVOICE'),$amount,$invoice));
+                if($item_head['sales_payment_method']=='Credit')
+                {
+                    Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$mobile_no,sprintf($this->lang->line('SMS_SALES_INVOICE_CREDIT'),$amount,$invoice));
+                }
+                else
+                {
+                    Mobile_sms_helper::send_sms(Mobile_sms_helper::$API_SENDER_ID_BEEZTOLA,$mobile_no,sprintf($this->lang->line('SMS_SALES_INVOICE_CASH'),$amount,$invoice));
+                }
+
             }
             $this->system_details($sale_id);
         }
