@@ -917,6 +917,7 @@ class Transfer_oo_receive extends Root_Controller
             $user_ids[$data['item']['user_updated_delivery_forward']]=$data['item']['user_updated_delivery_forward'];
             $user_ids[$data['item']['user_updated_receive_approve']]=$data['item']['user_updated_receive_approve'];
             //$data['users']=$this->get_sms_users_info($user_ids);
+            $data['users_login']=$this->get_sms_users_info($user_ids);
             $data['users']=System_helper::get_users_info(($user_ids));
 
 

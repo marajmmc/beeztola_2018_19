@@ -72,7 +72,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 ?>
                 <tr>
                     <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CREATED_BY');?> (Request)</label></th>
-                    <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_created_request']]['name'];?></label></th>
+                    <th class=" header_value"><label class="control-label"><?php echo $users_login[$item['user_created_request']]['name'];?></label></th>
                     <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_CREATED_TIME');?> (Request)</label></th>
                     <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_created_request']);?></label></th>
                 </tr>
@@ -82,7 +82,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     ?>
                     <tr>
                         <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_UPDATED_BY');?> (Request)</label></th>
-                        <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_updated_request']]['name'];?></label></th>
+                        <th class=" header_value"><label class="control-label"><?php echo $users_login[$item['user_updated_request']]['name'];?></label></th>
                         <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_UPDATED_TIME');?> (Request)</label></th>
                         <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_request']);?></label></th>
                     </tr>
@@ -103,7 +103,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         ?>
                         <tr>
                             <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_FORWARDED_BY');?> (Request)</label></th>
-                            <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_updated_forward']]['name'];?></label></th>
+                            <th class=" header_value"><label class="control-label"><?php echo $users_login[$item['user_updated_forward']]['name'];?></label></th>
                             <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_FORWARDED_TIME');?> (Request)</label></th>
                             <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_forward']);?></label></th>
                         </tr>
@@ -159,7 +159,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         ?>
                         <tr>
                             <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_UPDATED_BY');?> (<?php echo $label_approve_reject?> Edit)</label></th>
-                            <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_updated_approve']]['name'];?></label></th>
+                            <th class=" header_value"><label class="control-label"><?php echo $users_login[$item['user_updated_approve']]['name'];?></label></th>
                             <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $CI->lang->line('LABEL_DATE_UPDATED_TIME');?> (<?php echo $label_approve_reject?> Edit)</label></th>
                             <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_approve']);?></label></th>
                         </tr>
@@ -172,7 +172,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                         ?>
                         <tr>
                             <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $label_approve_reject?> By</label></th>
-                            <th class=" header_value"><label class="control-label"><?php echo $users[$item['user_updated_approve_forward']]['name'];?></label></th>
+                            <th class=" header_value"><label class="control-label"><?php echo $users_login[$item['user_updated_approve_forward']]['name'];?></label></th>
                             <th class="widget-header header_caption"><label class="control-label pull-right"><?php echo $label_approve_reject?> Time</label></th>
                             <th class=""><label class="control-label"><?php echo System_helper::display_date_time($item['date_updated_approve_forward']);?></label></th>
                         </tr>

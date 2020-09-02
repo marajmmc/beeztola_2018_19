@@ -692,7 +692,7 @@ class Transfer_oo_delivery extends Root_Controller
             {
                 $user_ids[$data['item']['user_updated_receive_forward']]=$data['item']['user_updated_receive_forward'];
             }
-            $data['users']=$this->get_sms_users_info($user_ids);
+            $data['users_login']=$this->get_sms_users_info($user_ids);
             $data['users']=System_helper::get_users_info(($user_ids));
 
             $this->db->from($this->config->item('table_sms_transfer_oo_details').' details');
